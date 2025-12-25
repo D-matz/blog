@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Advent of Code 2025">
+    <meta name="keywords" content="aoc, advent, code, 2025, gleam, fold">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="Advent of Code 2025">
+    <meta property="og:image" content="https://correctarity.com/static/stars.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:alt" content="Preview image">
+    <link rel="stylesheet" href="static/style.css">
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='675 680 842 806.4'%3E%3Crect width='2105' height='2016' fill='%23FFAFF3'/%3E%3Cpath fill='%23151515' d='M790.631 1144.08C833.367 1136.54 861.904 1095.79 854.37 1053.06C846.836 1010.32 806.085 981.793 763.349 989.329C720.613 996.866 692.076 1037.62 699.61 1080.35C707.144 1123.08 747.896 1151.62 790.631 1144.08Z'/%3E%3Cpath fill='%23151515' d='M1423.7 1032.45C1466.43 1024.92 1494.97 984.164 1487.43 941.432C1479.9 898.699 1439.15 870.166 1396.41 877.703C1353.68 885.239 1325.14 925.991 1332.67 968.724C1340.21 1011.46 1380.96 1039.99 1423.7 1032.45Z'/%3E%3Cpath fill='%23151515' d='M1042.09 1126.57C1037.19 1128.46 1032.71 1131.3 1028.9 1134.92C1025.1 1138.54 1022.04 1142.88 1019.92 1147.68C1017.79 1152.49 1016.63 1157.66 1016.5 1162.91C1016.37 1168.16 1017.28 1173.39 1019.17 1178.29C1024.11 1191.06 1031.51 1202.74 1040.96 1212.66L1040.96 1212.66C1050.41 1222.58 1061.72 1230.53 1074.25 1236.07L1074.26 1236.08C1086.77 1241.62 1100.25 1244.64 1113.94 1244.97L1113.95 1244.97L1113.97 1244.97C1127.65 1245.29 1141.26 1242.92 1154.03 1237.99L1154.04 1237.99C1166.81 1233.06 1178.49 1225.66 1188.4 1216.21L1188.41 1216.21L1188.41 1216.2C1198.32 1206.76 1206.27 1195.45 1211.81 1182.94C1217.37 1170.41 1220.39 1156.9 1220.71 1143.2C1220.96 1132.6 1216.99 1122.33 1209.67 1114.65C1202.34 1106.98 1192.27 1102.53 1181.66 1102.28C1176.41 1102.15 1171.19 1103.07 1166.29 1104.96C1161.39 1106.86 1156.91 1109.7 1153.11 1113.33C1149.31 1116.95 1146.26 1121.29 1144.14 1126.1C1142.02 1130.9 1140.86 1136.08 1140.74 1141.33C1140.66 1144.5 1139.96 1147.63 1138.67 1150.53L1138.67 1150.54L1138.66 1150.56C1137.37 1153.47 1135.52 1156.1 1133.22 1158.3C1130.91 1160.5 1128.2 1162.22 1125.23 1163.36L1125.21 1163.37C1122.23 1164.52 1119.06 1165.07 1115.87 1165C1112.69 1164.92 1109.55 1164.21 1106.64 1162.92L1106.62 1162.92L1106.61 1162.91C1103.7 1161.62 1101.08 1159.78 1098.88 1157.48L1098.88 1157.47L1098.88 1157.47C1096.68 1155.16 1094.96 1152.45 1093.81 1149.47C1091.92 1144.57 1089.08 1140.09 1085.46 1136.29C1081.83 1132.49 1077.5 1129.43 1072.69 1127.31C1067.89 1125.18 1062.71 1124.02 1057.46 1123.89C1052.21 1123.76 1046.99 1124.67 1042.09 1126.57Z'/%3E%3C/svg%3E"
+    />
+</head>
+<body>
+    <h1><a href="/">Correct Arity</a></h1>
+    <img src="/static/stars.png">
+    <h2>Advent of Code 2025</h2>
+    <h3>My advent of Gleam: hard then easy then hard</h3>
+    <p>The first few problems I found hard because I was just starting to learn Gleam, so even things like parsing the input I was not sure about. The middle problems I flew through much more easily as I had learned more Gleam and the problems themselves were still not as bad relative to the final problems, which I found much trickier as problems themselves, regardless of language.</p>
+    <p>My solutions are <a href="https://github.com/D-matz/aoc2025/blob/main/src/day1p1.gleam">here, eg day 1 part 1.</a> In that one I found int.modulo, which returns a result, without realizing a normal modulo % operator exists, so I ended up writing a totally redundant wrapper around int.modulo that just reimplements %.</p>
+    <iframe height="300px" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9HMQDpJ+UArgCM6AMyR1yrbgAoAlHWB86dCDgAWCOugBMAZjoBSHQAYVazdqgQAJoKS3WxAPoaITStFl79mM/J8AL58fBJ0NvaOzvhuHl5QskiC5Kh0AJLE/rZwYHAwNGmZ+IrKknQs9KwwMND0APIA1kmKALx03PgAdOQI9kwISSnZufk0geX8SEEgQUA="></iframe>
+    <p>Learning a new language, I definitely tripped on stuff. Redundant modulo was not terrible but a mistake that slowed me down a lot on day 2 pt 2 was assuming list.range would be empty if the second arg was lower, but in Gleam it counts down.</p>
+    <iframe height="200px" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9E3DPgDpIBlAK4AjOgDMkdcqzhIAFAEo6wAXToQcACwR1uvAHRRWSBhAUBOTHQCsSgQF8QjoA=="></iframe>
+    <p>Which is totally reasonable; it just isn't what Python's range does, so my solution was slightly off for an input and it took me a while to figure out why.</p>
+    <p>Still, Gleam felt fast and fun to learn. Like Go, I could pick it up and try a few tour examples and get to solving aoc problems pretty quickly. Unlike Go, the solutions felt satisying enough to motivate doing all the problems.</p>
+    <p>After getting used to Gleam, many of the problems felt great, and I solved them on my own except day 10 pt 2 and day 12. For these I got so stuck I started reading other stuff including <a href="https://blog.tymscar.com/posts/gleamaoc2025/">Tymscar's blog</a> which mentioned the finale is troll and "the only puzzle I did not fully enjoy" which yeah I'd echo. For problem 10 pt 2 I copied a <a href="https://old.reddit.com/r/adventofcode/comments/1pk87hl/2025_day_10_part_2_bifurcate_your_way_to_victory/">brilliant approach from reddit</a>.</p>
+    <h3>The Gleam playground is friendly</h3>
+    <p>Gleam has a decent number of steps to install, so it's nice there's <a href="https://playground.gleam.run/">https://playground.gleam.run/</a>, it let me do a lot of the problems in an environment without Gleam installed.</p>
+    <h3>echo and todo are friendly</h3>
+    <p>echo and todo are great quality of life features: technically the same programs could be written without echo/todo, but I as a human would struggle without echo/todo. Specifically when lining up all the types to get Gleam to compile, echo is nice to slap on to something and see what it looks like, and todo lets you run the up to that point without fixing everything. So both help you test out half constructed programs and make Gleam "friendly", making the type system learning curve a lot easier.</p>
+    <iframe height="250px" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9ACZw74A6SQZQCuAIzoAzJHXKs4SABQBKOsEF06EHAAsEdAMSKsdAEyY6AbRPm6AZgC6mDZv4gA7jtb18AT0oQdHAwdPg6waHhSAwA/C5BXADWdGIi9Np6dO5wTEx0lFAK9HD0rEi+7qy+MG4W8Tx8AHRIEO4qdAA+AHx0DfiNCjDQ+IrWmKZOdABirExDysqCAL6CIEtAA"></iframe>
+    <p>Also really like how echo automatically prints the line number so you can jump to the print. Would be nice if the playground had line numbers too. Still very nice though.</p>
+    <h3>I can't index into an array?</h3>
+    <p>
+        Tymscar's blog mentions <a href="https://blog.tymscar.com/posts/gleamaoc2025/#options-everywhere-and-why-that-matters-for-grid-puzzles">problem 4</a>,
+        I bet because the way to get an item in a 2d array and the items around it is very surprising when new to Gleam. Gleam really does not want you to do mylist[i+1][j-1].
+        I got so mad I went looking for the commit where the maintainer removed list.at from the std lib to discourage indexing into a list:</p>
+    <a href="https://github.com/gleam-lang/stdlib/commit/7a15388249b67a0119351f12b6e94d9777fbd10c">deprecate list.at</a>
+    <a href="https://github.com/gleam-lang/stdlib/commit/b98705f890a2828c48dfdab291a22f145309d646">remove list.at</a>
+    <blockquote>"Gleam lists are immutable linked lists, so indexing into them is a slow operation that must traverse the list. In functional programming it is very rare to use indexing, so if you are using indexing then a different algorithm or a different data structure is likely more appropriate."</blockquote>
+    <p>They <em>really</em> do not want you indexing into a list. Personally that's how I'd naturally think about checking adjacent positions for problem 4 though.</p>
+    <p>Instead I put the 2d array items into a dict where the row/col indexes are the key, and as Tymscar says "The key ergonomic part is that dict.get gives you an option-like result, which makes neighbour checking safe by default." so you don't have to write the function checking if it's at zero or max len before getting a value, which saved some work I expected to do. So in a sense it's nicer, although mostly for me it was different and unexpected.</p>
+    <h3>Double fold and functional programming elegance</h3>
+    <p>Advent of code is full of "go through a list and for each item, add something to accumulator", and often a list of lists, requiring a nested fold, with an outer accumulator and an inner accumulator. This tripped me up a lot at first because I'd call both "acc" and accidentally add to the wrong one. It seems like usually the one you want to use is the inner acc, so naming them "inner_acc" and "outer_acc" helped me keep them straight. Also, these two are equivalent:</p>
+    <iframe height="550px" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9E3DPgDpIBlAK4AjOgDMkdcqzhIAFAEo6wAXTot6cQuRh0AvHQDa6jSfRY66AEyZrAZgC6mMxuM2rNu3RvPX0ubGDlYONk5mEYFmEDgAFgiaPPgAdBIITAAmChJQCOSodAAM9giQUIU6EHr2AO46cYVSCgjChFAA+qw4OPZ5tUpqgRpadP0dMMLkhkm8aRnZufmFJXRl0IX9dQ1NivJI0F099lXkg27m+4fdOHQA1HSnFwC+Shet7Ue3D+OT5GavMwxeKJbhzdJZHJ5ArFUrlSq6GDbfCNSSKD7XY5jBADIbmWapCGLaGFDGdG5wjbY2rI1HNK7krGnc7DS5IA6M76PXQvN6BQFIZ4CEDPIA==="></iframe>
+    <p>I feel like the second version is more elegant and some people would really prefer it, but I'm not sure. Imo this sort of thing where you start with one version and "improve" on it is sort of an anti pattern: it implies the first version is the one you'd first think of and the beautiful elegant solution is less obvious. Like the shorter nested fold code is probably more readable for experienced Gleam users, but is it readable for people who aren't as familiar? Again idk.</p>
+    <p></p>
+    <h3>Gleam is fun</h3>
+    <p>The downside of the elegance is it's not as easy (for me) to figure out, but Gleam is simple and friendly enough I could get into it despite it being a functional language. The upside is once you figure a solution out it is really satisfying. I have never done a full aoc before, and tbh probably only did this one because only 12 days, but also because Gleam solutions feel great.</p>
+    <p>Gleam is definitely fun for little aoc style problems; I hope it's still fun when things aren't as clean and self contained.</p>
+    <a href="/aoc25tachyon">Day 7 (tachyon manifold) visualization</a>
+</body>

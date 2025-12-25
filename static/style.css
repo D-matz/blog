@@ -1,0 +1,12 @@
+iframe {
+    width: 98vw;
+}
+
+body {
+    margin: 1vw;
+    max-width: 800px;
+}
+
+img {
+    width: 200px;
+}
