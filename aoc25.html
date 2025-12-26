@@ -44,7 +44,7 @@
     <h3>I can't index into an array?</h3>
     <p>
         Tymscar's blog mentions <a href="https://blog.tymscar.com/posts/gleamaoc2025/#options-everywhere-and-why-that-matters-for-grid-puzzles">problem 4</a>,
-        I bet because the way to get an item in a 2d array and the items around it is very surprising when new to Gleam. Gleam really does not want you to do mylist[i+1][j-1].
+        I bet because the way to get an item in a 2d array and the items around it may shock you if new to Gleam. Gleam really does not want you to do mylist[i+1][j-1].
         I got so mad I went looking for the commit where the maintainer removed list.at from the std lib to discourage indexing into a list:</p>
     <a href="https://github.com/gleam-lang/stdlib/commit/7a15388249b67a0119351f12b6e94d9777fbd10c">deprecate list.at</a>
     <a href="https://github.com/gleam-lang/stdlib/commit/b98705f890a2828c48dfdab291a22f145309d646">remove list.at</a>
