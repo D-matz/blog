@@ -29,7 +29,10 @@
     <iframe height="200px" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9E3DPgDpIBlAK4AjOgDMkdcqzhIAFAEo6wAXToQcACwR1uvAHRRWSBhAUBOTHQCsSgQF8QjoA=="></iframe>
     <p>Which is totally reasonable; it just isn't what Python's range does, so my solution was slightly off for an input and it took me a while to figure out why.</p>
     <p>Still, Gleam felt fast and fun to learn. Like Go, I could pick it up and try a few tour examples and get to solving aoc problems pretty quickly. Unlike Go, the solutions felt satisying enough to motivate doing all the problems.</p>
-    <p>After getting used to Gleam, many of the problems felt great, and I solved them on my own except day 10 pt 2 and day 12. For these I got so stuck I started reading other stuff including <a href="https://blog.tymscar.com/posts/gleamaoc2025/">Tymscar's blog</a> which mentioned the finale is troll and "the only puzzle I did not fully enjoy" which yeah I'd echo. For problem 10 pt 2 I copied a <a href="https://old.reddit.com/r/adventofcode/comments/1pk87hl/2025_day_10_part_2_bifurcate_your_way_to_victory/">brilliant approach from reddit</a>.</p>
+    <p>After getting used to Gleam, many of the problems felt great, and I solved them on my own except day 10 pt 2 and day 12. For these I got so stuck I started reading other stuff including <a href="https://blog.tymscar.com/posts/gleamaoc2025/">Tymscar's blog</a> which mentioned the finale is troll and "the only puzzle I did not fully enjoy" which yeah I'd echo. For problem 10 pt 2 I copied a <a href="https://old.reddit.com/r/adventofcode/comments/1pk87hl/2025_day_10_part_2_bifurcate_your_way_to_victory/">brilliant approach from reddit</a>. You check each combo of buttons (at most 1 of each button) that gives each light an even value, which works because you can recurse by halving the values and multiplying that answer by 2. If you stare at this problem for a while, their comment "I expected the state space to balloon quickly like with other searching-based solutions, but that just... doesn't really happen here." rings true and is really impressive. Tbh I never would've come up with this answer on my own, so it was cool just to copy it to Gleam.</p>
+    <h3>The std lib is friendly</h3>
+    <p>I will also say the mistakes I made with modulo, range, etc., are due to my being dumb and not Gleam lacking functionality or documentation. The standard lib has all the tools you need for cute little aoc problems such as list, dict, and set. And hexdocs tell you % exists, range counts down, etc.</p>
+    <p>There's a lot of much less friendly stuff for interacting with the world that you can't find in the std lib (files, json, http..), but aoc doesn't need that is pleasant intro to Gleam.</p>
     <h3>The Gleam playground is friendly</h3>
     <p>Gleam has a decent number of steps to install, so it's nice there's <a href="https://playground.gleam.run/">https://playground.gleam.run/</a>, it let me do a lot of the problems in an environment without Gleam installed.</p>
     <h3>echo and todo are friendly</h3>
@@ -49,11 +52,35 @@
     <h3>What's the biggest set you can fit in memory?</h3>
     <p>For day 9 pt 2 I originally made a set of all green tiles, which was correct but crashed the playground on my computer. My solution that worked on the problem input may not have been totally correct - in the literal corner case where the green tiles are a thin layer around two sides of a square like pac-man with an open mouth it would count the square entirely outside the tiles - but for the actual problem input it was ok. Anyways, what are the general performance limits? On the playground on my computer a set of size 12345 seems fine but once you get to 12345678 it slows down noticeably.</p>
     <iframe height="400px" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9DBPgDpIVqtRi3YcmcGHyT9KAVwBGdAGZI65VnCQAKAJR1g/OnRb0YALzoBeOugBMAZgAsAViMnJ+AHTKETACbaylAI5Kh03N5IEADueph0CJBQ4RJSXlCsSAwQ2gAMmBa6CTFw+AAW4ararDg4CXC6hmrGdLU4dAA+AHwRPF5a3LTaje4AvrruEDjlCBHm/GP8IGNAA==="></iframe>
+    <h3>Nested cases and functions confuse me</h3>
+    <p>Sometimes I'd have a big ugly nested list of case curly brackets and function parens. In these cases I struggled to tell which opening bracket matches which closing bracket. I really like that Gleam has an automatic formatter, and in general I am totally happy to say whatever the formatter says is what I (and everyone) should do without even thinking about it, but I wish it put opening brackets on the same indentation as the matching closing bracket. That would make it much easier visually to see which matches which.</p>
+    <pre>
+    So instead of this
+    case a {
+        1 -> case b {
+            True -> 9
+            False -> 3
+        }
+        _ -> 0
+    }
+    </pre>
+    <pre>
+    Imo in trivial examples both are fine, but this is more clear in big ugly cases
+    case a
+    {
+        1 -> case b
+        {
+            True -> 9
+            False -> 3
+        }
+        _ -> 0
+    }
+    </pre>
+    <p>If the {} and () formatting can't change, maybe IDE highlighting or something can help.</p>
     <h3>Double fold and functional programming elegance</h3>
     <p>Advent of code is full of "go through a list and for each item, add something to accumulator". Often a list of lists requires a nested fold with an outer accumulator and an inner accumulator. This tripped me up a lot at first because I'd name both "acc" and accidentally add to the wrong one. It seems like usually the one you want to use is the inner acc, so naming them "inner_acc" and "outer_acc" helped me keep them straight. Also, these two are equivalent:</p>
     <iframe height="550px" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9E3DPgDpIBlAK4AjOgDMkdcqzhIAFAEo6wAXTot6cQuRh0AvHQDa6jSfRY66AEyZrAZgC6mMxuM2rNu3RvPX0ubGDlYONk5mEYFmEDgAFgiaPPgAdBIITAAmChJQCOSodAAM9giQUIU6EHr2AO46cYVSCgjChFAA+qw4OPZ5tUpqgRpadP0dMMLkhkm8aRnZufmFJXRl0IX9dQ1NivJI0F099lXkg27m+4fdOHQA1HSnFwC+Shet7Ue3D+OT5GavMwxeKJbhzdJZHJ5ArFUrlSq6GDbfCNSSKD7XY5jBADIbmWapCGLaGFDGdG5wjbY2rI1HNK7krGnc7DS5IA6M76PXQvN6BQFIZ4CEDPIA==="></iframe>
     <p>I feel like the second version is more elegant and some people would really prefer it, but I'm not sure. Imo this sort of thing where you start with one version and "improve" on it is sort of an anti pattern: it implies the first version is the one you'd first think of and the beautiful elegant solution is less obvious. Like the shorter nested fold code is probably more readable for experienced Gleam users, but is it readable for people who aren't as familiar? Again idk.</p>
-    <p></p>
     <h3>Gleam is fun</h3>
     <p>The downside of the elegance is it's not as easy (for me) to figure out, but Gleam is simple and friendly enough I could get into it despite it being a functional language. The upside is once you figure a solution out it is really satisfying. I have never done a full aoc before, and tbh probably only did this one because only 12 days, but also because Gleam solutions feel great.</p>
     <p>Gleam is definitely fun for little aoc style problems; I hope it's still fun when things aren't as clean and self contained.</p>
