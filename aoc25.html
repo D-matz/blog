@@ -55,30 +55,7 @@
     <p>For day 9 pt 2 I originally made a set of all green tiles, which was correct but crashed the playground on my computer. My solution that worked on the problem input may not have been totally correct - in the literal corner case where the green tiles are a thin layer around two sides of a square like pac-man with an open mouth it would count the square entirely outside the tiles - but for the actual problem input it was ok. Anyways, what are the general performance limits? On the playground on my computer a set of size 12345 seems fine but once you get to 12345678 it slows down noticeably.</p>
     <iframe height="400px" allow="clipboard-write" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9DBPgDpIVqtRi3YcmcGHyT9KAVwBGdAGZI65VnCQAKAJR1g/OnRb0YALzoBeOugBMAZgAsdDh3xQAnutYBrLQzqELaOTgCsAGwAHACcdAC0dADucExMdEgI+AAWAXTZrJSURAD8RiaS+AB0yghMACbaylAI5Kh03NVIEEl6mHQIkFDtElJVUKxIDBDaAAyYFrr9KTntqtqsODj9cLqGasZ0mzh0AD4AfB08VVrctNq75QC+uuUQONkIHeb8T/wgTyAA"></iframe>
     <h3>Nested cases and functions confuse me</h3>
-    <p>Sometimes I'd have a big ugly nested list of case curly brackets and function parens. In these cases I struggled to tell which opening bracket matches which closing bracket. I really like that Gleam has an automatic formatter, and in general I am totally happy to do whatever the formatter says without even thinking about it, but I wish it put opening brackets on the same indentation as the matching closing bracket. So you could more easily see which matches which:</p>
-    <pre>
-    Instead of this (current)
-    case a {
-        1 -> case b {
-            True -> 9
-            False -> 3
-        }
-        _ -> 0
-    }
-    </pre>
-    <pre>
-    Imo in trivial examples both are fine, but this is more clear in big ugly cases
-    case a
-    {
-        1 -> case b
-        {
-            True -> 9
-            False -> 3
-        }
-        _ -> 0
-    }
-    </pre>
-    <p>If the {} and () formatting can't change, maybe IDE highlighting or something can help, and I guess if your IDE has little lines going up from a } you can follow them up to the line with the corresponding opening {.</p>
+    <p>Sometimes I'd have a big ugly nested list of case curly brackets and function parens. In these cases I struggled to tell which opening bracket matches which closing bracket. I really like that Gleam has an automatic formatter, and in general I am totally happy to do whatever the formatter says without even thinking about it, but I wish it put opening brackets on the same indentation as the matching closing bracket. Although maybe IDE highlighting or something can help, and I guess if your IDE has little lines going up from a } you can follow them up to the line with the corresponding opening {.</p>
     <p>Also, the <- use syntax probably helps with nested functions in cases where you'd have a bunch of callbacks, but I didn't use it for aoc. I did use |> a lot though.</p>
     <h3>Double fold and functional programming elegance</h3>
     <p>Advent of code is full of "go through a list and for each item, add something to accumulator". Often a list of lists requires a nested fold with an outer accumulator and an inner accumulator. This tripped me up a lot at first because I'd name both "acc" and accidentally add to the wrong one. It seems like usually the one you want to use is the inner acc, so naming them "inner_acc" and "outer_acc" helped me keep them straight. Also, these two are equivalent:</p>
