@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gleam - a simple language with sum types and immutable data">
+    <meta name="keywords" content="Gleam, type-safe, immutable, sum type">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="Gleam - a simple language with sum types and immutable data">
+    <link rel="stylesheet" href="static/style.css">
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/static/lucy_square.svg"
+    />
+</head>
+<body>
+    <h1><a href="/">Correct Arity</a></h1>
+    <h2>Gleam - a simple language with sum types and immutable data</h2>
+
+    <blockquote>
+    If the implementation is hard to explain, it's a bad idea.<br>
+    If the implementation is easy to explain, it may be a good idea.
+    </blockquote>
+
+    <p>Maybe the <a href="https://peps.python.org/pep-0020/">The Zen of Python</a> shouldn't be taken too literally (it does use "-- ", " --", and "--" to say there should be only one way to do it). And complex programming languages can be motivated by real complex use cases. Still, it's quick and easy to explain why I like Gleam, so I feel like it might be good.</p>
+
+    <h3>Sum types</h3>
+    <p>You might need to record if a patient is dead. Some systems record a boolean, others record a time of death. And some patients may not have alive or dead recorded either way. Well, a sum type can be either a Bool or Timestamp, in an Option.</p>
+
+    <p>The big benefit is when you want to get something out of a sum type, the compiler helps you check each case: is it None? Is it a Bool or Timestamp? So you're sure you're operating on the right type. This gives you confidence <b>at runtime</b> and <b>refactoring</b>. Which sounds like an oft-repeated banality, type safe bla bla bla, but really you just need to experience it.</p>
+
+    <h3>Immutable data</h3>
+    <p>I often find "functional" languages esoteric, confusing, and more academically interesting than productive. Not saying you can't do good work with such languages! But a median human could start Gleam faster, not having to learn objects, traits, macros, classes, typeclasses, monads(!), currying, etc. Also, Gleam's syntax feels more familiar. So if you're used to functional languages that's great, and if not Gleam is a gentle intro.</p>
+
+    <p>So technically Gleam is functional, but a less scary word that captures the benefit is "immutable". While having some mutable state potentially updated anywhere is sometimes practical, it's also sometimes hard to reason about. Gleam guarantees you can trace where values come from.</p>
+
+    <h3>Try Gleam</h3>
+    <p><a>href="https://tour.gleam.run/>Try Gleam</a>! There is of course much more cool stuff to Gleam, but what I like is it stays simple and friendly while getting a lot out of sum types and immutable data.</p
+</body>
