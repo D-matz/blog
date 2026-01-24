@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Go is the grug language">
+    <meta name="keywords" content="Go, Golang, grug, grugbrain, grugbrain.dev">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="Go is the grug language">
+    <meta property="og:image" content="https://correctarity.com/static/gruglang.jpeg">
+    <meta property="og:image:type" content="image/jpeg">
+    <link rel="stylesheet" href="static/style.css">
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/static/lucy_square.svg"
+    />
+</head>
+<body>
+<h1><a href="/">Correct Arity</a></h1>
+<img src="/static/gruglang.jpeg">
+<h2>Go is the grug language</h2>
+<h3>grugbrain.dev is not just "complexity bad"</h3>
+<p><a href="https://grugbrain.dev/">https://grugbrain.dev/</a> does not only say "complexity bad" in a funny style. It lists many specific ways of dealing with complexity: Saying No, Saying Ok, Factoring Your Code, Testing, Agile, Refactoring, Chesterton's Fence, Microservices, Tools, Type Systems, Expression Complexity, DRY, Separation of Concerns, Closures, Logging, Concurrency, Optimizing, APIs, Parsing, The Visitor Pattern, Front End Development, Fads, Fear Of Looking Dumb, Imposter Syndrome, Reads. Golang (regardless of if it's good or bad) matches grug's vibe.</p>
+
+<h3>Saying No</h3>
+<p><a href="https://commandcenter.blogspot.com/2012/06/less-is-exponentially-more.html">Go's founding myth was C++ saying Yes too much</a>. While other modern languages also constantly reject proposed features, Go seems to care less about having or quickly adding language capabilities. For example generics, although finally in 2022...</p>
+
+<h3>Saying Ok</h3>
+<p>...in 2022, Go 1.18 added generics as parametric polymorphism which as far as I can tell means "80/20 solution". One big thing you still cannot do is generic methods on structs. In general Go seems very willing to limit the language for ease of use or even compilation, maybe at the expense of the "right" or most elegant thing.</p>
+
+<h3>Factoring Your Code</h3>
+<blockquote>good cut point has narrow interface with rest of system: small number of functions or abstractions that hide complexity demon internally, like trapped in crystal</blockquote>
+<p>Grug uses the literal word interface, and describes a good Go interface. For example the Error() interface means you're guaranteed something to print without knowing the internals of a specific Go error or how it creates the string. Interfaces or something like them exist in other languages too, but are particularly important in Go because it lacks other features for factoring code. There are structs but no super powerful OOP, static types but no super powerful type system.</p>
+
+<p>Grug also says to wait and see what shape/abstractions emerge, but this is general advice not specific to Go.</p>
+
+<h3>Testing</h3>
+<p>Grug is ambivalent about tests in general but likes them for integration and bug fixing. I honestly couldn't tell you if Go, relative to other languages, is particularly good for this type of testing or pushes you too much towards the unit tests grug dislikes.</p>
+
+<h3>Agile</h3>
+<p>For grug Agile is "not terrible, not good"; more important for productivity is "prototyping, tools and hiring". Go addresses <a href="https://go.dev/talks/2012/splash.article#TOC_4.">human pain points</a> that slow down teams. It's quick and easy to learn and to start a project in. It's also easy to read and dive into someone else's existing project, or your own old project from years ago.</p>
+
+<h3>Refactoring</h3>
+<p>People have many <a href="https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/">strong</a> <a href="https://blog.codinghorror.com/paying-down-your-technical-debt/">opinions</a> on refactoring. Maybe born out of terrible experiences, as both maintaining decades of cruft and rewriting decades of accumulated logic can get pretty terrible.</p>
+
+<p>So to really do justice to refactoring in Go we'd have to go through a lot of people's experiences maintaining various projects. I will say <a href="https://go.dev/doc/go1compat">Go's focus on compatibility and stability</a> might help reduce how much you have to refactor in the first place (not saying this is necessarily true; maybe you had to rewrite a Go project).</p>
+
+<h3>Chesterton's Fence</h3>
+<p>Overall this is more of a general principle so idk how much any particular programming language encourages it, but at least there aren't frequent breaking changes in each Go release that drive redoing things.</p>
+
+<h3>Microservices</h3>
+<p>Grug dislikes microservices.</p>
+
+<h3>Tools</h3>
+<p>The grug tool story is sort of mixed with the type system making APIs usable, plus editor and debugger. If you define an AllergyIntolerance struct you can write myallergy dot in VSCode or whatever IDE and see its fields and methods. Of course other languages have good tooling too, I get the sense that Go arrived early with tooling, but now an LSP and even automatic formatting is table stakes for a language. I really like gofmt, and its influence on new languages eg Gleam.</p>
+
+<h3>Type Systems</h3>
+<p>Grug gets value out of IDE code suggestions: "grug hit dot on keyboard and list of things grug can do pop up magic. this 90% of value or more to grug"</p>
+
+<p>Grug is not as impressed by correctness guarantees: "big brain type system shaman often say type correctness main point type system, but grug note some big brain type system shaman not often ship code...danger abstraction too high, big brain type system code become astral projection of platonic generic turing model of computation into code base. grug confused and agree some level very elegant but also very hard do anything like record number of club inventory for Grug Inc. task at hand"</p>
+
+<p>Go has static types but no algebraic data types. This is the right balance <em>for Grug</em>. I do think there is a case that people who read and write blogs about programming languages tend to have an unusual preference for powerful type systems, and that bigger productivity problems could come from some programmers not understanding parts of the language than from the language not enforcing correctness. I'm not saying sum types are bad (I've been getting into Gleam and it's very nice); again just saying Go strikes the balance grug wants where types enable IDE tooling without lowering the number of language users.</p>
+
+<h3>Expression Complexity</h3>
+<p>Expression Complexity might mean specifically expanding boolean expressions, which you could do in any language. Go is particularly boilerplate heavy though, obviously much has been written about <code>if err != nil</code>. I know some people hate boilerplate, and maybe Go is harder for them to read, but for grug Go probably wins points for easier to understand and debug.</p>
+
+<h3>DRY</h3>
+
+<p>Ofc I'd like it if Go uniquely matched grug's description of DRY, but this tradeoff is not specific to Go: "hard balance here, repeat code always still make grug stare and say "mmm" often, but experience show repeat code sometimes often better than complex DRY solution". Maybe different languages give you more boilerplate or abstraction but eh, unlike some supposed tradeoffs where imo there are right answers, DRY is a real and tricky tradeoff.</p>
+
+<h3>Separation of Concerns</h3>
+
+<p>"sour faced" grug wrote <a href="https://htmx.org/essays/locality-of-behaviour/">locality of behavior</a>, and wants to quickly see everything that touches something, hence "grug much prefer put code on the thing that do the thing" (PCOTTDTT). One advantage Go has here is methods on a struct can't be defined outside of that struct's package, so you can press dot and see the struct and what you can do with it all in one place.</p>
+
+<h3>Closures</h3>
+<p>Grug accepts closures for limited needs ("abstracting operation over collection of objects"), but in general rejects them as confusing. Go has closures but generally prefers ifs and for loops over powerful but abstract language features, as does grug (not saying this is right or wrong). This is also why Gleam is not the grug language imo, relative to other functional languages Gleam doesn't lean super hard into a functional style, but grug still prefers Go with imperative ifs and loops.</p>
+
+<p>A big file or big function with lots of basic code looks fine to grug, whereas advanced langauge features like closures look suspicious to grug (even if to others it'd look cleaner).</p>
+
+<h3>Logging</h3>
+
+<p>Not really sure how Go logging compares to other languages, but the stdlib provides log and log/slog, so hopefully you avoid the Java situation with multiple kind of standard but different logging packages and potential security problems.</p>
+
+<p>Grug mentions "idol rob pike" worked on <a href="https://en.wikipedia.org/wiki/Sawzall_(programming_language)">logging</a>. He <a href="https://commandcenter.blogspot.com/2023/12/simplicity.html">probably influenced grug on simplicity</a> and <a href="https://commandcenter.blogspot.com/2024/01/what-we-got-right-what-we-got-wrong.html">helped create Go</a>.</p>
+
+<h3>Concurrency</h3>
+
+<p>I think a concurrency story actually makes a lot of sense for an 80/20 langauge, because it's important if you need it, but when you don't then you can ignore it. So grug who would rather not mess with concurrency can write sequential code without goroutines.</p>
+
+<p>Grug references Erlang: "hear good things, but language look wierd to grug sorry". CSP influenced both Erlang and Go, and Erlang/OTP might even be better than Go at <a href="https://go.dev/blog/codelab-share">Do not communicate by sharing memory; instead, share memory by communicating</a>. But, like grug, I have not tried Erlang because it looks "wierd". Go may be more similar to languages you already know.</p>
+
+<h3>Optimizing</h3>
+
+<p>"premature optimization" yada yada...</p>
+
+<p>Sometimes you see people ask if Go is fast enough or if they should choose another language, <a href="https://www.jerf.org/iri/post/2025/the_uselessness_of_fast/">https://www.jerf.org/iri/post/2025/the_uselessness_of_fast/</a> is a great post.</p>
+
+<blockquote>it is more common for developers to obsess over irrelevant performance details and losing more time programming in a suboptimal environment for what they need, but it is more consequential when developers make the opposite mistake and choose something that they should have known from the very beginning would not be able to meet their performance needs</blockquote>
+
+<p>The whole post is worth reading but an important thing is to have a sense of the orders of magnitude. A common example is minimizing requests over the network dwarfs other optimizations. Commercially viable databases are a different sort of example which seem doomed to a Rust rewrite. The point is "fast" and "slow" are too broad, the question is what you're working on.</p>
+
+<p>Go is often fast enough, not always, it depends. Is a garbage collector good for your problem?</p>
+
+<h3>APIs</h3>
+
+<p>For discoverability, users can type mything dot and see all the options you can do pop up, so the API designer should put all the functions on that object. Go definitely satisfies putting all the API functions on an object for autocomplete with methods on a struct, although any object oriented language can do this.</p>
+
+<p>For ease of use plus correctness, users may want a high level API that just does the thing you want rather than a bunch of lego blocks you have to snap together, but may also need to mess with the ugly low level stuff, so API designers should provide low level functions alongside higher level wrappers, ie "layering" the API. Which is another point not specific to Go.</p>
+
+<h3>Parsing</h3>
+<p>Seems like another general point, interestingly <a href="https://eli.thegreenplace.net/2022/book-review-crafting-interpreters-by-robert-nystrom">someone did work through (some of) crafting interpreters in Go</a></p>
+
+<h3>The Visitor Pattern</h3>
+<p>Grug dislikes the visitor pattern.</p>
+
+<h3>Front End Development</h3>
+<p>The grug approach to websites is to respond to requests with some html. Go has a solid http server in the standard library that you can quickly set up to respond to requests with html. While Go can compile to WASM, imo it does not really seem to want to run in the browser, aligning with grug's preference (as the author of <a href="https://htmx.org/">HTMX</a>) for servers returning html solving many cases where an SPA is not justified. Go is happy to live on the server, maybe with <a href="https://www.gomponents.com/">gomponents</a> or <a href="https://templ.guide/">templ</a>.
+
+<h3>Fads</h3>
+<p>A simple language is not actually easier if your problem needs some feature, so you have to implement a shitty version of the feature so because Go ignored the relevant programming language research. You <a href="https://commandcenter.blogspot.com/2011/12/esmereldas-imagination.html">might</a> <a href="https://www.jerf.org/iri/post/2960/">not</a> actually need that feature, but you might, not dismissing this, it is a real downside of Go. The upside though of Go moving very slowly is it can ignore fads. It is much easier to identify fads in hindsight ("OSGi"? what is grug talking about?) than when they first come out, especially because even if a fad is counterproductive for many projects, it probably did solve some real problem somewhere. So imo it's fair to say avoiding fads is hard, let's make a language focused on avoiding bad ideas rather than adding good ones.</p>
+
+<p>Also again imo Go lives more in backend, and grug feels fads more in frontend.</p>
+
+<h3>Fear Of Looking Dumb</h3>
+<p>Go is objectively boilerplate heavy, some would say ugly, so you need to get over Fear Of Looking Dumb (FOLD) to say well there might be terser ways to do this but they would be harder for me to understand.</p>
+
+<h3>Imposter Syndrome</h3>
+<p>Imo Go people like to say actually it's good to do the dumb thing (eg <a href="https://github.com/SuperPaintman/the-evolution-of-a-go-programmer?tab=readme-ov-file">factorial</a>) sometimes because there is real overengineering to prevent but also sometimes as emotional reassurance that we're not dumb.</p>
+
+<h3>Reads</h3>
+<p>People who dislike Go almost always like Rust and enjoy deep dives into the best way to do something. Simple vs correct is a philosophical question imo meaning the only wrong thing to do is choose a tool based on your philosophy rather than choose a tool for your problem and base your philosophy on that concrete example (which grugbrain.dev doesn't say but I'll editorialize as a grug take).</p>
+
+<p>Also, the New Jersey Unix gang mentioned in Worse is Better later created Go.</p>
+
+<h3>Conclusion: Golang is the grug language</h3>
+<p>Go fits grug's criteria. Is it any good? Idk maybe.</p>
+</body>
