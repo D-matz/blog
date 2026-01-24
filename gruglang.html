@@ -86,7 +86,7 @@
 
 <h3>Concurrency</h3>
 
-<p>I think a concurrency story actually makes a lot of sense for an 80/20 langauge, because it's important if you need it, but when you don't then you can ignore it. So grug who would rather not mess with concurrency can write sequential code without goroutines.</p>
+<p>A concurrency story actually makes a lot of sense for an 80/20 langauge, because it's important if you need it, but when you don't then you can ignore it. So grug who would rather not mess with concurrency can write sequential code without goroutines.</p>
 
 <p>Grug references Erlang: "hear good things, but language look wierd to grug sorry". CSP influenced both Erlang and Go, and Erlang/OTP might even be better than Go at <a href="https://go.dev/blog/codelab-share">Do not communicate by sharing memory; instead, share memory by communicating</a>. But, like grug, I have not tried Erlang because it looks "wierd". Go may be more similar to languages you already know.</p>
 
@@ -123,7 +123,7 @@ without client side state or general jankiness. As always it depends but imo hav
 </p>
 
 <h3>Fads</h3>
-<p>A simple language is not actually easier if your problem needs some feature, but because Go ignored the relevant programming language research, you have to reimplement a shitty version of the feature . You <a href="https://commandcenter.blogspot.com/2011/12/esmereldas-imagination.html">might</a> <a href="https://www.jerf.org/iri/post/2960/">not</a> actually need that feature, but you might, not dismissing this, it is a real downside of Go. The upside though of Go moving very slowly is it can ignore fads. It is much easier to identify fads in hindsight ("OSGi"? what is grug talking about?) than when they first come out, especially because even if a fad is counterproductive for many projects, it probably did solve some real problem somewhere. So imo it's fair to say avoiding fads is hard, let's prioritize avoiding bad ideas over adding good ones.</p>
+<p>A simple language is not actually easier if your problem needs some feature, but because Go ignored the relevant programming language research, you have to reimplement a shitty version of the feature. You <a href="https://commandcenter.blogspot.com/2011/12/esmereldas-imagination.html">might</a> <a href="https://www.jerf.org/iri/post/2960/">not</a> actually need that feature, but you might, not dismissing this, it is a real downside of Go. The upside though of Go moving very slowly is it can ignore fads. It is much easier to identify fads in hindsight ("OSGi"? what is grug talking about?) than when they first come out, especially because even if a fad is counterproductive for many projects, it probably did solve some real problem somewhere. So imo it's fair to say avoiding fads is hard, let's prioritize avoiding bad ideas over adding good ones.</p>
 
 <p>Also again imo Go lives more in backend, and grug feels fads more in frontend.</p>
 
@@ -131,7 +131,7 @@ without client side state or general jankiness. As always it depends but imo hav
 <p>Go is objectively boilerplate heavy, some would say ugly, so you need to get over Fear Of Looking Dumb (FOLD) to say well there might be terser ways to do this but they would be harder for me to understand.</p>
 
 <h3>Imposter Syndrome</h3>
-<p>Imo Go people like to say actually it's good to do the dumb thing (eg <a href="https://github.com/SuperPaintman/the-evolution-of-a-go-programmer?tab=readme-ov-file">factorial</a>) sometimes because there is real overengineering to prevent but also sometimes as emotional reassurance that we're not dumb.</p>
+<p>I feel like Go people enjoy saying actually it's good to do the dumb thing (eg <a href="https://github.com/SuperPaintman/the-evolution-of-a-go-programmer?tab=readme-ov-file">factorial</a>) sometimes because there is real overengineering to prevent but also sometimes as emotional reassurance that we're not dumb.</p>
 
 <h3>Reads</h3>
 <p>People who dislike Go almost always like Rust and enjoy deep dives into the best way to do something. Simple vs correct is a philosophical question imo meaning the only wrong thing to do is choose a tool based on your philosophy rather than choose a tool for your problem and base your philosophy on that concrete example (which grugbrain.dev doesn't say but I'll editorialize as a grug take).</p>
