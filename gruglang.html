@@ -115,10 +115,15 @@
 <p>Grug dislikes the visitor pattern.</p>
 
 <h3>Front End Development</h3>
-<p>The grug approach to websites is to respond to requests with some html. Go has a solid http server in the standard library that you can quickly set up to respond to requests with html. While Go can compile to WASM, imo it does not really seem to want to run in the browser, aligning with grug's preference (as the author of <a href="https://htmx.org/">HTMX</a>) for servers returning html solving many cases where an SPA is not justified. Go is happy to live on the server, maybe with <a href="https://www.gomponents.com/">gomponents</a> or <a href="https://templ.guide/">templ</a>.
+
+<p>As the creator of <a href="https://htmx.org/">HTMX</a>, grug thinks <a href="https://htmx.org/essays/hateoas/">servers return html</a>
+and an SPA is often overkill. While Go can compile to WASM and run in browser, the bundle is large (megabytes) and if your aesthetic is libraries over frameworks,
+Go is much happier on the backend. Go + <a href="https://templ.guide/">templ</a>/<a href="https://www.gomponents.com/">gomponents</a> + HTMX often gets you a long way
+without client side state or general jankiness. As always it depends but imo having a production ready http server in the standard library appeals to grug.
+</p>
 
 <h3>Fads</h3>
-<p>A simple language is not actually easier if your problem needs some feature, so you have to implement a shitty version of the feature so because Go ignored the relevant programming language research. You <a href="https://commandcenter.blogspot.com/2011/12/esmereldas-imagination.html">might</a> <a href="https://www.jerf.org/iri/post/2960/">not</a> actually need that feature, but you might, not dismissing this, it is a real downside of Go. The upside though of Go moving very slowly is it can ignore fads. It is much easier to identify fads in hindsight ("OSGi"? what is grug talking about?) than when they first come out, especially because even if a fad is counterproductive for many projects, it probably did solve some real problem somewhere. So imo it's fair to say avoiding fads is hard, let's make a language focused on avoiding bad ideas rather than adding good ones.</p>
+<p>A simple language is not actually easier if your problem needs some feature, so you have to reimplement a shitty version of the feature so because Go ignored the relevant programming language research. You <a href="https://commandcenter.blogspot.com/2011/12/esmereldas-imagination.html">might</a> <a href="https://www.jerf.org/iri/post/2960/">not</a> actually need that feature, but you might, not dismissing this, it is a real downside of Go. The upside though of Go moving very slowly is it can ignore fads. It is much easier to identify fads in hindsight ("OSGi"? what is grug talking about?) than when they first come out, especially because even if a fad is counterproductive for many projects, it probably did solve some real problem somewhere. So imo it's fair to say avoiding fads is hard, let's make a language focused on avoiding bad ideas rather than adding good ones.</p>
 
 <p>Also again imo Go lives more in backend, and grug feels fads more in frontend.</p>
 
