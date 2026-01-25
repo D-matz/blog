@@ -31,9 +31,7 @@
 
 <h3>Factoring Your Code</h3>
 <blockquote>good cut point has narrow interface with rest of system: small number of functions or abstractions that hide complexity demon internally, like trapped in crystal</blockquote>
-<p>Grug uses the literal word interface, and describes a good Go interface. For example the Error() interface means you're guaranteed something to print without knowing the internals of a specific Go error or how it creates the string. Interfaces or something like them exist in other languages too, but are particularly important in Go because it lacks other features for factoring code. There are structs but no super powerful OOP, static types but no super powerful type system.</p>
-
-<p>Grug also says to wait and see what shape/abstractions emerge, but this is general advice not specific to Go.</p>
+<p>Grug uses the literal word interface, and describes a good Go interface. For example the Error() interface means you're guaranteed something to print without knowing the internals of a specific Go error or how it creates the string. Interfaces or something like them exist in other languages too, but are particularly important in Go because it lacks other features for factoring code. There are structs but no super powerful OOP, static types but no super powerful type system. Lacking these features might also make it easier to wait and see what shape/abstractions emerge, although that advice applies to any language.</p>
 
 <h3>Testing</h3>
 <p>Grug is ambivalent about tests in general but likes them for integration and bug fixing. I honestly couldn't tell you if Go, relative to other languages, is particularly good for this type of testing or pushes you too much towards the unit tests grug dislikes.</p>
