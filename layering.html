@@ -1,0 +1,142 @@
+<html><head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Layering over sans-io">
+    <meta name="keywords" content="Layering, layered, layer, sans-io, API, Gleam, http, fetch, httpc, rsvp">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="Layering over sans-io">
+    <meta property="og:image" content="https://correctarity.com/static/layeringoversans.jpg">
+    <meta property="og:image:type" content="image/jpg">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/lucy_square.svg">
+    <script src="/static/searchdemo.js" type="module"></script>
+</head>
+<body>
+<h1><a href="/">Correct Arity</a></h1><img src="/static/layeringoversans.jpg">
+<h2>Layering over sans-io</h2>
+
+<h3>Library implementers vs users</h3>
+
+<p>As a library implementer, <mark>sans-io</mark> targeting Erlang and JavaScript with different concurrency models without duplicating code is very elegant, and you're so in the weeds of http you can say "Just don't make the request for me. Just let me make the request. It's one extra line of code, it's fine.". As a library user, though, these details might be too low level: I don't want to hear about IO and function coloring and snapping lego together; I want a single function to prepare, send, and parse my http request. <mark>Layering</mark> common http clients over sans-io abstracts ugliness away, and if it doesn't help sans-io is still an option.</p>
+<p>For example, for the spacetraders API, a <a href="https://hexdocs.pm/spacetraders_api_httpc/index.html">wrapper over sansio+httpc</a> or a <a href="https://hexdocs.pm/spacetraders_api_fetch/index.html">wrapper over sansio+fetch</a> may be ideal for users who don't want to worry about http stuff. Meanwhile <a href="https://hexdocs.pm/spacetraders_api_httpc/index.html">sans-io</a> is still available for users who need it.</p>
+<p>Layered APIs are probably described many places, but I like how <a href="https://www.youtube.com/watch?v=dTstnhS3moc">API Design by Carson Gross</a> explains easy high level APIs on top of flexible low level ones, for instance http client wrappers over sans-io.</p>
+<p>When you develop a sans-io library, you have to test it against an http client, so you can provide your first layered client by pulling out and formalizing that code you've already written. Even so, providing a layered client is a tradeoff between maintainence burden and friendly API.</p>
+<h3>Gleam fhir clients</h3>
+<p>In my project, <a href="https://hexdocs.pm/fhir/">Gleam fhir</a>, it's not that I think library users are too dumb to understand http if they try, but it does save a little attention to abstract http away, and it's good to save 100% focus for complex FHIR data. So for example, instead of 3 lines to plug into httpc to read a patient, a wrapper client can read a patient in 1 line, without worrying about sansio or httpc stuff around http.</p>
+
+<pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#D73A49">import</span><span style="color:#24292E"> fhir</span><span style="color:#D73A49">/</span><span style="color:#24292E">r4_httpc</span></span>
+<span class="line"><span style="color:#D73A49">import</span><span style="color:#24292E"> fhir</span><span style="color:#D73A49">/</span><span style="color:#24292E">r4_sansio</span></span>
+<span class="line"><span style="color:#D73A49">import</span><span style="color:#24292E"> gleam</span><span style="color:#D73A49">/</span><span style="color:#24292E">httpc</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">pub</span><span style="color:#D73A49"> fn</span><span style="color:#6F42C1"> main</span><span style="color:#24292E">() {</span></span>
+<span class="line"><span style="color:#D73A49">  let</span><span style="color:#24292E"> fc </span><span style="color:#D73A49">=</span><span style="color:#24292E"> r4_httpc.</span><span style="color:#6F42C1">fhirclient_new</span><span style="color:#24292E">(</span><span style="color:#032F62">"https://r4.smarthealthit.org/"</span><span style="color:#24292E">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  //prepare req (sansio), send (httpc), parse resp (sansio)</span></span>
+<span class="line"><span style="color:#D73A49">  let</span><span style="color:#24292E"> pat_req </span><span style="color:#D73A49">=</span></span>
+<span class="line"><span style="color:#24292E">    r4_sansio.</span><span style="color:#6F42C1">patient_read_req</span><span style="color:#24292E">(</span><span style="color:#032F62">"87a339d0-8cae-418e-89c7-8651e6aab3c6"</span><span style="color:#24292E">, fc)</span></span>
+<span class="line"><span style="color:#D73A49">  let</span><span style="color:#D73A49"> assert</span><span style="color:#6F42C1"> Ok</span><span style="color:#24292E">(pat_resp) </span><span style="color:#D73A49">=</span><span style="color:#24292E"> httpc.</span><span style="color:#6F42C1">send</span><span style="color:#24292E">(pat_req)</span></span>
+<span class="line"><span style="color:#D73A49">  let</span><span style="color:#D73A49"> assert</span><span style="color:#6F42C1"> Ok</span><span style="color:#24292E">(pat1) </span><span style="color:#D73A49">=</span><span style="color:#24292E"> r4_sansio.</span><span style="color:#6F42C1">patient_resp</span><span style="color:#24292E">(pat_resp)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  //read patient (httpc)</span></span>
+<span class="line"><span style="color:#D73A49">  let</span><span style="color:#D73A49"> assert</span><span style="color:#6F42C1"> Ok</span><span style="color:#24292E">(pat2) </span><span style="color:#D73A49">=</span></span>
+<span class="line"><span style="color:#24292E">    r4_httpc.</span><span style="color:#6F42C1">patient_read</span><span style="color:#24292E">(</span><span style="color:#032F62">"87a339d0-8cae-418e-89c7-8651e6aab3c6"</span><span style="color:#24292E">, fc)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">  echo</span><span style="color:#24292E"> pat1 </span><span style="color:#D73A49">==</span><span style="color:#24292E"> pat2</span></span>
+<span class="line"><span style="color:#24292E">}</span></span>
+<span class="line"></span></code></pre>
+
+<p>Normally httpc and fetch would probably be good choices, but I want to do a <a href="https://hexdocs.pm/lustre/lustre.html">Lustre</a> browser app, so I'm doing rsvp. But I or someone else could always go add fetch or whatever, each layered client is its own little modular module.</p>
+
+<p>I am not an expert on Lustre or rsvp, but it seems different enough that we can't have the same pattern as httpc of just doing everything in one function. Instead of sending and receiving the request all at once, rsvp gives you an Effect to give to Lustre, which at some later point comes back with a Msg.</p>
+
+<pre>
+    httpc: prepare request -> send -> parse response
+    rsvp: prepare request (and handler) -> give Effect to lustre
+          .
+          -> lustre sends request (and uses handler on response)
+          .
+          -> lustre returns Msg
+</pre>
+
+<p>It's nice to define request and handler all in one place, they're different little mechanisms but all part of the same concern. So a wrapper that puts those together for us at least does something, although it can't totally abstract away receiving a Msg. Also, the API to get type safe search params is a bit verbose. So you might look at this and say eh, is that supposed to be the nice version?</p>
+
+<pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#6F42C1">UserTypedName</span><span style="color:#24292E">(name) </span><span style="color:#D73A49">-></span></span>
+<span class="line"><span style="color:#D73A49">  case</span><span style="color:#24292E"> name {</span></span>
+<span class="line"><span style="color:#032F62">    ""</span><span style="color:#D73A49"> -></span><span style="color:#24292E"> #(</span><span style="color:#6F42C1">Model</span><span style="color:#24292E">(</span><span style="color:#D73A49">..</span><span style="color:#24292E">model, </span><span style="color:#E36209">show: </span><span style="color:#6F42C1">EmptyMsg</span><span style="color:#24292E">), effect.</span><span style="color:#6F42C1">none</span><span style="color:#24292E">())</span></span>
+<span class="line"><span style="color:#24292E">    name </span><span style="color:#D73A49">-></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">      let</span><span style="color:#E36209"> search: </span><span style="color:#6F42C1">Effect</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Msg</span><span style="color:#24292E">) </span><span style="color:#D73A49">=</span></span>
+<span class="line"><span style="color:#24292E">        r4_rsvp.</span><span style="color:#6F42C1">patient_search</span><span style="color:#24292E">(</span></span>
+<span class="line"><span style="color:#E36209">          search_for: </span><span style="color:#24292E">r4_sansio.</span><span style="color:#6F42C1">SpPatient</span><span style="color:#24292E">(</span></span>
+<span class="line"><span style="color:#D73A49">            ..</span><span style="color:#24292E">r4_sansio.</span><span style="color:#6F42C1">sp_patient_new</span><span style="color:#24292E">(),</span></span>
+<span class="line"><span style="color:#E36209">            name: </span><span style="color:#6F42C1">Some</span><span style="color:#24292E">(name),</span></span>
+<span class="line"><span style="color:#24292E">          ),</span></span>
+<span class="line"><span style="color:#E36209">          with_client: </span><span style="color:#24292E">model.client,</span></span>
+<span class="line"><span style="color:#E36209">          response_msg: </span><span style="color:#6F42C1">ServerReturnedPatients</span><span style="color:#24292E">,</span></span>
+<span class="line"><span style="color:#24292E">        )</span></span>
+<span class="line"><span style="color:#D73A49">      let</span><span style="color:#24292E"> model </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> Model</span><span style="color:#24292E">(</span><span style="color:#D73A49">..</span><span style="color:#24292E">model, </span><span style="color:#E36209">show: </span><span style="color:#6F42C1">LoadingMsg</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">      #(model, search)</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1">ServerReturnedPatients</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Ok</span><span style="color:#24292E">(pats)) </span><span style="color:#D73A49">-></span><span style="color:#24292E"> #(</span></span>
+<span class="line"><span style="color:#6F42C1">  Model</span><span style="color:#24292E">(</span><span style="color:#D73A49">..</span><span style="color:#24292E">model, </span><span style="color:#E36209">show: </span><span style="color:#6F42C1">Pats</span><span style="color:#24292E">(pats)),</span></span>
+<span class="line"><span style="color:#24292E">  effect.</span><span style="color:#6F42C1">none</span><span style="color:#24292E">(),</span></span>
+<span class="line"><span style="color:#24292E">)</span></span>
+<span class="line"></span></code></pre>
+
+<p>Well, let's see how it looks without the wrapper:</p>
+
+<pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#D73A49">type</span><span style="color:#6F42C1"> ErrSansioOrRsvp</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#6F42C1">  ErrRsvp</span><span style="color:#24292E">(rsvp.</span><span style="color:#6F42C1">Error</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#6F42C1">  ErrSansio</span><span style="color:#24292E">(r4_sansio.</span><span style="color:#6F42C1">Err</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1">UserTypedName</span><span style="color:#24292E">(name) </span><span style="color:#D73A49">-></span></span>
+<span class="line"><span style="color:#D73A49">  case</span><span style="color:#24292E"> name {</span></span>
+<span class="line"><span style="color:#032F62">    ""</span><span style="color:#D73A49"> -></span><span style="color:#24292E"> #(</span><span style="color:#6F42C1">Model</span><span style="color:#24292E">(</span><span style="color:#D73A49">..</span><span style="color:#24292E">model, </span><span style="color:#E36209">show: </span><span style="color:#6F42C1">EmptyMsg</span><span style="color:#24292E">), effect.</span><span style="color:#6F42C1">none</span><span style="color:#24292E">())</span></span>
+<span class="line"><span style="color:#24292E">    name </span><span style="color:#D73A49">-></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">      let</span><span style="color:#24292E"> search_req </span><span style="color:#D73A49">=</span></span>
+<span class="line"><span style="color:#24292E">        r4_sansio.</span><span style="color:#6F42C1">patient_search_req</span><span style="color:#24292E">(</span></span>
+<span class="line"><span style="color:#24292E">          r4_sansio.</span><span style="color:#6F42C1">SpPatient</span><span style="color:#24292E">(</span></span>
+<span class="line"><span style="color:#D73A49">            ..</span><span style="color:#24292E">r4_sansio.</span><span style="color:#6F42C1">sp_patient_new</span><span style="color:#24292E">(),</span></span>
+<span class="line"><span style="color:#E36209">            name: </span><span style="color:#6F42C1">Some</span><span style="color:#24292E">(name),</span></span>
+<span class="line"><span style="color:#24292E">          ),</span></span>
+<span class="line"><span style="color:#24292E">          model.client,</span></span>
+<span class="line"><span style="color:#24292E">        )</span></span>
+<span class="line"><span style="color:#D73A49">      let</span><span style="color:#24292E"> handle_read </span><span style="color:#D73A49">=</span><span style="color:#D73A49"> fn</span><span style="color:#24292E">(</span><span style="color:#E36209">resp_res: </span><span style="color:#6F42C1">Result</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Response</span><span style="color:#24292E">(</span><span style="color:#6F42C1">String</span><span style="color:#24292E">), rsvp.</span><span style="color:#6F42C1">Error</span><span style="color:#24292E">)) {</span></span>
+<span class="line"><span style="color:#6F42C1">        ServerReturnedPatients</span><span style="color:#24292E">(</span><span style="color:#D73A49">case</span><span style="color:#24292E"> resp_res {</span></span>
+<span class="line"><span style="color:#6F42C1">          Error</span><span style="color:#24292E">(err) </span><span style="color:#D73A49">-></span><span style="color:#6F42C1"> Error</span><span style="color:#24292E">(</span><span style="color:#6F42C1">ErrRsvp</span><span style="color:#24292E">(err))</span></span>
+<span class="line"><span style="color:#6F42C1">          Ok</span><span style="color:#24292E">(resp_res) </span><span style="color:#D73A49">-></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">            case</span><span style="color:#24292E"> r4_sansio.</span><span style="color:#6F42C1">any_resp</span><span style="color:#24292E">(resp_res, r4.</span><span style="color:#6F42C1">bundle_decoder</span><span style="color:#24292E">()) {</span></span>
+<span class="line"><span style="color:#6F42C1">              Ok</span><span style="color:#24292E">(bundle) </span><span style="color:#D73A49">-></span></span>
+<span class="line"><span style="color:#6F42C1">                Ok</span><span style="color:#24292E">(</span></span>
+<span class="line"><span style="color:#24292E">                  { bundle </span><span style="color:#D73A49">|></span><span style="color:#24292E"> r4_sansio.bundle_to_groupedresources }.patient,</span></span>
+<span class="line"><span style="color:#24292E">                )</span></span>
+<span class="line"><span style="color:#6F42C1">              Error</span><span style="color:#24292E">(err) </span><span style="color:#D73A49">-></span><span style="color:#6F42C1"> Error</span><span style="color:#24292E">(</span><span style="color:#6F42C1">ErrSansio</span><span style="color:#24292E">(err))</span></span>
+<span class="line"><span style="color:#24292E">            }</span></span>
+<span class="line"><span style="color:#24292E">          }</span></span>
+<span class="line"><span style="color:#24292E">        })</span></span>
+<span class="line"><span style="color:#24292E">      }</span></span>
+<span class="line"><span style="color:#D73A49">      let</span><span style="color:#24292E"> handler </span><span style="color:#D73A49">=</span><span style="color:#24292E"> rsvp.</span><span style="color:#6F42C1">expect_any_response</span><span style="color:#24292E">(handle_read)</span></span>
+<span class="line"><span style="color:#D73A49">      let</span><span style="color:#24292E"> search </span><span style="color:#D73A49">=</span><span style="color:#24292E"> rsvp.</span><span style="color:#6F42C1">send</span><span style="color:#24292E">(search_req, handler)</span></span>
+<span class="line"><span style="color:#D73A49">      let</span><span style="color:#24292E"> model </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> Model</span><span style="color:#24292E">(</span><span style="color:#D73A49">..</span><span style="color:#24292E">model, </span><span style="color:#E36209">show: </span><span style="color:#6F42C1">LoadingMsg</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">      #(model, search)</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1">ServerReturnedPatients</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Ok</span><span style="color:#24292E">(pats)) </span><span style="color:#D73A49">-></span><span style="color:#24292E"> #(</span></span>
+<span class="line"><span style="color:#6F42C1">  Model</span><span style="color:#24292E">(</span><span style="color:#D73A49">..</span><span style="color:#24292E">model, </span><span style="color:#E36209">show: </span><span style="color:#6F42C1">Pats</span><span style="color:#24292E">(pats)),</span></span>
+<span class="line"><span style="color:#24292E">  effect.</span><span style="color:#6F42C1">none</span><span style="color:#24292E">(),</span></span>
+<span class="line"><span style="color:#24292E">)</span></span>
+<span class="line"></span></code></pre>
+
+<p>Imo, much worse without the wrapper to combine rsvp and r4_sansio for us. Remember you have the answer sitting in front of you; imagine writing it from scratch, especially if new to Gleam or Lustre. I'd bet if you give r4_sansio and rsvp to random programmers it would take them longer to get working than if you gave them the layered r4_rsvp. Could someone very familiar with translating sansio to rsvp write this fast or clean it up? Probably, but it's not trivial for everyone.<p>
+
+<p>On the bright side, Gleam is nice in that once we line up the types it might even work on the first try. And after all this work we get a cool demo where you can type a name and it will go off to <a href="https://r4.smarthealthit.org/">https://r4.smarthealthit.org/</a> and search for that name, then list the returned patients or error. (see network in your browser tools if interested)</p>
+
+<div id="app"></div>
+
+<p><a href="https://github.com/D-matz/searchdemo/blob/main/src/searchdemo_rsvp.gleam">[Source]</a> P.S. it has a bug which might make a good case against this sort of layering, but I will leave that as an exercise to the reader.</p>
+
+</body></html>
