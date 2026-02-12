@@ -4,7 +4,8 @@ iframe {
 
 body {
     margin: 1vw;
-    max-width: 800px;
+    padding-bottom: 150px;
+    max-width: 600px;
     font-family: Verdana, Helvetica, sans-serif;
 }
 
