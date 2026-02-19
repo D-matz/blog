@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html><head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="What would you say you do here?">
+    <meta name="keywords" content="Office Space, AI, Claude Code, ChatGPT, Codex, Agent, Prompt, Harness, Context, Engineering">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="What would you say you do here?">
+    <meta property="og:image" content="https://correctarity.com/static/os1.jpg">
+    <meta property="og:image:type" content="image/jpg">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/lucy_square.svg">
+</head>
+<body>
+<h1><a href="/">Correct Arity</a></h1>
+<div style="text-align: right;">
+<img src="/static/os1.jpg" style="width: 80%; padding-bottom: 5px;">
+</div>
+<img src="/static/os2.jpg" style="width: 80%; padding-bottom: 5px;">
+<div style="text-align: right;">
+<img src="/static/os3.jpg" style="width: 80%; padding-bottom: 5px;">
+</div>
+<img src="/static/os4.jpg" style="width: 80%; padding-bottom: 5px;">
+<h2>What would you say you do here?</h2>
+<h3>I talk to the customers so claude code doesn't have to</h3>
+
+<p>AI might be useless in any hands, useful in any hands, or useful only when used skillfully, and I feel like a lot of people want that last option to be true. Hence "Prompt Engineering", "Context Engineering", "Agentic Engineering", "Harness Engineering", etc., like guys, we may not be writing code, but we are still doing *Engineering*. This always comes with some phrase like <a href="https://openai.com/index/harness-engineering/">"Humans steer. Agents execute."</a></p>
+
+<p>The idea of you design a system and the agent implements your vision really appeals to people, imo because
+
+<ol>
+<li>between AI is useless/super AGI does everything it's a middle path, and we love middle paths, nothing else makes us so quietly smug</li>
+
+<li>instead of AI taking all our jobs, it gives *Engineers* (but not everyone else) superpowers and we can make even more money now</li>
+
+<li>maybe you're only average at memorizing syntax, how to find the intersection of two arrays in javascript in O(M+N) time (M and N len of 2 arrays), how to create a Dog class in python that inherts from Animal and make it call the Animal's name method and bla bla bla...but your real skill is high level design choices: if you can abstract away the nitty gritty <em>how</em> and move up to deciding <em>what</em> to build, now your ✨taste✨ will really shine</li>
+</ol>
+</p>
+<p>I'm not sure this is wrong, but not sure it's right either.</p>
+
+<h3>Managers, Architects, and Administrators</h3>
+
+<p>Per Boris Cherny, the creator of claude code, <a href="https://x.com/bcherny/status/2022762422302576970">Someone has to prompt the Claudes, talk to customers, coordinate with other teams, decide what to build next. Engineering is changing and great engineers are more important than ever.</a> Is managing a team of junior robots really a skill you can be bad or good or great at?</p>
+
+<p>Imo managers definitely have to deal with the administrative side of work. Email and so forth, meetings, your manager handling this stuff so you don't have to is a genuine blessing. I'm more skeptical of managers as software architects though, which is where engineers seem to slot themselves in above the AI.</p>
+
+<p>I should clarify I've only worked at two companies, both of which maybe started in hardware and eventually belatedly created software for it (with some jankiness), so this is just my experience. But for example, at one point I had to update some fairly old code to generate messages of a certain protocol, for some other team to test using those messages, and I and my counterpart on the other team were struggling because neither of us could really verify our own code worked without the other one to run against. So there was a fair amount of staring at PDFs and wireshark, and actually maybe this is the sort of thing claude code would just grind through. But anyways, what I really appreciated was in a meeting where the other team's manager was asking about deadlines and if our team could add people or something to finish faster, my manager said (paraphrasing) look, David's your guy, nobody else is familiar with the protocol, best thing we can do is end the meeting and let them figure it out.</p>
+
+<p>Managers can definitely shield the person writing code from distracting administrative work. I'm less confident managers can, even with general technical knowledge, contribute high level architecture or design despite not working on the code. I really appreciate when managers have faith that, based on the low level problems I've worked through, I'm better equipped to make high level choices.</p>
+
+<h3>Leading from behind</h3>
+
+<p>Don't take it from me though, Boris apparently used to work at Instagram and at one point moved to Japan, so due to time zones he switched from attending meetings to writing code: <a href="https://borischerny.com/tech/2023/12/10/Working-Remotely.html">"I had essentially turned myself into an intern, coding 80% of the day. This was a powerful change, which let me identify and execute on opportunities that others simply couldn’t."</a>. His low level familiarity with the codebase let him identify opportunities! He roped in other people to communicate and coordinate, sort of managerish functions, but the design part of management came from his knowledge of the code.</p>
+
+<p>This is my big sticking point: design is bottom up, not top down. Rather than some boss starting with a vision and the software minions implementing it, the low level work you might dismiss as tedious is actually where original ideas come from.</p>
+
+<h3>Taking yourself off the factory floor</h3>
+
+<p>Tony Hoare won a Turing award "For his fundamental contributions to the definition and design of programming languages". He made the "billion-dollar mistake" of adding <code>null</code>. His <a href="https://en.wikipedia.org/wiki/Tony_Hoare">wikipedia</a> lists "Hoare developed the sorting algorithm quicksort in 1959–1960. He developed Hoare logic, an axiomatic basis for verifying program correctness. In the semantics of concurrency, he introduced the formal language communicating sequential processes (CSP) to specify the interactions of concurrent processes, and along with Edsger Dijkstra, formulated the dining philosophers problem". Wow!</p>
+
+<p>But even he had ups and downs, which he goes through in <a href="https://dl.acm.org/doi/epdf/10.1145/358549.358561">The Emporer's Old Clothes</a>: He worked on a very successful ALGOL compiler, then on the "Mark II" second system that was way too complicated and collapsed under its own weight. The story is so good and well written you should just go read it, click the link, it's on page 4 of the PDF, go read it. But to summarize, the project added tons of bigger and better features, he was promoted, given responsibility for company hardware and software products, and started with a team of 15 programmers. In other words, he was set up for failure.</p>
+
+<p>Problems with complexity and delegating work are much more obvious in hindsight, though. Hoare only realized later:</p>
+
+<blockquote>
+here breezed into my office the most senior manager of all, a general manager of our parent company, Andrew St. Johnston. I was surprised that he had even heard of me. "You know what went wrong?" he shouted—he always shouted—"You let your programmers do things which you yourself do not understand." I stared in astonishment. He was obviously out of touch with present day realities. How could one person ever understand the whole of a modern software product like the Elliott 503 Mark II software system?<br><br>I realized later that he was absolutely right; he had diagnosed the true cause of the problem and he had planted the seed of its later solution.
+</blockquote>
+
+
+<p>"O.K. Tony," the company said, "you got us into this mess and now you're going to get us out." They helpfully took away his responsibility for hardware and reduced his programmer team size. The engineers reflected a lot on their mistakes and started fighting feature creep. They got their designs and schedules down to realistic levels, and Hoare noted "Above all, I did not allow anything to be done which I did not myself understand. It worked!"</p>
+
+<p>It's no coincidence that Hoare's good principles and architectural decisions came while he was grappling with low level problems. Good taste comes from the feedback you get doing the work and bumping into problems and limits, not from ascending to management and saying ok now make it better. Obviously teams can be larger than one person, but there does need to be one person with all the little technical details in their head in order to make good higher level decisions.</p>
+
+<p>Agents make it very easy to remove yourself from that position, because not only do they give you a team of 15 programmers, they will happily do work you yourself do not understand. Writing code yourself forces you to think about it; giving work to another human maybe pushes you into thinking about it, and at least some human will think about it; giving work to an agent defaults to ok, generated some code, nobody learned anything from the experience.</p>
+
+<p>But ok, it's 2026, who cares about 1980's opinion on 1963's work? Maybe a <a href="https://www.anthropic.com/engineering/building-c-compiler">team of claudes</a> could one shot an ALGOL compiler. I mean maybe every time your claude hits a roadblock you add a skill and it's kind of learning and building its own context for decisions, idk. I just doubt you're learning the details you need to be informed of to make decisions that will keep complexity under control and maintainable.</p>
+
+<h3>Learning without struggle?</h3>
+
+<p>Back in high school, a friend said in the process of debugging one problem he often learned a bunch of unrelated stuff about his code, which at the time seemed very wise and actually today still seems very wise. Imo when you sit there struggling and working through a bunch of potential problems, even if they're unrelated to your actual problem, they might be relevant later. Whereas with an AI it's very easy to get an instant answer, not necessarily one that solves your problem the best way or teaches you anything. I'm not sure it's impossible to learn using AI, maybe it can even be helpful, but it doesn't force you to learn the way figuring things out yourself does. So I'm skeptical when someone says "I learned XYZ with chatgpt", did you really learn anything, or did it just burp out a product you won't be able to maintain?</p>
+
+<h3>Maintanence</h3>
+
+<p><a href="https://en.wikipedia.org/wiki/The_Elements_of_Programming_Style">debugging is twice as hard as writing code</a>, readability is most important, bla bla bla. Imo the person who originally wrote the code is best qualified by far to maintain it, because they know what they were thinking. If nobody writes the code, will anyone learn what's needed to maintain it?</p>
+
+<p>AI has only been around for a few years, and around late 2025 became capable of generating a lot more. So it's simply not possible for anyone to say AI generated this code and I've had no problems maintaining it for decades. Maybe the AI will maintain it for us, or throw it away and rewrite a replacement in a day, idk. But the default position should be that code is only valuable inosfar as people understand it; it would be a weird new paradigm if code nobody understands is valuable because you can just point claude at it.</p>
+
+<h3>AI can do some things maybe</h3>
+
+<p>This is the part where I performatively say AI is good at some things but bad at others, I am so measured and reasonable. I mean really maybe AI can do everything and you should just sit, or maybe letting it do anything erodes your understanding, idk. Still this is my current feeling as I work on Gleam FHIR:
+<ul>
+<li>AI might help for tests - adding a bunch of datetime examples myself might help me think about various time formats, but eh, I already stared at FHIR docs writing the parser, what would I learn copying them into test cases</li>
+<li>AI might help for codegen - as long as the generated code is identical I don't really care how the codegen works, imo codegen is always inscrutable crap anyways, maybe not idk but imo Gleam does not have great codegen tools now (to my knowledge) but maybe will one day, so I'm happy saying idc how it works now, maybe I'll rewrite it some other way later, it's easy to check the generated output</li>
+<li>AI generated documentation seems like the worst idea ever - If I want to know what claude thinks I can just ask it (as Hayleigh said), function types automatically generate basic documentation anyways. The readme/docs exist so I can show you the point of all of this, maybe explain what FHIR does and how it maps to Gleam, maybe convey what I was thinking. AI docs add nothing and smell of slop.</li>
+<li>For a library, other people have to be confident in it, so there's no tolerance for slop (vs some one off throwaway for yourself only)</li>
+</ul>
+</p>
+
+<p>Maybe there's a world where AI gets so good it can get its own feedback from the low level problems and use that to make high level decisions, write good docs, etc. Maybe that world is already here but unevenly distributed! I don't see where us humans fit into that world though. And I feel like 9/10 AI rapture comments I see don't link any code, and of those that do 9/10 build some kind of AI tooling slop I'd never touch. Still, some cases eg <a href="https://mitchellh.com/writing/non-trivial-vibing">Vibing a Non-Trivial Ghostty Feature</a> are interesting. Imo these compelling cases are less about ignoring how things work to make high level decisions; more about learning how everything works to base decisions on that.</p>
+
+</body></html>
