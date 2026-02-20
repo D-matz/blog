@@ -18,6 +18,7 @@
     <h1><a href="/">Correct Arity</a></h1>
     <h2>Gleam - how to suffer from lack of metaprogramming</h2>
     <h3>🐎🛒</h3>
+	<a href="https://lpil.uk/blog/how-to-add-metaprogramming-to-gleam/">How to add metaprogramming to Gleam</a> sensibly points out (metaprogramming) solutions should start with problems. 
     <blockquote>
         <h2 id="putting-the-cart-before-the-horse">Putting the cart before the horse</h2>
 
@@ -38,7 +39,7 @@
         <p>And no, “I like this feature in this other language” and “it would be cool” are
         not valid problems! 😁</p>
     </blockquote>
-<p><a href="https://lpil.uk/blog/how-to-add-metaprogramming-to-gleam/">How to add metaprogramming to Gleam</a> sensibly points out (metaprogramming) solutions should start with problems. The two big pain points (imo) are generating <b>decoder/to_json fns</b> and <b>HTML templating</b>. That said, these do not justify adding metaprogramming; it is more important for Gleam to be readable and compile fast.</p>
+<p>The two big pain points (imo) are generating <b>decoder/to_json fns</b> and <b>HTML templating</b>. That said, these do not justify adding metaprogramming; it is more important for Gleam to be readable and compile fast.</p>
 <h3>{"firstIssue": "JSON"}</h3>
 <p>Manually generating JSON decoder and to_json fns for a lot of custom types (eg <a href="https://raw.githubusercontent.com/PotatoEMR/gleam-fhir/refs/heads/main/src/fhir/r4.gleam">FHIR</a>) feels like you're doing something unusual and difficult. There are LSP actions but you cannot easily hook into them as part of your codegen, and you cannot configure them to use camel case keys or treat optional fields as missing rather than null. Another awkward thing is <code>decode.failure</code> makes you construct an unused return, which is a bit of effort as Gleam has no null type. All of this is surmountable but could be easier with a bit of magic. I know some people <a href="https://jonashedeng.github.io/posts/gleam-decode/">like Gleam's decode</a> but everyone's serialization reimplements basically the same thing so it is amenable to a little magic, maybe dipping into manual code for less common cases.</p>
 <p>Nevertheless! A bit of pain in serialization is outweighed by how nice Gleam is overall, and fortunately serialization can be solved without adding macros to the language. You can create code generators that are easy to hook into and configure, making serialization easy for people who need it without adding macros or metaprogramming or whatever to the language. So any pain here is totally solveable through code generators (which might even exist already idk).</p>
@@ -71,3 +72,4 @@ Such is modern computing: everything simple is made too complicated because it's
 </blockquote>
 <cite>-Rob Pike (supposedly, haven't found the source)</cite>
 </body></html>
+
