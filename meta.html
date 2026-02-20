@@ -38,21 +38,36 @@
         <p>And no, “I like this feature in this other language” and “it would be cool” are
         not valid problems! 😁</p>
     </blockquote>
-<p><a href="https://lpil.uk/blog/how-to-add-metaprogramming-to-gleam/">How to add metaprogramming to Gleam</a> sensibly points out (metaprogramming) solutions should start with problems. The two big pain points (imo) are generating <b>decoder/to_json fns</b> and <b>HTML templating</b>. That said these do not justify adding metaprogramming; it is more important for Gleam to be readable and compile fast.</p>
-<h3>{"1": "JSON"}</h3>
+<p><a href="https://lpil.uk/blog/how-to-add-metaprogramming-to-gleam/">How to add metaprogramming to Gleam</a> sensibly points out (metaprogramming) solutions should start with problems. The two big pain points (imo) are generating <b>decoder/to_json fns</b> and <b>HTML templating</b>. That said, these do not justify adding metaprogramming; it is more important for Gleam to be readable and compile fast.</p>
+<h3>{"firstIssue": "JSON"}</h3>
 <p>Manually generating JSON decoder and to_json fns for a lot of custom types (eg <a href="https://raw.githubusercontent.com/PotatoEMR/gleam-fhir/refs/heads/main/src/fhir/r4.gleam">FHIR</a>) feels like you're doing something unusual and difficult. There are LSP actions but you cannot easily hook into them as part of your codegen, and you cannot configure them to use camel case keys or treat optional fields as missing rather than null. Another awkward thing is <code>decode.failure</code> makes you construct an unused return, which is a bit of effort as Gleam has no null type. All of this is surmountable but could be easier with a bit of magic. I know some people <a href="https://jonashedeng.github.io/posts/gleam-decode/">like Gleam's decode</a> but everyone's serialization reimplements basically the same thing so it is amenable to a little magic, maybe dipping into manual code for less common cases.</p>
-<p>Nevertheless! A bit of pain in serialization is outweighed by how nice Gleam is overall, and fortunately serialization can be solved without adding macros to the language. You can create code generators that are easy to hook into and configure, making serialization easy for people who need it without adding macros or metaprogramming or whatever to the language. So any pain here is totally solveable.</p>
-<h3>&lt;p&gt;2: HTML&lt;/p&gt;</h3>
-<p>HTML templating is trickier because people really like looking at HTML as they write templates, so you can't solve it with codegen tools. In fact <a href="https://lpil.github.io/html-lustre-converter/">https://lpil.github.io/html-lustre-converter/</a> exists, butthe experience people want is something like JSX or Razor Pages where you create HTML directly in your code.</p>
+<p>Nevertheless! A bit of pain in serialization is outweighed by how nice Gleam is overall, and fortunately serialization can be solved without adding macros to the language. You can create code generators that are easy to hook into and configure, making serialization easy for people who need it without adding macros or metaprogramming or whatever to the language. So any pain here is totally solveable through code generators (which might even exist already idk).</p>
+<h3>&lt;li&gt;second issue - HTML&lt;/li&gt;</h3>
+<p>HTML templating is trickier because people really like looking at HTML as they write templates, so you can't solve it with codegen tools. In fact <a href="https://lpil.github.io/html-lustre-converter/">https://lpil.github.io/html-lustre-converter/</a> exists, but the experience people want is something like JSX or Razor Pages where you create HTML directly in your code.</p>
 <p>I say "people", do I really just mean "me"? Well for example in Go, <a href="https://www.gomponents.com/">Gomponents</a> is pure Go that renders to HTML whereas <a href="https://templ.guide/">templ</a> is its own little language that compiles to Go and proxies to the Go language server, and people seem to prefer templ:</p>
 <img src="static/star-history.png" style="width: 100%">
-<p>There are downsides to templ, one big thing is if you get a panic on some line and click to jump to it, you go to the generated gibberish instead of the actual code that generate it. It requires its own tooling, just seems like a lot more complexity. Still, people put up with the added jankiness to write HTML as HTML.</p>
-<p><a href="https://hexdocs.pm/lustre/index.html#features">Lustre's</a> "No templates, no macros, just Gleam." does save a lot of jankiness and once you get used to it may even be better than writing HTML templates. Still, consider<br>
+<p>There are downsides to templ, one big thing is if you get a panic on some line and click to jump to it, you go to the generated gibberish instead of the actual code that generated it. It requires its own tooling, just seems like a lot more complexity. Still, people put up with the added jankiness to write HTML as HTML.</p>
+<p><a href="https://hexdocs.pm/lustre/index.html#features">Lustre's</a> "No templates, no macros, just Gleam" does save a lot of jankiness and once you get used to it may even be better than writing HTML templates. Still, consider:<br><br>
 <code>
     &lt;p&gt;hi&lt;/p&gt;
 </code><br>vs<br>
 <code>
     h.p([], [h.text("hi")])
-</code><br>
-    The first version is friendlier, not because it's inherently better, but because people are used to HTML looking like that and the browser shows HTML like that.</p>
-</body>
+</code><br><br>
+    The first version is not inherently better, but it's what <em>people are used to</em> and what <em>the browser ends up showing</em>. People expect this kind of html templating, and it doesn't require any learning or adjustment, so in that sense it's friendly.</p>
+	<p>Unfortunately, there's no way to write HTML in Gleam without really messing with the language. Seems like either 1) write something that compiles to Gleam (like templ to Go), or 2) modify the Gleam compiler itself to support HTML templating. Again there's some jankiness with adding a new language like templ imo, and there are already some layers of Gleam -> Erlang/JS -> HTML, seems silly to add more, so I'd favor modifying the Gleam binary you download to support HTML templates. Either way you'd have something like .glx files that the normal Gleam compiler can't understand. Some downsides/challenges:
+	<ul>
+	<li>Gleam is a general purpose programming language, HTML templating is way too specific of a case to merge into the language itself, so you'd be on the hook for maintaining it and would not deserve any help or stability commitment from Gleam itself</li>
+	<li>On top of just compiling code, Gleam provides a bunch of nice features (LSP, gleam format) that you'd have to rework to get the usability benefits</li>
+	<li>As .glx code can't be compiled by normal Gleam, it splits the ecosystem, so you'd have to also provide a command to convert a .glx file into standard .gleam file</li>
+	<li>I haven't done this or even fully thought it through so you'd probably run into more problems</li>
+	</ul>
+	Despite all that, people love writing HTML as HTML enough to justify trying something like this.
+	</p>
+<h3>Anyways keep Gleam simple</h3>
+<p>Gleam is cool because it's a <a href="/gleam">simple language with sum types and immutable data</a> and the worst thing would be to gild the lily. It's hard to properly value simplicity because it's so easy to say "wow xyz would be so cool" without considering implementation costs and how much more difficult it would make everything else. So two things that I would like to see are serialization codegen and some sort of HTML templating (and maybe they exist and I just haven't seen them), but in a way that doesn't add any complexity to Gleam. A few pain points stick out, but in perspective the language overall is great because it's simple. Sorry this is kind of a <a href="https://www.urbandictionary.com/define.php?term=Shit+Sandwich">shit sandwich</a>, basically saying "keep gleam simple, complain complain complain complain complain complain complain complain, anyways keep gleam simple".</p>
+<blockquote>
+Such is modern computing: everything simple is made too complicated because it's easy to fiddle with; everything complicated stays complicated because it's hard to fix.
+</blockquote>
+<cite>-Rob Pike (supposedly, haven't found the source)</cite>
+</body></html>
