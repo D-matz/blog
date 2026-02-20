@@ -43,7 +43,7 @@
 <h3>{"firstProblem": "JSON"}</h3>
 <p>Manually generating JSON decoder and to_json fns for a lot of custom types (eg <a href="https://raw.githubusercontent.com/PotatoEMR/gleam-fhir/refs/heads/main/src/fhir/r4.gleam">FHIR</a>) feels like you're doing something unusual and difficult. There are LSP actions but you cannot easily hook into them as part of your codegen, and you cannot configure them to use camel case keys or treat optional fields as missing rather than null. Another awkward thing is <code>decode.failure</code> makes you construct an unused return, which is a bit of effort as Gleam has no null type. All of this is surmountable but could be easier with a bit of magic. I know some people <a href="https://jonashedeng.github.io/posts/gleam-decode/">like Gleam's decode</a> but everyone's serialization reimplements basically the same thing so it is amenable to a little magic, maybe dipping into manual code for less common cases.</p>
 <p>Nevertheless! A bit of pain in serialization is outweighed by how nice Gleam is overall, and fortunately serialization can be solved without adding macros to the language. You can create code generators that are easy to hook into and configure, making serialization easy for people who need it without adding macros or metaprogramming or whatever to the language. So any pain here is totally solveable through code generators (which might even exist already idk).</p>
-<h3>&lt;li&gt;problem two - HTML&lt;/li&gt;</h3>
+<h3>&lt;li&gt;second problem - HTML&lt;/li&gt;</h3>
 <p>HTML templating is trickier because people really like looking at HTML as they write templates, so you can't solve it with codegen tools. In fact <a href="https://lpil.github.io/html-lustre-converter/">https://lpil.github.io/html-lustre-converter/</a> exists, but the experience people want is something like JSX or Razor Pages where you create HTML directly in your code.</p>
 <p>I say "people", do I really just mean "me"? Well for example in Go, <a href="https://www.gomponents.com/">Gomponents</a> is pure Go that renders to HTML whereas <a href="https://templ.guide/">templ</a> is its own little language that compiles to Go and proxies to the Go language server, and people seem to prefer templ:</p>
 <img src="static/star-history.png" style="width: 100%">
@@ -72,5 +72,6 @@ Such is modern computing: everything simple is made too complicated because it's
 </blockquote>
 <cite>-Rob Pike (supposedly, haven't found the source)</cite>
 </body></html>
+
 
 
