@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gleam - how to suffer from lack of metaprogramming">
+    <meta name="keywords" content="Gleam, HTML, JSX, to_json, decoder, template, macro">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="Gleam - how to suffer from lack of metaprogramming">
+    <link rel="stylesheet" href="static/style.css">
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/static/lucy_square.svg"
+    />
+</head>
+<body>
+    <h1><a href="/">Correct Arity</a></h1>
+    <h2>Gleam - how to suffer from lack of metaprogramming</h2>
+    <h3>🐎🛒</h3>
+    <blockquote>
+        <h2 id="putting-the-cart-before-the-horse">Putting the cart before the horse</h2>
+
+        <p>Features are solutions to problems, and we cannot judge whether a solution is
+        good if we don’t know what the problem being solved is.</p>
+
+        <p>Identity real problems and deficiencies with reading and writing Gleam today.
+        Not <em>predicted</em> problems or <em>suspected</em> problems. Actual concrete pains that are
+        present in real-world Gleam today. Persistent problems that cannot be
+        reasonably solved with any of the options we have today in Gleam.</p>
+
+        <p>List the current approaches folks take to solve these problems and put into
+        words why they are not enough. This will involve talking to other community
+        members to discover how they’re approaching these problems, or even if they
+        consider them problem at all. It may be that during this process you discover a
+        satisfactory solution that you were not aware of!</p>
+
+        <p>And no, “I like this feature in this other language” and “it would be cool” are
+        not valid problems! 😁</p>
+    </blockquote>
+<p><a href="https://lpil.uk/blog/how-to-add-metaprogramming-to-gleam/">How to add metaprogramming to Gleam</a> sensibly points out (metaprogramming) solutions should start with problems. The two big pain points (imo) are generating <b>decoder/to_json fns</b> and <b>HTML templating</b>. That said these do not justify adding metaprogramming; it is more important for Gleam to be readable and compile fast.</p>
+<h3>{"1": "JSON"}</h3>
+<p>Manually generating JSON decoder and to_json fns for a lot of custom types (eg <a href="https://raw.githubusercontent.com/PotatoEMR/gleam-fhir/refs/heads/main/src/fhir/r4.gleam">FHIR</a>) feels like you're doing something unusual and difficult. There are LSP actions but you cannot easily hook into them as part of your codegen, and you cannot configure them to use camel case keys or treat optional fields as missing rather than null. Another awkward thing is <code>decode.failure</code> makes you construct an unused return, which is a bit of effort as Gleam has no null type. All of this is surmountable but could be easier with a bit of magic. I know some people <a href="https://jonashedeng.github.io/posts/gleam-decode/">like Gleam's decode</a> but everyone's serialization reimplements basically the same thing so it is amenable to a little magic, maybe dipping into manual code for less common cases.</p>
+<p>Nevertheless! A bit of pain in serialization is outweighed by how nice Gleam is overall, and fortunately serialization can be solved without adding macros to the language. You can create code generators that are easy to hook into and configure, making serialization easy for people who need it without adding macros or metaprogramming or whatever to the language. So any pain here is totally solveable.</p>
+<h3>&lt;p&gt;2: HTML&lt;/p&gt;</h3>
+<p>HTML templating is trickier because people really like looking at HTML as they write templates, so you can't solve it with codegen tools. In fact <a href="https://lpil.github.io/html-lustre-converter/">https://lpil.github.io/html-lustre-converter/</a> exists, butthe experience people want is something like JSX or Razor Pages where you create HTML directly in your code.</p>
+<p>I say "people", do I really just mean "me"? Well for example in Go, <a href="https://www.gomponents.com/">Gomponents</a> is pure Go that renders to HTML whereas <a href="https://templ.guide/">templ</a> is its own little language that compiles to Go and proxies to the Go language server, and people seem to prefer templ:</p>
+<img src="static/star-history.png" style="width: 100%">
+<p>There are downsides to templ, one big thing is if you get a panic on some line and click to jump to it, you go to the generated gibberish instead of the actual code that generate it. It requires its own tooling, just seems like a lot more complexity. Still, people put up with the added jankiness to write HTML as HTML.</p>
+<p><a href="https://hexdocs.pm/lustre/index.html#features">Lustre's</a> "No templates, no macros, just Gleam." does save a lot of jankiness and once you get used to it may even be better than writing HTML templates. Still, consider<br>
+<code>
+    &lt;p&gt;hi&lt;/p&gt;
+</code><br>vs<br>
+<code>
+    h.p([], [h.text("hi")])
+</code><br>
+    The first version is friendlier, not because it's inherently better, but because people are used to HTML looking like that and the browser shows HTML like that.</p>
+</body>
