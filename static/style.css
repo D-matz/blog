@@ -12,3 +12,12 @@ body {
 img {
     width: 400px;
 }
+
+summary {
+    cursor: pointer;
+}
+
+details {
+    border: 1px solid black;
+    padding: 1em;
+}
