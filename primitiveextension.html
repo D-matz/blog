@@ -1,0 +1,63 @@
+<img src="/static/???">
+
+<h2>I do not like FHIR primitive extensions</h2>
+
+<h3>1..1...or not</h3>
+
+<p>In a nutshell, extensions on primitive types make data structures much more complicated. They undermine the guarantuee that a 1..1 element (min 1 and max 1 means required) of a specific type will exist, making every element optional with potentially any type.</p>
+
+<p>It is true that <a href="https://build.fhir.org/extensibility.html">"The use of extensions is what allows the FHIR specification to retain a core simplicity for everyone"</a> but could you not get away with allowing extensions on complex elements but not primitives? The big thing primitive extensions uniquely make possible is representing data that is missing or a different type, for example with data-absent-reason. I am not sure if this is practical for real life data or just bad design, but either way I do not like it.</p>
+
+<h3>It is what it is</h3>
+
+<p>Now that primitive extensions are part of the spec it's too late to remove them. As Gandalf says, all we have to decide is what to do with the FHIR R4 specification that is given us.</p>
+
+<p>In Gleam, I eventually added a <a href="https://hexdocs.pm/fhir/codegen/primitiveextension.html">Primitive type for extending primitive elements</a> in case they're needed, but would rather not include it in the default fhir/r4 package. My guess is for most users in most cases, Gleam primitive extensions are useless boilerplate, net negative. There is a danger that you start with the simple seeming package without primitive extensions, then run into some data with primitive extensions, and suddenly have to do a bunch more work to change everything, so maybe it would be simpler overall to start with primitive extensions. Honestly I'm not sure what percent of users/data really need them.</p>
+
+<h3>Did you know?</h3>
+
+<p>When I search "fhir primitive extension" the docs are 3rd (good effort google), the first two results say "Did you know" and "But did you know". Maybe search results for part of a specification saying "did you know" smell of an overly complicated idea?
+
+<p>Now, technically they share this wording because Keren Skubach's InterSystems post copies Darenn Devitt's blog post (without attribution):
+
+<table>
+<tr><th><a href="https://darrendevitt.com/fhir-extensions-and-primitive-data-types/">Darenn Devitt</a></th><th><a href="https://web.archive.org/web/20260116214636/https://community.intersystems.com/post/creating-primitive-extension-fhir-resource">Keren Skubach</a></th></tr>
+<tr><td>An extension “extends” or enhances a resource or a data element in a custom way.</td><td>An extension “extends” or enhances a resource or a data element in a custom way.</td></tr>
+<tr><td>They can be added to the root of a resource, like “Patient.ethnicity” in US Core. And they can be added to individual elements such as HumanName, Address or Identifier.</td><td>The extension can be added to the root of a resource, such as “Patient.ethnicity” in US Core profile, and they can be added to individual elements such as HumanName, Address or Identifier.</td></tr>
+<tr><td>But did you know that you can also add an extension to a primitive data type?</td><td>Did you know that you can also add an extension to a primitive data type?</td></tr>
+<tr><td>Primitives are the most basic element in FHIR and usually store a single item. Here are some examples:</td><td>Primitives usually store a single item and are the most basic element in FHIR. For example:</td></tr>
+<tr><td>123<br>
+“Darren”<br>
+false<br>
+01/02/1974</td><td>"Keren", false, 1234, 12/08/2024 etc.</td></tr>
+</table>
+
+<p>What's a little ctrl v between friends, though. The main point is, as Darenn writes, primitive extensions are tricky:</p>
+
+<blockquote>This is not something most FHIR users are aware of.
+
+When it comes to primitives, SDKs often hide the underlying base element and its two attributes from us or make it difficult to find.</blockquote>
+
+<p>Idk, it kind of sounds like primitive extensions were a mistake that SDKs try to hide from users as much as possible.</p>
+
+<p>The examples show <em>what</em> primitive extensions are, but imo don't motivate <em>why</em> they deserve to exist. Adding an "IsAlive" boolean to the "DeceasedBoolean" field is patently useless, maybe Keren thought "is-a-zombie" was too unprofessional or didn't want to plagiarize so blatantly, but either way lol, adding an "alive" boolean to a "deceased" boolean adds no new information, in fact now we have the same boolean in two places, plus a more complex data structure. Good work guys. Ok but what about is a zombie? That is at least more fun, but I don't understand why it couldn't be a separate element from deceased, which seems simpler. Maybe on some level a patient can only be a zombie if they are deceased, but I'm not aware of any mechanism in the primitive extension that enforces something like that which you couldn't also do with unextended primitive elements. The time of year extension is a bit better (for InterSystems Keren changed "http://example.org/fhir/StructureDefinition/time-of-year" to "http://example.org/fhir/StructureDefinition/Holiday" but kept the explanatory text as "Time of year"...) but I have the same basic problem trying to understand why it needs to exist: wouldn't a separate element be simpler, in terms of data structures needed, than extending birthDate?</p>
+
+<p>To be fair, primitive extensions allow birth time-of-year to satisfy a 1..1 requirement in a way separate extension elements would not. But this seems more like relaxing the guarantuee of what data will be available than providing something to satisfy the guarantuee. 1..1 used to mean you know you have at least one piece of data with a certain shape; now it could be any shape.</p>
+
+<h3>Maybe primitive extensions were the result of powerful tools that give you a lot of rope to hang yourself?</h3>
+
+<p>Darenn <a href="https://www.linkedin.com/posts/darrendevitt_if-you-work-with-fhir-you-use-extensions-activity-7168126357846081537-6B-8">shared his post on LinkedIn</a> (shudder) and Nikolai Ryzhikov responded</p>
+
+<blockquote>For me, primitive extensions have always seemed absurd - How can a primitive have an extension? How can it be presented conveniently in the database or in code? There is a suspicion that they can almost always be replaced with an ordinary extension at the same level in resource.</blockquote>
+
+<p>💯💯💯 tell them Nikolai...</p>
+
+<p>I kind of wonder if neat systems for extending primitive elements in C# and Java and in XML made them seem like good ideas, and now pulling back to languages with less powerful objects/inheritance/whatever and JSON makes primitive extensions seem terribly complicated (primitive elements in FHIR JSON are split in two, eg "birthDate" plus "_birthDate", which seems ugly).</p>
+
+<p>It may be that in practice this is not an issue, SDKs solve it, the real challenge turns out to be resolving terminology or something. That said I don't see how even C# or Java could make primitive extensions workable without prior coordination between each interoperating system. My suspicion is while primitive extensions are clearly not a good fit for Gleam, they only seem pleasant in more powerful languages because SDKs make it easy to compile something, but when you actually go to test your thing, you'll run into a bunch of fields that you assumed exist but do not, in fact, exist.</p>
+
+<h3>Maybe primitive extensions are pragmatic</h3>
+
+<p>Of course my feeling comes from looking at FHIR itself and how much less elegant it is with primitive extensions. Maybe if you instead start from looking at ugly data in the real world, primitive extensions seem obviously needed for missing or weird fields, idk.</p>
+
+<p>Also btw (after all this ranting!) I like extensions in general. It's great FHIR tells people to stick their pet type nobody else will ever use <s>where the sun don't shine</s> in an extension to keep the spec simple for everyone. I just don't like that they can be on primitive elements.</p>
