@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="I am not using semantic versioning">
+    <meta name="keywords" content="SemVer, ZeroVer, Semantic Versioning, Version, API, Ready, Stable">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="I am not using semantic versioning">
+	<link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/lucy_square.svg">
+</head>
+<body>
+    <h1><a href="/">Correct Arity</a></h1>
+  <h2>"I am not using semantic versioning"</h2>
+<p>When you <code>gleam publish</code> a project with version 0.y.z it makes you type "I am not using semantic versioning" before publishing, and tells you to only publish production ready libraries users can depend on. On a similar note <a href="https://blog.nytsoi.net/2026/04/03/say-no-to-zero-ver/">nicd's blog</a> argues SemVer exists to convey if a change requires attention, which 0.y.z throws away. I just published <a href="https://hexdocs.pm/fhir/">fhir</a> v0.4.0 to hex.pm, so I'm relieved nicd also gives us an out:</p>
+
+<blockquote>
+
+<h3>I do what I want</h3>
+
+<p>That's fine and I can't demand anything else of you, as I don't pay your bills.</p>
+
+</blockquote>
+
+<p>But I'd still like to make my case: I am using semantic versioning to say this package is not stable or v1 ready, but is worth a try.</p>
+
+<h3>My package is kind of ready but also kind of not ready</h3>
+
+<p>Say your package is not yet clearly <a href="https://semver.org/#how-do-i-know-when-to-release-100">already 1.0.0</a>: it's not used in production, users don't depend on a stable API, and you don't worry about backwards compatibility. You can publish a 0.y.z version if you want people to try it, and people are free to decide an unstable v0 project isn't worth spending time on and not try it, which is not a failure but an example of successful communication via SemVer.</p>
+
+<p>1.0.0 is qualitatively special, it's a big deal, you know what I mean. So I don't agree with nicd saying a package is either ready for users, in which case it should be 1.0.0, or not ready, in which case it shouldn't be published at all:</p>
+
+<blockquote>
+<h3>My package isn't ready yet</h3><p>Is anything ever ready? Furthermore, <em>it doesn't need to be!</em> SemVer does not
+require or suggest anything special about <em>1.0.0</em> other than:</p><blockquote><p>Version 1.0.0 defines the public API.</p></blockquote><p>When you publish a package to a package manager, you are already publishing a
+public API! Whether you want it or not, people will start relying on it and
+building on top of it.</p><p>If you're really, <em>really</em> unsure about your package's API, then don't publish
+it. Put it in a public git repo and post the link; most package managers have a
+way of installing git dependencies.</p>
+</blockquote>
+
+<p>I want to make it easy for people to download and try my package and give feedback, because some parts are good and ready. Even just going through the process of cutting an initial release is helpful to clarify what needs to be done and what the API will look like. So I want to release it as a package people can use normally, rather than a link to a git repo, which even vs 0.y.z conveys (imo) less readiness and is harder to use. I do think Gleam fhir could be if not valuable at least interesting, notably you can run stuff against a public FHIR test server, eg create/read/update/delete AllergyIntolerance.</p>
+
+<p>At the same time I want to make clear the caveat that, in addition to the general churn any package can have, my package has definite problems that need fixed before the big 1.0.0 release which will indicate its readiness. So far I've published one big fat package with everything, but it needs to somehow split into multiple packages and modules, as it includes FHIR r4/r4b/r5 (you may only want one) and <a href="https://correctarity.com/layering">http client layers</a> for httpc and rsvp (you may only want one), and all ~150 fhir resources (you may only want some), which seems to slow or kill the Gleam LSP. It also doesn't comply with the spec's requirement for decimal implicit precision in JSON, which is surprisingly hard in Gleam (and many other languages, because it's not proper JSON). The latter will be trickier to implement, the former will impact the public API more.</p>
+
+<p>Not to harp on my own project too much; what I'm trying to say is a package might benefit from release but not not v1. For example <a href="https://hexdocs.pm/tom/">tom</a>, <a href="https://hexdocs.pm/prng/">prng</a>, and <a href="https://hexdocs.pm/gleam_stdlib/">gleam_stdlib</a> are common useful packages that released with zero major version. Maybe ideally they'd come out as 1.0.0, but people might have benefitted from their early versions and given good feedback for development. As long as you eventually settle on a public API, it's fine if the package used to constantly break without warning. Actually, it's not without warning, that's what the zero major version warns you of!</p>
+
+<p>(stdlib is a kind of weird case, as Gleam matures it should maybe go to 1.y.z)</p>
+
+<h3>SemVer doesn't solve tension between the language ecosystem and individual publishing a package</h3>
+
+<p>If an individual puts some broken/poorly designed/insecure garbage up on package manager, they don't really suffer from their own lack of care, but they do hurt the overall ecosystem. So the downside risk is sort of misaligned and I totally see the need to enforce a quality bar for packages. Sometimes the experience of using a language comes down to how ready and stable the packages are (or are not).</p>
+
+<p>That said, enforcing an initial 1.0.0 release doesn't automatically enforce good packages — in 2026, a mountain of vibecoded slop dwarfs all the other potential dangers (imo), and AI will happily publish slop as v1. I'm honestly not sure what the best approach to ecosystem quality is. You definitely want some way of impressing "only publish good packages" on people, but you also don't want to discourage newcomers or innovation, so maintaining standards is definitely not easy.</p>
+
+<h3>Obligatory concluding hedge</h3>
+
+<p>Not saying you necessarily should publish a zero major version. If you can start with 1.0.0 then great, do that.</p>
+</body></html>
