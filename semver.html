@@ -50,7 +50,7 @@ way of installing git dependencies.</p>
 
 <h3>Edit: package managers should respect ZeroVer</h3>
 <p>When I sent this to nicd he pointed out that package managers do not, in fact, refuse to install 0.y.z dependencies, or even warn users, so it is very easy in real life for ZeroVer transitive dependencies to sneak in without users knowing. This is a good point!</p>
-<p>In an ideal world where I am dictator, the problem is package managers are throwing away the information the 0 in 0.y.z communicates, and the solution is to make packagers warn users whenever they <code>gleam add</code> a ZeroVer dependency or transitive dependency. Ideally there would be much more friction in this case. Of course I am not a dictator, and it would be awkward now in Gleam as almost all packages depend on the stdlib (currently v0.71.0). But this would be an interesting package manager feature imo.</p>
+<p>In an ideal world where I am dictator, the problem is <em>package managers throw away the information the 0 in 0.y.z communicates</em>, and the solution is to make packagers warn users whenever they <code>gleam add</code> a ZeroVer dependency or transitive dependency. Ideally there would be much more friction in this case. Of course I am not a dictator, and it would be awkward now in Gleam as almost all packages depend on the stdlib (currently v0.71.0). But this would be an interesting package manager feature imo.</p>
 	
 <h3>SemVer doesn't solve tension between the language ecosystem and individual publishing a package</h3>
 
