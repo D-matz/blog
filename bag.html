@@ -107,7 +107,7 @@
 "></iframe>
 <h3>objects with methods</h3>
 
-<p>Object Oriented Programming with inheritance, encapsulation, etc., is a whole jungle I'm not going to really get in to, but once nice thing about objects is for discoverability you can type thing dot in your editor and see everything you can do with it. It's also sometimes nice to chain methods, eg <code>mything.set_wibble(3).set_wobble("high").delete_wumble()</code>.</p>
+<p>Object Oriented Programming with inheritance, encapsulation, etc., is a whole jungle I'm not going to really get in to, but once nice thing about objects is for discoverability you can type mything dot in your editor and see everything you can do with it. It's also sometimes nice to chain methods, eg <code>mything.set_wibble(3).set_wobble("high").delete_wumble()</code>.</p>
 
 <p>In Gleam a module is the unit of related types and functions, so you get some discoverability by typing mymodule dot and seeing autocompletes. The type system also enforces what functions you can or can't use, although one feature I'd like added is typing <code>mything |></code> and getting functions that take <code>mything</code> as their first arg sorted first in autocomplete (this is trickier due to function capture or something, but the LSP already filters functions by correct return type when known, which is nice).</p>
 
