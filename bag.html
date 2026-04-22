@@ -36,7 +36,7 @@
 
 <p>So how far can you get with just data and functions? Or in other words, what else does Gleam omit?</p>
 
-<p>A not exhaustive list: if/else if/else, for/while, exceptions, function overloading, operator overloading, curried functions, objects with methods, ORM, automatic JSON serialization, HTML templating, macros, reflection, null.</p>
+<p>A not exhaustive list: if/else if/else, for/while, exceptions, function overloading, operator overloading, curried functions, objects with methods, ORM, automatic JSON serialization, special HTML DSL, macros, reflection, null.</p>
 
 <h3>if, else if, else</h3>
 
@@ -148,11 +148,11 @@
 
 <p>Kind of rambling here idk, Gleam's decoder approach makes sense for Gleam but I don't want to oversell it, parse a bunch of JSON yourself and form your own opinion xd. The Gleam pov is probably JSON takes boilerplate or magic, pick your poison, and Gleam is decidedly unmagical.</p>
 
-<h3>HTML templating</h3>
+<h3>special HTML DSL</h3>
 
 <p>Similarly, humans enjoy HTML templating that lets them write HTML the way they're used to and the way it looks in the browser, but that takes, if not magic, at least a second little HTML templating language. People who want to read and write "&ltp&gt" in source will definitely try to create this additional templating layer, although it will probably be janky, even if well implemented.</p>
 
-<p>Doing HTML in pure Gleam is less friendly in that it doesn't look like HTML, but simpler in that you only need one language, and critically gets you all the great control flow, composition with functions, tooling, etc. that makes Gleam nice. Once you start making little functions for components, the ergonomics (kind of a cliche word but not sure what else to call the general good design and tooling) of Gleam probably win over dedicated HTML templating.</p>
+<p>Doing HTML in pure Gleam is less friendly in that it doesn't look like HTML, but simpler in that you only need one language, and critically gets you all the great control flow, composition with functions, tooling, etc. that makes Gleam nice. Once you start making little functions for components, the ergonomics (kind of a cliche word but not sure what else to call the general good design and tooling) of Gleam probably win over dedicated HTML DSL.</p>
 
 <h3>macros</h3>
 
