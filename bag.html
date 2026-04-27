@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gleam - it's what's not in the bag">
+    <meta name="keywords" content="Gleam, if, else, else if, for, while, exceptions, function, operator, currying, objects, ORM JSON, HTML, macros, reflection, null">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="Gleam - it's what's not in the bag">
+    <meta property="og:image" content="https://correctarity.com/static/bag.jpeg">
+    <meta property="og:image:type" content="image/jpeg">
+    <link rel="stylesheet" href="static/style.css">
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/static/lucy_square.svg"
+    />
+</head>
+<body>
+<h1><a href="/">Correct Arity</a></h1>
+<img src="/static/bag.jpeg">
+<small style="display: block;">not endorsing whole foods but it is clever marketing</small>
+
+<h2>Gleam - it's what's not in the bag</h2>
+
+<h3>In the bag: data and function</h3>
+
+<a href="https://mckayla.blog/posts/all-you-need-is-data-and-functions.html">All you need is data and functions</a> shows how to, without traits as a feature in the language itself, cobble together something similar out of custom types:
+
+<blockquote>
+<h3>tl;dr</h3>
+<p>Instead of a trait, just make a type that implements the generic behavior you want, and then write a function to convert your data-type into your trait-type. If you need some data-type specific logic, then pass around functions as necessary (usually from your conversion function).</p>
+<p>Traits make sense in Rust, because the alternative I've proposed wouldn't work well with Rust's memory model or focus on performance, and using functions in this first-class manner would be much more complicated. For a language like Gleam, that doesn't have those concerns, but that is very concerned with being simple and keeping concept count low, they don't make as much sense. After all, all you really need is data and functions. :^)</p>
+</blockquote>
+
+<p>So how far can you get with just data and functions? Or in other words, what else does Gleam omit?</p>
+
+<p>A not exhaustive list: if/else if/else, for/while, exceptions, function overloading, operator overloading, curried functions, objects with methods, ORM, automatic JSON serialization, special HTML DSL, macros, reflection, null.</p>
+
+<h3>if, else if, else</h3>
+
+<p>No <code>if</code>/<code>else</code> may be the most striking example. Pattern matching is really great though, you always know what type you operate on, and it's exhaustive i.e. checks you handle all cases.</p>
+
+<p>Case expressions for everything also highlights where <a href="https://gleam.run/documentation/conventions-patterns-and-anti-patterns/#Replace-bools-with-custom-types">representing data with bools can be an anti-pattern</a> vs an enum which is easier to read and extend.</p>
+
+<iframe height="850px" allow="clipboard-write" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9IgDpK+UBXAEZ0AZkjrlWcJAAoAlHWC86dFvUrQYyAPqs6AXjoBlHAAsECJgAUtyAEKsAJrO4hWTODghvMdAGIeMBDyKnSIAHSUUDL4THJQVhA6MqIIOkLOspqwuqzyoRJqEBp2SBmGJuaWNmUA4pYubkIIQr4m+AJORPiFqpHRsfGyiSwpSGk6DI3ZZRkFvAC+vPzCdPgAnppVFla2uUiOTkphpru1B0eySOwQqB0xSAx+cDA6MJ3dxPf2NYXLfCQghE4joo2SqXSmRcOW0SHuZxq+zhR3kyiKdBwrGCdFhyAir3enx6JwxqjoABUoAIIHQALQAPlxZQiN3ItIAPEy3OEYHR9EwEAB3JgbOgfLo9NxhckBIK0xl0NzRBCiCAwbRQJUgOhc5kHVm3XXcnWvfl0JyvfAyBgCV5mCDHQisczQaUYgEA1YiTbbRF7eqNUmqf0XOENBAuNl3B42vzg+4AJSS/xWQLWvtpyZYwY6kuIYQpbFdUCWaeBYgk4PGk2mkdmBwR1QDBwjTjRMsx2NpeKQEXBudlxmJxHpTP1cMN7ON2t55sFIrFEq++HdstURZdDq1iuViTVGpos71vannJNc/0lo+NrtMAdTuL27X5M9IEWQA==="></iframe>
+
+<h3>for, while</h3>
+
+<p>Honestly recursion and the various list functions may take a bit more getting used to for many people compared to the familiar <code>for</code> and <code>while</code> loops. The <a href="https://hexdocs.pm/gleam_stdlib/gleam/list.html">stdlib list module</a> with list.map, list.fold, etc. is pretty good. The real advantage of no loops though is loops make more sense with mutable state, so omitting loops makes it easier for Gleam to make everything immutable.</p>
+
+<iframe height="500px" allow="clipboard-write" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9E3DPgDpIBlAK4AjOgDMkdcqzhIAFAEo6wAXTot6SYeRh0AvHQDaAVkx0AtObpY6AJgC66uhBwALBDICeAfRi6Cjp6Si5unpo8+AB0EghMACYKElAI5Kh0AAwWCJBQGcEwFgDucPjuGVIKrDg4FsFKatIadDU4dADUdMEuAL6hSL0CQmKS0uR+AeRBujAZADJRCgCSxEoqlgB8dKv0TRoT/rq+TAgIlArZ3bMDQ4JIIuJSPkfkJ2cXUxm79bMLS7t1lZtrtVC4cKwYBBrnowc0NMZHMC6FMXAiJHBYPgLNFolAILwkVsXlN3ucFFNOpJMbwLPjeAMNHdeiBekA="></iframe>
+
+<h3>exceptions</h3>
+
+<p>Gleam can panic on <code>panic</code> or <code>assert</code> but there is no type of "catch" to handle exceptions (well maybe OTP crash handling but that's its own thing). Exceptions are not for control flow; errors in control flow are normal values.
+
+<p>Error handling with normal values makes calling functions and using libraries much less surprising! From <a href="https://www.joelonsoftware.com/2003/10/13/13"/>Exceptions (Spolsky, 2003)</a></p>
+
+<blockquote>
+<p>The reasoning is that I consider exceptions to be no better than “goto’s”, <a href="https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf">considered harmful</a> since the 1960s, in that they create an abrupt jump from one point of code to another. In fact they are significantly worse than goto’s:</p>
+<ol>
+<li><strong>They are invisible in the source code.</strong> Looking at a block of code, including functions which may or may not throw exceptions, there is no way to see which exceptions might be thrown and from where. This means that even careful code inspection doesn’t reveal potential bugs. </li>
+<li><strong>They create too many possible exit points</strong> for a function. To write correct code, you really have to think about every possible code path through your function. Every time you call a function that can raise an exception and don’t catch it on the spot, you create opportunities for surprise bugs caused by functions that terminated abruptly, leaving data in an inconsistent state, or other code paths that you didn’t think about. </li>
+</ol>
+...
+<p>(The only languages I have used extensively that do let you return multiple values nicely are ML and Haskell.)</p>
+</blockquote>
+
+<p>Fortunately it is not 2003 anymore, other languages exist such as Gleam with a nice little <code>Result(a, b)</code> type that can be either <code>Ok(a)</code> or <code>Error(b)</code>, as well whatever custom types you want to define.</p>
+
+<h3>function overloading</h3>
+
+<p>In some languages you can call a function with different arguments, but not Gleam:</p>
+<iframe height="350px" allow="clipboard-write" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIADgK4BGABAGZI0AmC1ANhABQAeqNAksQCUwADqMa3GgCoaAJnEBfceMq0GzVlQ48+g/JhoBPPcLETgUgNTHFM+UvEhFQA==="></iframe>
+<p>You'd need 2 separate function names</p>
+<iframe height="250px" allow="clipboard-write" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIADgK4BGABAGZI0AmC1ANhABQAeqNAksQCUwADqMa3GgCoaAJnEBfceMq0GzVlQ4B9fAHcEPPoPyYaATxPCxE4FIDUlxTPlLxIRUA"></iframe>
+
+<p>Gleam is maybe more explicit at the cost of more boilerplate for optional arguments. One way is to create a function that takes all the args, then create a second function that calls the first function with defaults. Another way for a bunch of optional args is to create an args type that the user can intialize to all <code>None</code> and use the <code>..</code> record update syntax to fill in. This is more work for you when you define the function, but it keeps the language simpler, maybe making it easier for people to use your function.</p>
+
+<iframe height="1800px" allow="clipboard-write" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9ApfokgHTAAcsgiY6AZQTkxdfAE9KEOgHkefAL4AdJBWq1GLdhxj4ocJAx07KAVwBGdAGZI65VhYAUASjrAddHQs9BAAHuyULHQAvHQA6nD29iyeSOwQqHRaIABSCBDZ4qwMGXQAbADs4oSh+JnZABIQTEwI2d4BdBA4ABYIdDAQ+AD6AO6JyRDDNfieYREs4tms9jjtnd19A0NjEyzTYbPzVItZIKHyAF7rrl29/YMj40n7M8MAJhBOrLZMR+EnCAdW6bB47Z6TXb4HrDbi8ZAwOYAyKybIAIQQ9kKnUCanwiMew2KpRESFkvVYlimOFYg0ypNkAGsIBBKLCmO9MlIZJ4AIKUJRId7eEUbe7bJ57KbjaGw9QIpELVEgACycGZ2NuuJ4iP4/E+31+IzhiO84mZrPZnMk0ggfIFRGFopB4sJEP2MphcL4iOOKKWqvVBRAmBxqh1nj1Bp+fzl+J85pZbIQHK5ts8AAUoKzHSLgYFQRLdi9pXBZd6FX7Ttk1RqQ2G8br9V8Y8aI2ai8S0zyACwAJjzYq2bqlUK98qQvuR1ZADAQCHe9nkwdDWvD8cJXZtvYH4gpVOGNLp27tvJaAGFWJQYB2LcnU3QGc7tEgbA45IplAkS/5bt/Jqk6RcmYFgMEUJSZAAksQ1SHMB5iWMCL5vo4LhFu6UwzJ4oyZP+pwzPBoHeL+gR4XaeqjLBtSoJgSHWEgdioa4I4lgctQfC2RrYbhUrEZ0LGQlhlFnKMmKTDcyEMe+aECR6ZbjvCk7cfEUriGSoxsXUkggZY4jkPIRJQAwMCZI2fG3BwHB0KMyjvMgADk9DZqwLTyHQZIQO8dCsO5ECjM4rgAFa2KYchgvQpgIcZnSWXQ9i2PQ8gILYbhwAwPRObYrgWPg/Q+fYQyEFAbgILwYCsIQXlOFlOCKTFVkWAMtp0HZ7iNdCFW+Z5MB0BWaRMN5RkwJ0wTWTEdBHso+mGcZ/CbiUfhhgydAALQAHzWWG3J2sSvjrSpJaRvwwlbrtnQvoEo3+bEk1uAZrBDfwd5WiRgSPqIq0bWRR3CQRvkaTM+Zvdtngpu8ml7Rtt1g5pi1roEAAizRDMo+3fRRVFaepENhoEWY5kKn0HQBGNyHB/2wwAPBt2RnHQ1PWfwgO43Q/KCl5aNSj9mOZKMTOHAztO0wz2PM2uF10BLt3TQ9s37iUh60sor2BMt+2jFt6by9SSuQxNSsTT0lIK7dKtvWeTCXteRPo8dPMDDpDD8LYDpQJN2H87UzpvW9AAyCA2cVnOHaTf2RaB/CtIH7t84DQM+wAYnAsD4FbZYuTbXOh+T4eWPwNKUOnTBwIMHtx2GEsvpJjEfko64wK9jaePNpR4nwnjQfgZqdNrivHm3yCeJegzd7cz1g6ZE6eCoHIACqHM+9E1wodfDxAr0W1bw23P7gedEnKdp/gLk6NX74r8oM/vPPtSvUjwQFLc+Ps50bOOqfS/Sa40ZGnGpqNxGFu9JRB7iNgeSawCySJktBPd6ZI6IoA0EAA"></iframe>
+
+<h3>operator overloading</h3>
+
+<p>Even built in <code>+</code> for <code>Int</code> and <code>+.</code> for <code>Float</code> are different (try changing <code>+.</code> to <code>+</code> and see the helpful compiler error).</p>
+
+<iframe height="200px" allow="clipboard-write" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIADgK4BGABAGZI0C2AhnEgBQCUNwAOoxoQcACwQ10NANQSBNIaPHoAdJKnKJqgQF8Q2oA"></iframe>
+
+<h3>Curried functions</h3>
+
+<p><a href="https://www.roc-lang.org/faq#curried-functions">Why aren't Roc functions curried by default?</a> is a nice writeup:</p>
+
+<blockquote>
+<ul>
+<li>It lowers error message quality, because there can no longer be an error for "function called with too few arguments." (Calling a function with fewer arguments is always valid in curried functions; the error you get instead will unavoidably be some other sort of type mismatch, and it will be up to you to figure out that the real problem was that you forgot an argument.)</li>
+<li>It makes the <code>|&gt;</code> operator more error-prone in some cases.</li>
+<li>It makes higher-order function calls need more parentheses in some cases.</li>
+<li>It significantly increases the language's learning curve. (More on this later.)</li>
+<li>It facilitates pointfree function composition. (More on why this is listed as a downside later.)</li>
+</ul>
+</blockquote>
+
+<p>In Gleam, this may suffice for your problem:</p>
+
+<iframe height="400px" allow="clipboard-write" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9IgDpIXW1GLdl2K9elAK4AjOgDMkdcqzhIAFAEo6wXnT10ATHQA+APjowZAfXUAWLWbqr8AOnwIrMfFFUMT5xBdKH2ImJF19dABOfwtreAAPWOc3Dy8Qv0dA4Ocw3gBfcSQpWQU46Rs1BMw6AE8NHUU6JIBaOoKikvlFSwrEqoaI3srqugA2DQKQfKA
+"></iframe>
+<h3>objects with methods</h3>
+
+<p>Object Oriented Programming with inheritance, encapsulation, etc., is a whole jungle I'm not going to really get in to, but once nice thing about objects is for discoverability you can type mything dot in your editor and see everything you can do with it. It's also sometimes nice to chain methods, eg <code>mything.set_wibble(3).set_wobble("high").delete_wumble()</code>.</p>
+
+<p>In Gleam a module is the unit of related types and functions, so you get some discoverability by typing mymodule dot and seeing autocompletes. The type system also enforces what functions you can or can't use, although one feature I'd like added is typing <code>mything |></code> and getting functions that take <code>mything</code> as their first arg sorted first in autocomplete (this is trickier due to function capture or something, but the LSP already filters functions by correct return type when known, which is nice).</p>
+
+<p>A chain of functions in Gleam would be <code>mything |> set_wibble(3) |> set_wobble("high") |> delete_wumble</code> (As fun as writing long pipelines is, maybe the higher <a href="https://grugbrain.dev/#grug-on-expression-complexity">expression complexity</a> is a downside, but one nice thing is you can slap <code>echo</code> literally anywhere in the pipeline to debug).</p>
+
+<h3>ORM</h3>
+
+<p>People have strong feelings on ORMs. Here's cases mostly against them:</p>
+
+<ul>
+<li><a href="https://www.odbms.org/wp-content/uploads/2013/11/031.01-Neward-The-Vietnam-of-Computer-Science-June-2006.pdf"/>The Vietnam of Computer Science</a></li>
+<li><a href="https://eli.thegreenplace.net/2019/to-orm-or-not-to-orm/">To ORM or not to ORM</a></li>
+<li><a href="https://www.youtube.com/watch?v=8vrEtKc-TBU">You do not need an ORM (talk by squirrel creator)</a></li>
+<li><a href="https://github.com/giacomocavalieri/squirrel">https://github.com/giacomocavalieri/squirrel</a></li>
+</ul>
+
+<p>SQL doesn't map perfectly to Gleam (or whatever language), which motivates ORMs but also makes them hard. You may end up asking lot of questions about the ORM itself, maybe eventually spending more time on the glue code it gives you than if you generated code for SQL yourself, such as with squirrel in Gleam.</p>
+
+<p>Arguably an ORM ties your code to a library that may wax and wane, whereas plain SQL will live on forever and even makes your project portable across languages. That said an ORM like Django's that has existed for many years will exist for many more.</p>
+
+<p>I have not done enough projects with/without ORMs to really talk from a point of experience, and would like to see case studies of production applications using squirrel. Interestingly <a href="https://curling.io/">curling.io</a> (the funny Canada sport) seem to be making a version of squirrel called <a href="https://github.com/pairshaped/marmot">marmot</a> for SQLite instead of Postgres. Theoretically ORMs abstract over different databases but eh, people seem to argue over to what extent you can actually paper over the database.</p>
+
+<h3>Automatic JSON serialization</h3>
+
+<p>Even people who like Gleam's JSON decoding mention how it seemed painful at first:</p>
+
+<a href="https://jonashedeng.github.io/posts/gleam-decode/">In praise of Gleam's decode</a>
+
+<blockquote><p>When first encountering Gleam’s approach to encoding/decoding data to/from outside of Gleam, I (just as many other people new to Gleam) think it strange that such a modern and well-thought out language still has a relatively verbose and manual-ish[<a href="https://jonashedeng.github.io/posts/gleam-decode/#footnotes">1</a>] way of doing it.</p></blockquote>
+
+<a href="https://hashset.dev/article/2026/03/21/reflecting-on-deserialization-why-you-should-explicitly-decode-your-json/">Reflecting on deserialization. Why you should explicitly decode your JSON.</a>
+
+<blockquote><p>At first glance, this seems like an incredibly error prone and involved way to parse JSON. And you'd be right (or not, see below). There's a ton of boilerplate code required to map every single field in an expected JSON payload and decode it using a specific decoder for each and every field.</p></blockquote>
+
+<p>It's probably uncharitable to take these quotes out of context, if you click the links you'll see they both come to the conclusion that explicitly writing decoders is better than the more magical approaches in other languages such as Rust or C#. Imo this is <a href="https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/SimpleMadeEasy.md">simple vs easy</a>: in most languages serializing a struct is ready at hand, very easy to initially use, but internally handles missing fields, pascal vs camel case, etc., which you have to fiddle with to parse weird JSON payloads. The Gleam approach is itself simpler, which leaves a lot of boilerplate to you, but also allows you to handle custom tricky JSON by writing ordinary functions.</p>
+
+<p>Gleam definitely leans towards making hard cases possible, both articles end with how the Gleam language server can generate decoders for you, but eh, LSP seems like an awkward protocol that you can't really configure, for example there's no way to tell it to generate lowercase strings, and you can't easily hook into it for codegen. I hope I don't sound too ungrateful though, people are doing good work on this and I couldn't come up with a better approach to decoding myself. The current decoder api is kind of confusing imo in that it constantly passes continuation functions around, but I believe the point of that is to keep decoding and accumulating errors even after hitting one initial error, so that you get a list of all errors decoding the json rather than just one. A resulting wart is for <code>decode.failure</code> you need to create an unused value of your type, which is not totally trivial as Gleam omits null and default zero values, again all good reasonable decisions but it's definitely a wart in the decoder API. On the bright side <a href="https://github.com/gleam-lang/gleam/pull/5316">recently the LSP can generate some zero values for you</a>.</p>
+
+<p>Kind of rambling here idk, Gleam's decoder approach makes sense for Gleam but I don't want to oversell it, parse a bunch of JSON yourself and form your own opinion xd. The Gleam pov is probably JSON takes boilerplate or magic, pick your poison, and Gleam is decidedly unmagical.</p>
+
+<h3>special HTML DSL</h3>
+
+<p>Similarly, humans enjoy HTML templating that lets them write HTML the way they're used to and the way it looks in the browser, but that takes, if not magic, at least a second little HTML templating language. People who want to read and write "&ltp&gt" in source will definitely try to create this additional templating layer, although it will probably be janky, even if well implemented.</p>
+
+<p>Doing HTML in pure Gleam is less friendly in that it doesn't look like HTML, but simpler in that you only need one language, and critically gets you all the great control flow, composition with functions, tooling, etc. that makes Gleam nice. Once you start making little functions for components, the ergonomics (kind of a cliche word but not sure what else to call the general good design and tooling) of Gleam probably win over dedicated HTML DSL.</p>
+
+<h3>macros</h3>
+
+<p>Metaprogramming is so powerful you can't really even enumerate all the things it could possibly do for you, so it's hard to say how data and functions cover all the cases you might use macros for. Imo omitting metaprogramming leads to a few specific pain points <a href="https://correctarity.com/meta">eg json and html, but not enough to justify adding metaprogramming</a>. Not that macros are always bad but it's good that there exists a language without them.</p>
+
+<h3>reflection</h3>
+
+<p>Like macros, reflection is very powerful and you can do a lot with it; reflection is also <a href="https://go-proverbs.github.io/">never clear</a> (not never good, but if some other solution eg generic types works, it's probably clearer than reflection).</p>
+
+<h3>null</h3>
+
+<p>Billion dollar bla bla bla. Pattern matching on <code>Option(a)</code>:</p>
+
+<iframe height="400px" allow="clipboard-write" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9IgDpIXW1GLdhwSV8iJADpgAZQTkImOgDlkSuvgCelCHQDy4yQF9evSgFcARnQBmSRlAgR8AfSTsIACg+LUBo2QvWXwoOCQGAEpIugBaAD46ELCIumBeOjocVhg9Xz10h0ykhW9dWGQYhLpuEAAJCCYmBGVaugAeRPKYZA7E2oBCWozitSQ9atq1OnzGOEgkYaLTJBXzazsHclZwrxjCzMQpShT8JiQvBicXd09g0q9agCkECFroyJGjk/Czi6vnG58vdFI8QAAlBBWaD4d7RL4IY6nc6Xa5Au5jCDw1a8EDGIA"></iframe>
+
+<h3>Tempering the zeal of the convert</h3>
+
+<p>New language users seem much more likely to say some language is strictly the greatest and others are stinky because xyz; language designers seem much more circumspect, constantly complaining of tradeoffs and far reaching consequences. Even when language designers omit or add a feature they recognize it might make sense in one language but not another, and even when languages go different directions the designers respect one another for the work they do under the constraints and goals they have.</p>
+
+<p>Gleam is a <a href="https://correctarity.com/gleam">simple language with sum types and immutable data</a>. Sometimes that simplicity is great, sometimes it's frustrating. The question now is what have/what will people make in Gleam? I'd be interested in production Gleam projects as proof that you can do things without these features and to see what projects without them look like.</p>
+</body></html>
