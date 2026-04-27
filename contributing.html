@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gleam - contributing to 1.16.0">
+    <meta name="keywords" content="Gleam, 422, hex.pm, hex, error, pull, issue, github, api, publish, build, tool">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="Gleam - contributing to 1.16.0">
+    <link rel="stylesheet" href="static/style.css">
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/static/lucy_square.svg"
+    />
+</head>
+<body>
+    <h1><a href="/">Correct Arity</a></h1>
+    <h2>Gleam - contributing to 1.16.0</h2>
+	<p>To not bury the lede: my name (David Matz) is in the Gleam 1.16.0 <a href="https://gleam.run/news/javascript-source-maps/#Hex-package-manager-error-message-improvements">release notes</a>! Very excited.</a></p>
+	<p>I was trying to publish a package to hex.pm and getting an error <code>Can only modify a release up to one hour after publication</code> which was very confusing ("this is a new release? should I bump the version one more? but it is a new version? what..."). Of course with hindsight you know to check the build tool itself, but at the time I got stuck for a few hours looking on google, elixirforum, claude, etc. I finally cloned <a href="https://github.com/gleam-lang/gleam">gleam-lang/gleam</a> and pointed claude at it which found the problem. Again in hindsight maybe you don't need AI, could just grep the error message, but things are harder to figure out in the moment, especially when you assume the error message is correct about what you're publishing wrong, which is usually true.</p>
+	<p>The problem was on gleam publish, hex.pm returns a potential error, and gleam pattern matches on the status code, but then if it's an error 422 gleam further pattern matches on the message body, and if nothing matches it falls through to <code>ApiError::LateModification</code>. In general pattern matching on status codes is great, pattern matching on a string is sketchier, as there's more of a danger of error message strings changing, but <a href="https://en.wiktionary.org/wiki/Hyrum%27s_law">people rely on them anyways</a>. So maybe the cleanest/most complete fix would be to make 422 case stop pattern matching on message body entirely, but I wasn't sure what else gleam is doing and didn't want to change anything not obviously wrong. So I just changed it to fall through to printing the whole message body string if it no pattern matches. I think this is good because if you are getting some obscure hex error 1) you're probably in some weird uncommon path 2) you probably want the full verbatim error to google.</p>
+	<p>I wrote this up in an <a href="https://github.com/gleam-lang/gleam/issues/5472">issue</a> which was quickly approved. I struggled a bit making the actual code change, not being familiar with Rust, hex.pm, or gleam project standards. Fortunately the maintainer was nice and helpful, and eventually merged the <a href="https://github.com/gleam-lang/gleam/pull/5476">pull request</a>. Discovering the error, testing cases, and writing up the issue are helpful for the gleam project, whereas the code change would probably be easier for a gleam core team member to do on their own, rather than shepherd me through, so hopefully it adds up to a positive contribution overall.</p>
+	<p>If you get some weird 422 error on <code>gleam publish</code> such as
+	<code>An unexpected response was sent by Hex: 422 Unprocessable Entity: {"message":"Validation error(s)", "status":422,"errors":{"tar":"file too big: metadata.config"}}</code> you're welcome! Although you're probably not totally happy as you have some problem to work out, but at least you don't have 2 problems (problem + wrong error), it could be worse.
+	</p>
+</body></html>
