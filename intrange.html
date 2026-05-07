@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gleam - print 2d array of x,y pairs">
+    <meta name="keywords" content="Gleam, range, int.range, x, y, map, fold, list, list.map, list.fold">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="Gleam - print 2d array of x,y pairs">
+    <link rel="stylesheet" href="static/style.css">
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/static/lucy_square.svg"
+    />
+</head>
+<body>
+
+<h1><a href="/">Correct Arity</a></h1>
+
+<h2>Gleam - print 2d array of x,y pairs</h2>
+
+<h3>Print all x,y pairs</h3>
+
+<p>Someone asked how would you run a function for each x,y pair. So how would you do this in Gleam? Say it's not even a function, just <pre><code>"(" <> int.to_string(x) <> "," <> int.to_string(y) <> ")"</code></pre> so given</p>
+
+<pre><code>
+const x1 = 2
+const y1 = 7
+const x2 = 13
+const y2 = 15
+</pre></code>
+
+<p>how would you print all the points between x1,y1 and x2,y2?</p>
+
+<p>
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+<br>.
+</p>
+
+<p>My first guess was a helper fn to make a range of numbers between x1 - x2, and between y1 - y2, then map over those.</p>
+
+<iframe height="500px" allow="clipboard-write" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9HMQDpIXVajFuw5M4MfHz54kkugA90dALx0ATDOTyAnsrUB2LXPoL1quugDMx3ebXoArNKSUArgCM6AMyR1yrNwAFACUdMB8dHQs9JSBsBbikgB03kys+AD6AZRBHqwAJplQrEgMEEFKmIrqIdW+lSERflHREvjJOXmFxaXlQXrVOrX1SANNka1RPCBBM3QAPAB8dNwd+AiZklDcDI2LKzOY88urxMkbW/g7ZeMHdDMhM5NRAL5PLe+TEDgAFgh0OJwWB8V4udxeXx0fJFEplCqSVi0apEAoTFprZJw/qI5F0VHVADaAF1qkkOpQoBBKKiPmCUK8gA="></iframe>
+
+
+<p>But this is wrong! Or wrong ish in the sense that there's a better way. The problem is this first builds up a 2d array of nums, then maps fn <code>run</code> over them, but you don't actually need to create that first indermediate 2d array. You can instead, as you build up each x,y pair, apply fn <code>run</code> to the x,y pair, so you end up with the desired output without the intermediate numbers taking up more memory.</p>
+
+<iframe height="500px" allow="clipboard-write" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9HMQDpJ988SGPQAe6OgF46AJkHIRdAJ4TpAdnnCxMqXXQBmTYqU7p6AKwCklAK4AjOgDMkdcq24AKAJR1gfOnQs9JTusLrc+AB0UKxIDBAe4ph0ojLJANoAusnOHgg2hFAA+qw4OMmiXn4uAXQR0bHxHirJJsn5hSVlOUge3EjQXeXKVf61Aek8IB5TdAA8AHx1xJH4CEUiUNwMiT6LdFOYs/v1axv4W3HNe0tTXod0kZH9g6U4mWMBAL73NT9jEBwAAsEHQQnBYHwvnwQF8gA="></iframe>
+
+<p>One final <a href="https://hexdocs.pm/gleam_stdlib/gleam/int.html#range">int.range</a> gotcha:</p>
+
+<blockquote><p><code>from</code> is inclusive, and <code>to</code> is exclusive.</p></blockquote>
+
+<p>Which might be what you want, or maybe you want upper to be inclusive too, so you'd do something like this</p>
+
+<iframe height="500px" allow="clipboard-write" src="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9HMQDpJ988SGPQAe6OgF46AJkHIRdAJ4TpAdnnCxMqXXQBmTYqU7p6AKwCklAK4AjOgDMkdcq24AKAJR1gfOnQs9EwIAO7QAPqiutz4AHTknuKYdKIyXv6BEPQ2lJSR0dKxCayiHsmp6XQA1HqZQYFhkUoxxAmeKikmGS5ZOXnNrfFuZZ3KVbXo9dl0lO6wQ3FQrEgMEB4h4VBRKbn526IpANoAuinOHgg2hNusODgpol5+vQHFy6vrm827A9tKKSuNwidweTiQHm4SEioK6z0yAQCRx4IA8KLoAB4AHx0Yr4BARERQbgMco+bF0FGYdEUvEEokkjxKck4lEZEApOJxKEw+4nBF0AC+PQCwsyEBwAAsELN5jA+IK+CBBUA="></iframe>
+
+<p>Anyways, I feel like this is all fine, but maybe not as totally easy/trivial as it is in other languages? Maybe I'm just more used to imperative languages than functional languages. For example in python:</p>
+
+
+<pre><code>
+x1 = 2
+y1 = 7
+x2 = 13
+y2 = 15
+
+lower_x = min(x1, x2)
+upper_x = max(x1, x2) + 1
+lower_y = min(y1, y2)
+upper_y = max(y1, y2) + 1
+
+nums = []
+
+for x in range(lower_x, upper_x):
+    for y in range(lower_y, upper_y):
+        nums.append("(" + str(x) + "," + str(y) + ")")
+
+print(nums)
+</pre></code>
+
+<p>For me this feels easier, like there's less of a need to achieve enlightement en route to printing points in 2d array. I wonder why?
+
+<h3>I like map more than fold</h3>
+
+<p>Maybe I had that wrong first thought in Gleam because I find map easier to use than fold? Would that sound ridiculous to someone better at functional programming? On some level map and fold are probably equivalent, like you could implement map using fold, idk. I just feel like I grasp Gleam code using map faster than code using fold. Idk if there's real empirical research on this, but if you gave pop quizzes to random people on the street, would more people be able to correctly answer a question about <code>list.map</code> than about </code>list.fold</code>?</p>
+
+<p>For me map is easier than fold because it doesn't have that extra accumulator floating around. Of course there's a good reason why Gleam needs the acc: Gleam is immutable, it wouldn't make sense to have something like the python <code>nums.append</code>. The immutable Gleam version is probably easier to reason about in many cases and for many people, so idk, it depends.</p>
+
+<p>Anyways, I guess I probably always found fold a bit harder than map but never realized it? Also not saying fold is incredibly painful or anything, or that fold is not the right thing in a lot of cases. And maybe one day I'll look back at this and say uh what was I thinking?? Sorry for subjecting you to such rambling!</p>
+</body></html>
