@@ -88,7 +88,7 @@ print(nums)
 
 <h3>I like map more than fold</h3>
 
-<p>Maybe I had that wrong first thought in Gleam because I find map easier to use than fold? Would that sound ridiculous to someone better at functional programming? On some level map and fold are probably equivalent, like you could implement map using fold, idk. I just feel like I grasp Gleam code using map faster than code using fold. Idk if there's real empirical research on this, but if you gave pop quizzes to random people on the street, would more people be able to correctly answer a question about <code>list.map</code> than about </code>list.fold</code>?</p>
+<p>Maybe I had that wrong first thought in Gleam because I find map easier to use than fold? Would that sound ridiculous to someone better at functional programming? On some level map and fold are probably equivalent, like you could implement map using fold, idk. I just feel like I grasp Gleam code using map faster than code using fold. Idk if there's real empirical research on this, but if you gave pop quizzes to random people on the street, would more people be able to correctly answer a question about <code>list.map</code> than about <code>list.fold</code>?</p>
 
 <p>For me map is easier than fold because it doesn't have that extra accumulator floating around. Of course there's a good reason why Gleam needs the acc: Gleam is immutable, it wouldn't make sense to have something like the python <code>nums.append</code>. The immutable Gleam version is probably easier to reason about in many cases and for many people, so idk, it depends.</p>
 
