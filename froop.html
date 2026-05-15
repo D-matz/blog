@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Was there a French conspiracy to proliferate object oriented programming?">
+    <meta name="keywords" content="Object, Oriented, Programming, OOP, Erlang, OCaml, Prolog, Java, France, experiences, subjective">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="Was there a French conspiracy to proliferate object oriented programming?">
+	<meta property="og:image" content="https://correctarity.com/static/armSTRONG.jpg">
+    <meta property="og:image:type" content="image/jpg">
+	<link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/lucy_square.svg">
+</head>
+<body>
+    <h1><a href="/">Correct Arity</a></h1>
+ <h2>Was there a French conspiracy to proliferate object oriented programming?</h2>
+
+<img src="/static/frenchflag.jpg" alt="convoluted object oriented Java French flag print">
+
+<h3>OCaml</h3>
+
+<p>OOP bashing seems trendier these days, so I'm not really saying anything original here; the prevailing wisdom in like 2000-2010 (2010 was 16 years ago, time flies) was much more favorable to OOP, so it's interesting to see objections people raised back then. Their thoughts are also more interesting than mine because <a href="https://blog.janestreet.com/author/yminsky/">Yaron Minsky</a>/<a href="https://blog.janestreet.com/author/sweeks/">Stephen Weeks</a> and <a href="https://en.wikipedia.org/wiki/Joe_Armstrong_(programmer)">Joe Armstrong</a> know much more about OCaml and Erlang respectively (for a similar understatement, <a href="https://en.wikipedia.org/wiki/Michael_Olise">Olise</a> dribbles a bit better than me).</p>
+
+<p><a href="https://www.cs.rice.edu/~javaplt/411/23-spring/NewReadings/functional_programming_on_Wall_Street.pdf">Caml trading – experiences with functional programming on Wall Street</a> (Yaron Minsky and Stephen Weeks, 2008) claims</p>
+
+<blockquote>OCaml makes it possible to write code that is considerably easier to read, review, and think about than code written in more mainstream languages, due to a number of factors</blockquote>
+
+<p>including (among others) better tools for modularity:</p>
+
+<blockquote>the standard functional programming mechanisms (closures, parametric polymorphism, modules, and functors) for providing modularity in OCaml are significantly better suited to the task than the standard object-oriented mechanisms (objects, classes, and inheritance).<br>
+When we first tried switching over from VB to C#, one of the most disturbing
+features of the language for the partners who read the code was inheritance.
+They found it difficult to figure out which implementation of a given method was
+being invoked from a given call point, and therefore, difficult to reason about the
+code.</blockquote>
+
+<p>But, too honest to omit inconvenient parts of the story, they mutter</p>
+
+<blockquote>It is worth mentioning that OCaml actually does support inheritance as part
+of its object system. That said, objects are an obscure part of the language,
+and inheritance even more so.</blockquote>
+
+<p>Later in the "OCaml pitfalls" section they outright say</p>
+
+<blockquote>In our opinion, having an object system in OCaml (Remy &amp; Vouillon, 1998) is a mistake. 
+The presence of objects in OCaml is perhaps best thought of as an
+attractive nuisance. Things that other languages do with objects are better achieved
+in ML using features like parametric polymorphism, union types and functors.
+Unfortunately, programmers coming in from other languages where objects are the norm tend to use OCaml’s objects as a matter, of course, to their detriment. In the hundreds of thousands of lines of OCaml at Jane Street, there are only a handful
+of uses of objects and most of those could be eliminated without difficulty.</blockquote>
+
+<p>Regarding OCaml's pitfalls such as objects, they complain</p>
+
+<blockquote>Many of these deficiencies are further hindered
+by the “cathedral” development model adopted by INRIA, which slows the pace of
+improvement.</blockquote>
+
+<h3>Erlang</h3>
+
+<p>Of course in 2026 Jane Street has enough money (another understatement) to develop its own OCaml tools, oxidized or whatever super version they need. It's funny though that <a href="https://en.wikipedia.org/wiki/French_Institute_for_Research_in_Computer_Science_and_Automation">INRIA</a> is a French research institute, and Joe Armstrong references the boss of IBM France pushing object oriented in Prolog (not seriously claiming OOP is a uniquely French vice or Bonaparte forced OOP upon the world; just a funny coincidence, and maybe there was a lot of language development happening in France?):</p>
+
+<blockquote>
+<p>When I was first introduced to the idea of OOP I was sceptical but
+didn't know why—it just felt “wrong”. After its
+introduction OOP became very popular (I will explain why later) and
+criticising OOP was rather like “swearing in church”. OOness
+became something that every respectable language just had to have.
+
+</p><p>As Erlang became popular we were often asked “Is Erlang
+OO”—well, of course the true answer was “No of course
+not”—but we didn't care to say this out loud—so we
+invented a serious of ingenious ways of answering the question that were
+designed to give the impression that Erlang was (sort of) OO (If you
+waved your hands a lot) but not really (if you listened to what we
+actually said, and read the small print <i>carefully</i>).
+
+</p><p>At this point I am reminded of the keynote speech of the then boss of
+IBM in France who addressed the audience at the 7th IEEE Logic
+programming conference in Paris.  IBM Prolog had added a lot of OO
+extensions.  When asked why he replied:
+</p><blockquote>
+<i>Our customers wanted OO Prolog so we made OO Prolog</i>
+</blockquote>
+
+<p>I remember thinking “How simple, no qualms of conscience, no
+soul-searching, no asking ‘Is this the right thing to do’
+…”
+
+</p>
+</blockquote>
+
+<p>This is from <a href="https://www.cs.otago.ac.nz/staffpriv/ok/Joe-Hates-OO.htm">Why OO Sucks</a> (Joe Armstrong, 2000), but don't let the clickbait title fool you, Joe is quite measured and friendly when talking out loud, with a lot of stammering and grins. In fact <a href="https://www.infoq.com/interviews/johnson-armstrong-oop/">in 2010 he said</a> Erlang is the <em>only</em> object oriented language, maybe, for a certain definition of object oriented</p>
+
+<blockquote>I wrote an article, a blog, thing, years ago, why object oriented programming is silly, I mainly wanted to provoke people, quite interesting response to that, managed to annoy a lot of people, part of the intention actually! (laughs) And I started wondering about what object oriented programming was, and I thought well, Erlang wasn't object oriented, it was a functional programming language. And then my supervisor, my thesis advisor Seif Haridi said "But you're wrong!" he said, "Joe", he said, "Erlang is <em>extremely</em> object oriented" he said, "all the other", he said, such things as, "the object oriented languages aren't object oriented". And so, I might think that, I'm not sure if I believe this or not, but Erlang might be the only object oriented language, because the 3 tenets of object oriented programming are that it's based on message passing, that you have isolation between objects, and have polymorphism. And Alan Kay himself wrote this famous thing, he said the notion has been completely misunderstand, it's not about objects and messages, sorry, it's not about objects and classes, it's all about <em>messages</em>.</blockquote>
+
+<p>This would be news to a lot of people, OOP is not about inheritance, it's about message passing!</p>
+
+<p>Of course, inheritance and objects and classes etc. is what people typically think of as object oriented, and Joe definitely objects to that, just to give the blog outline</p>
+
+<blockquote>
+	<h3>Objection 1.&nbsp;&nbsp;Data structure and functions should not be bound together</h3>
+	...
+	<h3>Objection 2.&nbsp;&nbsp;Everything has to be an object.</h3>
+	...
+	<h3>Objection 3.&nbsp;&nbsp;In an OOPL data type  definitions are spread out all over the place.</h3>
+	...
+	<h3>Objection 4.&nbsp;&nbsp;Objects have private state.</h3>
+</blockquote>
+
+<p>It sounds like Joe chewed for a while on an Erlang process sounding a lot like an object in that it has private state. The point in Erlang is letting one process halt or crash without also stopping another process, which as Joe says in the video is not the point of, for instance, the JVM.</p>
+
+<h3>Subjective programming</h3>
+
+<p>Obligatory waffling conciliatory disclaimer, someone could easily come along with an example of a great object oriented system they built and they would be right about their own experience with objects, even while Jane Street and Ericsson are great examples without them. You can't stack up a big pile of evidence and objectively <strong>prove</strong> Objects Considered Harmful or whatever. The <a href="https://lexi-lambda.github.io/blog/2019/10/19/empathy-and-subjective-experience-in-programming-languages/">"unsatisfying subjective reality of programming languages"</a> is these are just feelings people have about their experiences.</p>
+
+<img src="/static/armSTRONG.jpg" alt="gigachad.jpg, greentext: named armstrong, invent Erlang, write why oo sucks, refuse to elaborate, 10 years later, actually erlang is the only oo lang">
+
+<p>So it's totally fine to simply assert OO sucks without a huge long post showing why, in fact writing a really long post about programming languages might smell of trying to prove more than is really possible to prove. Of course there can also be a lot of interesting and valuable stuff to glean from a long post detailing a project's use of a langauge.</p>
+
+<p>It comes down to which language features make sense <em>to you</em>, not which langauge features make sense full stop. Except for the French plot to spread objects (FROOP), that part is objectively true.</p>
+
+</body></html>
