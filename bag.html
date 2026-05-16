@@ -107,9 +107,9 @@
 "></iframe>
 <h3>objects with methods</h3>
 
-<p>Object Oriented Programming with inheritance, encapsulation, etc., is a whole jungle I'm not going to really get in to, but once nice thing about objects is for discoverability you can type mything dot in your editor and see everything you can do with it. It's also sometimes nice to chain methods, eg <code>mything.set_wibble(3).set_wobble("high").delete_wumble()</code>.</p>
-
-<p>In Gleam a module is the unit of related types and functions, so you get some discoverability by typing mymodule dot and seeing autocompletes. The type system also enforces what functions you can or can't use, although one feature I'd like added is typing <code>mything |></code> and getting functions that take <code>mything</code> as their first arg sorted first in autocomplete (this is trickier due to function capture or something, but the LSP already filters functions by correct return type when known, which is nice).</p>
+<p>Object oriented programming with inheritance etc may have been a <a href="https://correctarity.com/froop">French conspiracy</a>. More seriously, for some of the problems that tools like inheritance are for, functions and types might work.</p>
+	
+<p>One nice thing about objects is discoverability: you can type mything dot in your editor and see everything you can do with it. It's also sometimes nice to chain methods, eg <code>mything.set_wibble(3).set_wobble("high").delete_wumble()</code>. In Gleam a module is the unit of related types and functions, so you get some discoverability by typing mymodule dot and seeing autocompletes. The type system also enforces what functions you can or can't use, although one feature I'd like added is typing <code>mything |></code> and getting functions that take <code>mything</code> as their first arg sorted first in autocomplete (this is trickier due to function capture or something, but the LSP already filters functions by correct return type when known, which is nice).</p>
 
 <p>A chain of functions in Gleam would be <code>mything |> set_wibble(3) |> set_wobble("high") |> delete_wumble</code> (As fun as writing long pipelines is, maybe the higher <a href="https://grugbrain.dev/#grug-on-expression-complexity">expression complexity</a> is a downside, but one nice thing is you can slap <code>echo</code> literally anywhere in the pipeline to debug).</p>
 
