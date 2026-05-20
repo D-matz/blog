@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="They’re not capable of understanding a brilliant language">
+    <meta name="keywords" content="Golang, Go, Sawzall, Rob, Pike, CSP, Procedural, Functional, Simple, Simplistic, C, C++, Java, Python, Gleam">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="They’re not capable of understanding a brilliant language">
+    <link rel="stylesheet" href="static/style.css">
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/static/lucy_square.svg"
+    />
+</head>
+<body>
+<h1><a href="/">Correct Arity</a></h1>
+
+<h2>"They’re not capable of understanding a brilliant language"</h2>
+
+<p>Rob Pike (2014):</p>
+
+<blockquote>The key point here is our programmers are Googlers, they’re not researchers. They’re typically, fairly young, fresh out of school, probably learned Java, maybe learned C or C++, probably learned Python. They’re not capable of understanding a brilliant language but we want to use them to build good software. So, the language that we give them has to be easy for them to understand and easy to adopt.</blockquote>
+
+<p>Rubs some people the wrong way (maybe especially Rust enjoyers?) and if you don't like Go then fair enough! Not changing your mind about that; just giving context for the quote, because I've seen it a few times but the source is a rotted msdn link so it's usually presented without context. It's still available on archive.org though: <a href="https://web.archive.org/web/20140812045959/https://channel9.msdn.com/Events/Lang-NEXT/Lang-NEXT-2014/From-Parallel-to-Concurrent
+">From Parallel to Concurrent</a>.</p>
+
+<p>So first, half the talk is about <a href="https://en.wikipedia.org/wiki/Sawzall_(programming_language)">Sawzall</a>, which Google used to process logs for billing (!!). Before Sawzall, Google was about to drown in logs; Sawzall's big delivery was bringing the time to process a day's log down from 24 hours to 2 minutes. The talk goes through some specifics but frankly I did not pay much attention to the syntax etc. Interestingly Sawzall was a very early user of <a href="https://en.wikipedia.org/wiki/MapReduce">MapReduce</a>. All the parallelism was hidden from users though. The important point is <em>Sawzall let non experts write parallel code</em>. (Or maybe more accurately, write code without any parallelism at all and let the system handle it)</p>
+
+<p>Meanwhile at Google, other people were scared by the difficulty of writing parallel programs using threads, to the extent that they wanted to ban concurrency. So you can see why Rob Pike would say hey, it's possible for mortals to write concurrent code (and in fact necessary at our scale), we just need tools that make concurrency easy for people.</p>
+
+<p>So the notorious quote in its immediate context is:</p>
+
+<blockquote>
+<p>I define software engineering as the maximization of the quality of the software written by your group of programmers. That's my definition of it.
+<br><br>The key point here is our programmers are Googlers, they’re not researchers. They’re typically, fairly young, fresh out of school, probably learned Java, maybe learned C or C++, probably learned Python. They’re not capable of understanding a brilliant language but we want to use them to build good software. So, the language that we give them has to be easy for them to understand and easy to adopt.
+<br><br>And the most important part is, in my personal view, that it needs to support concurrency very, very well. 
+<br><br>For Google servers, we just need to have concurrency available. This was a very long battle, and it's only fairly recently been won. 
+<br><br>For the first N years I was at Google, there were key people who believed that threading was a bad idea, that it was very hard to write code that worked well with threads. 
+<br><br>And the thing is, they were scared by the models they were forced to use rather than by the idea and how it should be made to work.
+</blockquote>
+
+<p>The word brilliant is a backhanded compliment, or maybe veiled insult. He's grading languages on if Googlers can concurrency get out it, so a language with new stuff for them to learn fails. They need concurrency that meets Java/C/C++/Python users where they are.</p>
+
+<p>Specifically, after spending their only innovation token on concurrency, the rest of the language has to be simple and <em>procedural</em>. Imo his smuggest quote is actually not the famous one, but rather</p>
+
+<blockquote>first-class concurrency can, in fact, work very well within a procedural language, even though the concurrency programming experts would like not to think that sometimes, I believe</blockquote>
+
+<p>His coup with Go is taking the existing CSP concurrency model and putting it in a language resembling popular languages, ie procedural.</p>
+
+<p>(Honestly I could not give you a great definition of functional vs procedural...maybe, uh, lots of functions for control flow? Immutable state? Maybe <a href="https://en.wikipedia.org/wiki/I_know_it_when_I_see_it">"I know it when I see it"</a>...)</p>
+
+<p>So for example, from <a href="https://gobyexample.com/select">Go by Example</a>:</p>
+<pre><code>
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func main() {
+
+    c1 := make(chan string)
+    c2 := make(chan string)
+
+    go func() {
+        time.Sleep(1 * time.Second)
+        c1 <- "one"
+    }()
+    go func() {
+        time.Sleep(2 * time.Second)
+        c2 <- "two"
+    }()
+
+    for range 2 {
+        select {
+        case msg1 := <-c1:
+            fmt.Println("received", msg1)
+        case msg2 := <-c2:
+            fmt.Println("received", msg2)
+        }
+    }
+}
+</code></pre>
+<p>In Pike's talk he calls <code>select</code> "Dijkstra's guarded commands via CSP turned into a switch-like thing". Dijkstra and CSP sounds sort of exotic or academic, maybe even *researchery*, but a switch? Good honest C that everyone knows! He's smuggling a new and maybe radical concurrency idea in a familiar (boring, even) switch statement. The anonymous functions might be a bit new but overall it looks like procedural languages users are used to.</p>
+
+<p>(the claim is merely that procedural languages are what most people know, not that they're inherently better than functional languages)</p>
+
+<p>Now, maybe people find the quote frustrating or insulting because it sounds like dumbing down programming for the hoi polloi who could never ever learn functional programming or anything new. I don't think Rob Pike actually thinks Googlers are dumb though! I'd bet a random 2014 Googler would be much stronger overall than the median programmer, including at concurrency. Rather, concurrency with Google's number of servers and employees is hard or even impossible without better tools.</p>
+
+<p>I don't think he's anti-intellectual or has no place for research languages. It's for their specific problem of getting lots of programmers to use concurrency that he argues it's more appropriate to put CSP in the most unoriginal procedural language possible</p>
+
+<p>Again not saying you have to like Go. Maybe some specific mistake bit you that would have been impossible in another language, or it's awkward or impossible to do what you want in Go, your experience is ofc valid. In fact the funny thing is I like Go but actually like Gleam a lot more, it has similar ideas but some nicer parts (sum types). Just wanted to put the quote in context!</p>
+</body></html>
+
