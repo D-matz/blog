@@ -8,4 +8,18 @@
   width: 100vw;
   height: 100vh;
 }
-</style><!-- /lustre:fragment --><!-- lustre:fragment --><!-- /lustre:fragment --><script src="/static/beefy.js" type="module"></script></head><body><main id="app"></main></body></html>
+
+.mobile-controls {
+  display: none;
+}
+
+@media (any-pointer: coarse) {
+  .mobile-controls {
+    display: grid;
+  }
+
+  .movement-hint {
+    display: none !important;
+  }
+}
+</style><!-- /lustre:fragment --><!-- lustre:fragment --><!-- /lustre:fragment --><script src="/beefy.js" type="module"></script></head><body><main id="app"></main></body></html>
