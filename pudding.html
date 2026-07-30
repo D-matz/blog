@@ -51,7 +51,7 @@ on <a href="https://packages.gleam.run/">packages.gleam.run</a> and maybe not al
 
 <h3>On a personal note</h3>
 
-<p>Part of this is probably me projecting my own concern about lack of progress on my own project. <a href="https://potatoemr.com/">PotatoEMR</a> is supposed to be a toy EMR, like a lesser OpenEMR in Gleam/FHIR, and what I should do is look at what people using EMRs need and try that in the project. But one thing OpenEMR does is export immunizations to <a href="https://www.nlm.nih.gov/oet/ed/healthdatastandards/03-300.html>hl7v2</a>, because that's what US vaccine registries use. So I got sucked in to trying to generate Gleam types for hl7v2.</p>
+<p>Part of this is probably me projecting my own concern about lack of progress on my own project. <a href="https://potatoemr.com/">PotatoEMR</a> is supposed to be a toy EMR, like a lesser OpenEMR in Gleam/FHIR, and what I should do is look at what people using EMRs need and try that in the project. But one thing OpenEMR does is export immunizations to <a href="https://www.nlm.nih.gov/oet/ed/healthdatastandards/03-300.html">hl7v2</a>, because that's what US vaccination registries use. So I got sucked in to trying to generate Gleam types for hl7v2.</p>
 
 <p>Which is not even a bad idea necessarily, but without contact with reality is very likely to be a waste of time. For one thing, it seems like real world hl7v2 users may define their own messages and even violate the spec, and if the data irl is too messy to parse into types...the types aren't so useful. Or maybe there won't be a need for this at all, who knows, it's impossible to say for sure without real users with problems.</p>
 
