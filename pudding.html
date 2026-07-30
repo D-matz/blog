@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gleam - where is the pudding?">
+    <meta name="keywords" content="Gleam, pudding, application, project, library, package">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="Gleam - where is the pudding?">
+    <meta property="og:image" content="https://correctarity.com/static/pudding.jpg">
+    <meta property="og:image:type" content="image/jpg">
+    <link rel="stylesheet" href="static/style.css">
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/static/lucy_square.svg"
+    />
+</head>
+<body>
+<h1><a href="/">Correct Arity</a></h1>
+<img src="/static/pudding.jpg"</img>
+
+<small>By Kim Traynor - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=18155691</small>
+
+<h2>Gleam - where is the pudding?</h2>
+
+<h3>Simon wants pudding</h3>
+
+<blockquote>
+<p>Seibel: For you, what about the relation between research and actually programming?</p>
+<p><a href="https://simon.peytonjones.org/">Peyton Jones</a>: Oh, they interact a lot. My area of study is programming languages. What are programming languages for in the end? They’re to make it easier to program. They’re the user interface of programming, in effect. So programming and programming language research are deeply related. One thing we’re not good about is this: the proof of the pudding is in the eating, so you should watch programmers eating. That is, you should do proper, formalized studies of programmers programming and see what they do. And that’s jolly expensive. And it’s also more “squishy.” It’s harder to come up with unequivocal results.<br>
+So the culture of the programming-language community is much more, “prove that your type system is sound and complete,” kind of stuff. We dodge, probably, the more important but much harder to answer questions about whether, in practice, they make people more productive. But they are questions that are really hard to give convincing answers to. Are you more productive writing a functional program or an object-oriented program to do the same thing? Even if you could spend a lot of money on doing serious experiments, I’m not sure you’d come up with results which people would actually buy.</p>
+</blockquote>
+<cite>-<a href="https://en.wikipedia.org/wiki/Coders_at_Work">Coders at Work</a> by Peter Seibel (2009)</a></cite>
+
+<p>While languages are for people to make things, it's <a href="https://en.wikipedia.org/wiki/Streetlight_effect">easier to measure</a> nice little properties. Which might be interesting and even suggest usefulness, but ultimately what matters is the projects people make - <a href="https://en.wiktionary.org/wiki/the_proof_of_the_pudding_is_in_the_eating">the proof of the pudding is in the eating.</a></p>
+
+<p>Haskell might "avoid success at all costs" to research new ideas; Gleam lacks this caveat, stealing existing features (message passing, sum types) with friendly syntax and tooling.</p>
+
+<h3>Gleam applications and libraries</h3>
+
+<p>So what things are people making? Where is the pudding?</p>
+
+<p>I see more libraries than applications, but the proof of libraries, like languages, is what applications people make with them. Today 1587 packages are available
+on <a href="https://packages.gleam.run/">packages.gleam.run</a> and maybe not all are good but many made by core Gleam people are pretty good. What I don't see as many of is Gleam applications, although of course libraries are naturally shared whereas there's no central gleam.applications.run repository.</p>
+
+<p>Applications are also important because useful libraries are extracted from applications, rather than original creations. It is <em>fun</em> to take an API or spec and model it in Gleam types. But what makes code good is <a href="https://jerf.org/iri/post/2026/what_value_code_in_ai_era/#tested-against-the-real-world">contact with the real world</a>. Which means a fresh pile of AI slop is not useful, but also even when writing code yourself, you have to think starting with real problems in the world -> applications to solve them -> reusable building blocks. A project solving a problem for people is the best sign you're doing something useful that, if reusable, you can pull out into a library.</p>
+
+<p>And this not to say there are no Gleam applications. <a href="https://misprint.moe">https://misprint.moe/</a> for instance lets you draw and print to a thermal printer! And it's enabled by libraries like lustre, plinth, envoy, mist, and of course <a href="https://starprnt.hexdocs.pm/">starprnt</a>. Again it may just be that libraries are more naturally shared than projects. But in any case I'd like to see more projects</p>
+
+<h3>On a personal note</h3>
+
+<p>Part of this is probably me projecting my own concern about lack of progress on my own project. <a href="https://potatoemr.com/">PotatoEMR</a> is supposed to be a toy EMR, like a lesser OpenEMR in Gleam/FHIR, and what I should do is look at what people using EMRs need and try that in the project. But one thing OpenEMR does is export immunizations to <a href="https://www.nlm.nih.gov/oet/ed/healthdatastandards/03-300.html>hl7v2</a>, because that's what US vaccine registries use. So I got sucked in to trying to generate Gleam types for hl7v2.</p>
+
+<p>Which is not even a bad idea necessarily, but without contact with reality is very likely to be a waste of time. For one thing, it seems like real world hl7v2 users may define their own messages and even violate the spec, and if the data irl is too messy to parse into types...the types aren't so useful. Or maybe there won't be a need for this at all, who knows, it's impossible to say for sure without real users with problems.</p>
+
+<p>I got as far as generating hl7v2 datatypes/segments/messages, with each thing_new and thing_to_string, but still not sure about parsing thing_from_string which is the hard one. Also just leaving dates etc as plain String. If hl7v2 is super common maybe I will come back to this, idk. But in terms of "is the juice worth the squeeze" I need to start with what problems OpenEMR users have.</p>
+
+<p>A good question after all of this application talk would be why not just work on OpenEMR directly, which has had much more contact with reality? Well, I think FHIR in Gleam is very nice in a few ways:
+<ul>
+<li>type system is great for cardinality, choice types, operationoutcome/http errors</li>
+<li>runs on server or in browser</li>
+<li>simple and easy to learn</li>
+</ul>
+But of course maybe it turns out the real challenge is resolving terminology or something and Gleam is not a particularly good fit; I hope Gleam FHIR makes sense but you don't really know until people use a project.
+</p>
+
+</body></html>
