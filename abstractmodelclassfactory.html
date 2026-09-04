@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A real life AbstractModelClassFactory">
+    <meta name="keywords" content="AbstractModelClassFactory, Java, hl7v2">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="A real life AbstractModelClassFactory">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/lucy_square.svg">
+</head>
+<body>
+<h1><a href="/">Correct Arity</a></h1>
+<h2>A real life AbstractModelClassFactory</h2>
+
+<p>Sometimes I read "actually modern java is great now bla bla bla" and idk maybe, I don't do anything with java so I assumed people were making up "AbstractModelClassFactory" complaints. But it seems like <a href="https://hapifhir.github.io/hapi-hl7v2/base/apidocs/ca/uhn/hl7v2/parser/AbstractModelClassFactory.html">AbstractModelClassFactory</a> is still out there...</p>
+
+<blockquote>
+<p>Abstract base class for <a href="https://hapifhir.github.io/hapi-hl7v2/base/apidocs/ca/uhn/hl7v2/parser/ModelClassFactory.html">ModelClassFactory</a> implementations that read event maps from the file system.</p>
+
+<p>The directory can be set using <a href="https://hapifhir.github.io/hapi-hl7v2/base/apidocs/ca/uhn/hl7v2/parser/AbstractModelClassFactory.html#setEventMapDirectory-java.lang.String-">setEventMapDirectory(String)</a> and defaults to ca/uhn/hl7v2/parser/eventmap/. The file itself is a property file named after the HL7 version (e.g. 2.4.properties).</p>
+</blockquote>
+
+<p>The funny thing is, I would be extremely scared to make fun of this code, well a) because in general we should be nice and not mean but also b) the possibility that it solves a problem driven by real complexity in the <a href="https://www.nlm.nih.gov/oet/ed/healthdatastandards/03-300.html">hl7v2</a> standard, which if I tried to do hl7v2 lib I would at first be totally ignorant of and then take great effort or realistically never figure out. Of course maybe for whatever event map stuff they could do, you could replace the AbstractModelClassFactory with just data and functions, which might even be better. But somewhere along the way you'd probably say ohhh I see why they reached for all this java gobbledygook it kind of makes sense... (or not idk)</p>
+
+</body></html>
