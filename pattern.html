@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A pattern of AI polluting human projects?">
+    <meta name="keywords" content="human, people, AI, gleam, zig, goose, gander, pollution, clanker">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="A pattern of AI polluting human projects?">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/lucy_square.svg">
+</head>
+<body>
+<h1><a href="/">Correct Arity</a></h1>
+<h2>A pattern of AI polluting human projects?</h2>
+
+<p>First, assume good taste <a href="https://dustycloud.org/blog/but-where-does-taste-come-from/">comes from doing work yourself</a>. Maybe this is not necessarily true - maybe you can get good feedback from what your AI struggles with, or your AI itself gets feedback and improves - but for now let's assume you do need to <a href=""https://correctarity.com/code">touch the code yourself to learn</a>. If you do need to do that to learn and develop good judgement, then won't people who rarely or never use AI create the best <a href="https://mitchellh.com/writing/building-block-economy">building blocks</a> for AI? Will there be a pattern of this hurting the original people involved?</p>
+
+<p>For example, languages like <a href="https://github.com/gleam-lang/gleam/blob/main/CONTRIBUTING.md#communication-with-contributions">gleam</a> and <a href="https://kristoff.it/blog/contributor-poker-and-ai/">zig</a>, in order to engage contributors in the language, don't take AI contributions. Of course once a language is released people can use it however they want, including with AI, but there are at least a group of core users who make <a href="https://github.com/giacomocavalieri/hashi">cool</a> <a href="https://whitespace.moe/lily/misprint">stuff</a> by hand. When people exercise the language by hand, they get feedback and improve it. These improvements might be just "ergonomics" but they make it possible to manage more complexity and larger contexts.</p>
+
+<p>Wait, larger contexts...sounds like this would be good for AI?!</p>
+
+<p>So second, assume what's good for the goose is good for the gander, ie what helps humans work on code also helps AI work on code (apparently a gander is a male goose, but that's neither here nor there). Funnily enough this works both directions, for instance oh chatgpt seems to read and edit JSON pretty well with <a href="https://jqlang.org/">jq</a>, so when I want to copy snapshot.element out of StructureDefinition-SEBasePatient.json, maybe I should try that jq thing. Importantly though in the human->AI direction, the strengths that make gleam nice for humans - <a href="/gleam">simple sum types and immutable data</a>, and <a href="/bag">explicit (maybe even verbose) data and functions rather than more powerful features</a> - are also nice for AI. <code>gleam check</code> catches a lot of errors at compile time for humans and for robots too.</p>
+
+<p>The potential problem though is AI polluting these pristine pools of human taste. Imo AI doesn't write great gleam. Getting some APIs wrong is fine as you can just point it at the current stdlib, and some problems you can check mechanically, like no `assert` in library code. But other problems are more domain specific. One annoying style is lots of local defensive checks rather than types that model the overall domain correctly. The AI will never say "does this really need to be a library - has anyone even tried using it in an application yet?" and in general there's just a much higher ratio of lines of code to contact with reality. Maybe if many gleam applications and gleam libraries are steaming piles of slop, that makes gleam less fun for AI haters, many of whom made gleam nice in the first place. Uh oh...</p>
+
+<p>And could this pattern repeat in general? People developing good taste by manually working on something, then using that feedback to make something useful for people, as well as for AI, which reduces the human feedback that made the thing good in the first place?</p>
+
+<p>(Not quite the same but related - <a href="https://mathstodon.xyz/@tao/117237320796901560">in math</a>, problems are interesting and worthwhile because of what we learn in the process of solving them, so ending a problem with a correct answer nobody understands does more to discourage mathematicians than help them.)</p>
+
+<p>Or, who knows, maybe AI judgement is good enough and you can 100% AI rewrite it in rust and still make a useful tool, as hopes <a href="https://bun.com/blog/bun-in-rust">bun</a>. Or maybe super dense code golf is good for AI but not humans, or reversed, more explicit/verbose code is good for humans but bad for AI. Or maybe a bunch of AI enjoyers descending on a project doesn't stop you from saying I'm going to ignore all of you and keep working on what feels nice to me, leading to <a href="https://en.wikipedia.org/wiki/Fishbowl_(conversation)">fishbowl conversations</a> where AI users listen but don't contribute.</p>
+
+</body></html>
