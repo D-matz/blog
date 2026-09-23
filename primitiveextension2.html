@@ -33,9 +33,9 @@
 
 </p><pre><code>mything: Primitive(Float)</code></pre>
 
-<p>you do something like
-
-</p><pre><code>
+<p>you do something like</p>
+	
+<pre><code>
 mything: Float,
 mything_: Primitive,
 </code></pre>
@@ -45,7 +45,6 @@ mything_: Primitive,
 <li>pro: maybe generic type is a bit too clever/tricky and we don't need it</li>
 <li>con: for repeating primitive elements both mything and mything_ would be a List and the user would be responsible for aligning the indexes correctly</li>
 <li>con: adding <code>thing_</code> for each primitive <code>thing</code> could be many lines of code, depending on how many primitive types you have for instance 3,788 for base R4, although the total lines of code are probably dominated by to_json/decoder fns, but adding lines to the types might feel worse idk</li>
-
 </ul>
 
 <p>This is just to say, these seem like the two possible ways you slap extensions on <em>all</em> primitives in Gleam, and neither seems great.</p>
@@ -78,7 +77,7 @@ pub type UsCoreQuestionnaireresponseQuestionnaire {
 }
 </code></pre>
 
-<p>Overall, this <code>UsCoreQuestionnaireresponseQuestionnaire</code> looks like a reasonable type; it has the <code>questionnaire_display</code> and <code>url</code> fields we care about as normal fields. The underlying shape of the primitive extension sort of pokes through a bit. The original questionnaire field is now "value" which is not super clear, but eh, fine. And us_core_questionnaireresponse_to_json butchers the json and us_core_questionnaireresponse_decoder stiches it back together, but behind the scenes.</p>
+<p>Overall, this <code>UsCoreQuestionnaireresponseQuestionnaire</code> looks like a reasonable type; it has the <code>questionnaire_display</code> and <code>url</code> fields we care about as normal fields. The underlying shape of the primitive extension sort of pokes through a bit. The original questionnaire field is now "value" which is not super clear, but eh, fine. And <code>us_core_questionnaireresponse_to_json</code> butchers the json and <code>us_core_questionnaireresponse_decoder</code> stiches it back together, but behind the scenes.</p>
 
 <p>More annoying is (did you catch this just looking at the type?) </p><details>json -> type -> json roundtrip does not preserve extension order and id, which might be bad. We can probably fix that somehow, maybe wrap <code>questionnaire_display</code> and <code>url</code> in something, but it does feel a bit less slick compared to simply putting all the extensions in a list and saying ok now do <code>get_questionnaire_display(extensions)</code>. But I want to try having fields for them, idk, it's a work in progress 🙃</details><p></p>
 
