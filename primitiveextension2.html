@@ -54,7 +54,7 @@ mything_: Primitive,
 <p>Handwaving away the <a href="https://www.hl7.org/fhir/profiling.html#slicing">mechanics of profiles and slicing</a>, and how "ungainly" the <a href="https://www.hl7.org/fhir/json.html#primitive">primitive extension looks in json</a>, here are the big improvements:</p>
 
 <ul>
-<li>unlike before when we slapped primitive extension on <em>every</em> base resource element; now we can define just <em>one</em> specific element for profile</li>
+<li>before we slapped primitive extension on <em>every</em> base resource element; now we can extend just <em>one</em> specific primitive element, per profile</li>
 <li>before the extension could be literally any primitive datatype; now this specific element can be the appropriate string or uri or whatever specific datatype</li>
 <li>all the systems using this profile can, before exchanging data, agree on element structure</li>
 </ul>
