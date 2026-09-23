@@ -1,0 +1,104 @@
+<!DOCTYPE HTML>
+<html lang="en"><head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="I still do not like FHIR primitive extensions, but ok they are more usable in profiles">
+    <meta name="keywords" content="FHIR, primitive, extension, gleam, json, xml, platform">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="I still do not like FHIR primitive extensions, but ok they are more usable in profiles">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/lucy_square.svg">
+</head>
+<body>
+
+<h1><a href="/">Correct Arity</a></h1>
+<h2>I still do not like FHIR primitive extensions, but ok they are more usable in profiles</h2>
+
+<h3>Previously</h3>
+
+<p>In <a href="/primitiveextension">I do not like FHIR primitive extensions</a> I complained
+
+</p><blockquote>They undermine the guarantuee that a 1..1 element (min 1 and max 1 means required) of a specific type will exist, making every element optional with potentially any type.</blockquote>
+
+<p>With powerful object oriented languages, you probably get some kind of Element object which normally behaves like a primitive string, bool, etc., but can also get/set extension. Maybe this just seems nice but is still tricky, or maybe it really is nice, idk.
+
+</p><p>In Gleam, primitive extensions mean wrapping every single string, bool, etc., in Primitive:
+
+</p><pre><code>pub type Primitive(a) {
+  Primitive(id: Option(String), ext: List(Extension), value: Option(a))
+}</code></pre>
+
+<p>I mean alternatively, you could also generate a second field, so instead of 
+
+</p><pre><code>mything: Primitive(Float)</code></pre>
+
+<p>you do something like
+
+</p><pre><code>
+mything: Float,
+mything_: Primitive,
+</code></pre>
+
+<ul>
+<li>pro: making two fields is closer to how primitive extensions actually look in the (ugly) json</li>
+<li>pro: maybe generic type is a bit too clever/tricky and we don't need it</li>
+<li>con: for repeating primitive elements both mything and mything_ would be a List and the user would be responsible for aligning the indexes correctly</li>
+<li>con: adding <code>thing_</code> for each primitive <code>thing</code> could be many lines of code, depending on how many primitive types you have for instance 3,788 for base R4, although the total lines of code are probably dominated by to_json/decoder fns, but adding lines to the types might feel worse idk</li>
+
+</ul>
+
+<p>This is just to say, these seem like the two possible ways you slap extensions on <em>all</em> primitives in Gleam, and neither seems great.</p>
+
+<h3>But now, profiles</h3>
+
+<p>Handwaving away the <a href="https://www.hl7.org/fhir/profiling.html#slicing">mechanics of profiles and slicing</a>, and how "ungainly" the <a href="https://www.hl7.org/fhir/json.html#primitive">primitive extension looks in json</a>, here are the big improvements:</p>
+
+<ul>
+<li>unlike before when we slapped primitive extension on <em>every</em> base resource element; now we can define just <em>one</em> specific element for profile</li>
+<li>before the extension could be literally any primitive datatype; now this specific element can be the appropriate string or uri or whatever specific datatype</li>
+<li>all the systems using this profile can, before exchanging data, agree on element structure</li>
+</ul>
+
+<p>What this means is you can have reasonable types from primitive extensions in Gleam. For example for <a href="https://build.fhir.org/ig/HL7/US-Core/StructureDefinition-us-core-questionnaireresponse.html#profile">US Core QuestionnaireResponse</a>, the questionnaire field looks like this</p>
+
+<img src="/static/questionnaireresponsequestionnaire.png">
+
+<p>Which in Gleam becomes</p>
+
+<pre><code>
+pub type UsCoreQuestionnaireresponseQuestionnaire {
+  UsCoreQuestionnaireresponseQuestionnaire(
+    id: Option(String),
+    extension: List(ct.Extension),
+    questionnaire_display: Option(String),
+    url: Option(String),
+    value: Option(String),
+  )
+}
+</code></pre>
+
+<p>Overall, this <code>UsCoreQuestionnaireresponseQuestionnaire</code> looks like a reasonable type; it has the <code>questionnaire_display</code> and <code>url</code> fields we care about as normal fields. The underlying shape of the primitive extension sort of pokes through a bit. The original questionnaire field is now "value" which is not super clear, but eh, fine. And us_core_questionnaireresponse_to_json butchers the json and us_core_questionnaireresponse_decoder stiches it back together, but behind the scenes.</p>
+
+<p>More annoying is (did you catch this just looking at the type?) </p><details>json -> type -> json roundtrip does not preserve extension order and id, which might be bad. We can probably fix that somehow, maybe wrap <code>questionnaire_display</code> and <code>url</code> in something, but it does feel a bit less slick compared to simply putting all the extensions in a list and saying ok now do <code>get_questionnaire_display(extensions)</code>. But I want to try having fields for them, idk, it's a work in progress 🙃</details><p></p>
+
+<p>The positive side is now we can modify a specific field. The base QuestionnaireResponse resource has a <a href="https://hl7.org/fhir/R4/references.html#canonical">canonical</a> link which must be URL to FHIR Questionnaire resource, whereas the profile says the link can, via extension:url, be to a non-FHIR questionnaire. Plus add display via extension:questionnaireDisplay. And again now that we're using a profile, the big improvement is we don't have to slap primitive extension on literally every field, and we can use the profile to agree with other systems on element structure.</p>
+
+<h3>History, just for fun</h3>
+
+<p>See <a href="https://web.archive.org/web/20180812030812/https://www.healthintersections.com.au/?p=2824">FHIR JSON format questions by Graham Grieve (2018)</a> and <a href="https://chat.fhir.org/#narrow/channel/179166-implementers/topic/JSON.20Format.20for.20Primitives.20.26.20extensions">https://chat.fhir.org/#narrow/channel/179166-implementers/topic/JSON.20Format.20for.20Primitives.20.26.20extensions</a> for some interesting backstory, but ofc it is what it is at this point</p>
+
+<h3>FHIR is a ✨platform✨</h3> 
+
+<p>FHIR <a href="https://www.hl7.org/fhir/profiling.html#slicing">motivates customizing data structures and APIs</a>:
+
+</p><blockquote>
+<p>there is wide variability between jurisdictions and across the healthcare ecosystem around practices, requirements, regulations, education and what actions are feasible and/or beneficial.</p>
+
+<p>For this reason, the FHIR specification is a "platform specification" - it creates a common platform or foundation on which a variety of different solutions are implemented.</p>
+</blockquote>
+
+<p>If the point of FHIR is to be a platform that you can twist to fit whatever use case, then primitive extensions make more sense. I still don't love them because, like, do you <em>really</em> need them over normal extension, plus the gross JSON, but primitive extensions do seem more usable in the context of profiles.</p>
+
+</body></html>
+
