@@ -1,0 +1,85 @@
+<!DOCTYPE HTML>
+<html lang="en"><head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="&quot;FHIR is a standard for health care data exchange&quot;">
+    <meta name="keywords" content="FHIR, standard, healthcare, health, care, data, exchange, profile, terminology, presentation, gleam">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="&quot;FHIR is a standard for health care data exchange&quot;">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/lucy_square.svg">
+</head>
+<body>
+
+</body></html>
+
+<h1><a href="/">Correct Arity</a></h1>
+
+<h2>"FHIR is a standard for health care data exchange"</h2>
+
+<h3>Welcome to FHIR®</h3>
+
+<p>If you're like me, when you go to <a href="https://hl7.org/fhir/">hl7.org/fhir</a> and read "FHIR is a standard for health care data exchange" your eyes kind of glaze over, you need to look at a bunch of examples to get a feel for it eg AllergyIntolerance:</p>
+
+<iframe style="height: 1550px; max-width: 920px" src="https://hl7.org/fhir/allergyintolerance.html#resource"></iframe>
+
+<p>But that original description covers some interesting stuff...</p>
+
+<h3>data</h3>
+
+<p>The least controversial part is "data"...yep it's data. Also the operations you can do on the data, for example you can Create an AllergyIntolerance, Read an AllergyIntolerance, etc.<p>
+
+<h3>health care</h3>
+
+<p>Imo "health care" as a domain is quite bloated. Some resources are clearly medical: AllergyIntolerance, ImagingStudy, Medication, etc. Others health care systems need to manage despite being more administrative: Organization, Claim, Appointment. Btw here is the Claim resource:</p>
+
+<iframe style="height: 5830px; max-width: 920px" src="https://hl7.org/fhir/claim.html#resource"></iframe>
+
+<h3>standard</h3>
+
+<p>"standard" does not mean everyone uses the same data structure. Rather, FHIR is a <a href="https://www.hl7.org/fhir/profiling.html">platform</a>, meaning
+<blockquote>
+<p>this specification usually requires further adaptation to particular contexts of use. Typically, these adaptations specify:</p>
+<ul>
+ <li>Rules about which resource elements are or are not used, and what additional elements are added that are not part of the base specification</li>
+ <li>Rules about which API features are used, and how</li>
+ <li>Rules about which terminologies are used in particular elements</li>
+ <li>Descriptions of how the Resource elements and API features map to local requirements and/or implementations</li>
+</ul>
+</blockquote>
+</p>
+
+<p>Systems do this by profiling fhir, which restricts resources in ways that keep the restricted resource valid for the original. For instance the default <a href="https://hl7.org/FHIR/patient.html#resource">Patient</a> may have zero names (0..*), whereas a <a href="https://build.fhir.org/ig/HL7/US-Core/StructureDefinition-us-core-patient.html#profile">US Core Patient</a> must have at least one name (1..*). So any US Core Patient is a valid base Patient, but the reverse isn't true. A Patient with no names would not be a valid US core patient. Because FHIR is a platform for profiling, resources can have a lot of elements or very generic elements such as Observation.component, which profiles can then restrict to a smaller useful subset.</p>
+
+<p>"terminologies" means defining the set of strings a value can come from, which can be <a href="https://en.wikipedia.org/wiki/SNOMED_CT">very complex</a>.</p>
+
+<p>There are also <a href="https://www.hl7.org/fhir/implementationguide.html">implementation guides (IGs)</a>, tbh I do not fully understand everything that can go into these, but it seems like what you publish online with all your resources, rules, documentation, yada yada...</p>
+
+<p>A "standard" with this much complexity is probably necessary as there is no technical solution to the social problem of, for instance, patient names being defined differently in different places. Still it does make the spec a lot more <a href="/primitiveextension2">complicated</a> for the sake of extensibility. You want to say ugh, couldn't you all just choose something and stick to it...</p>
+
+<h3>exchange</h3>
+
+<p>FHIR is for data <em>exchange</em> as opposed to data <em>storage</em>. JSON/XML are nice for sending data from one system to another, but don't map perfectly onto a relational database. Not having a schema might make it harder to guarantee all the data is valid over the years of an application. <a href="https://hl7.org/fhir/storage.html">hl7.org/fhir/storage</a> goes into a bit more depth on this. For instance a FHIR Reference is not exactly a SQL foreign key; under <a href="https://hl7.org/fhir/storage.html#joins">managing joins</a> they say
+
+<blockquote>All the flexibility is required in various exchange scenarios, but it can present challenges for application design when building a coherent data store with resources.</blockquote>
+
+Which again the point of FHIR is exchange not storage, this is fair and probably good design for an exchange format to focus on exchange. At the same time, there's a strong urge to say "well if we're already using FHIR for exchange, why convert it into another format for storage, wouldn't it be so much simpler to use a FHIR server". Maybe you have to try just storing resource JSONs and stub your toe enough to not want to, or maybe it's a good idea, idk.</p>
+
+<p>Also on the list of things FHIR maybe should not be responsible for, but it's ohh so tempting to try FHIR for it, is data <em>presentation</em>. A <a href="https://chat.fhir.org/#narrow/channel/179166-implementers/topic/FHIR.20IGs.20with.20non-interop.20conformance.20statements">thread on chat.fhir.org</a> asks <blockquote>
+<div>
+            <p>Do folks have any examples of FHIR IGs that:</p>
+<ol>
+<li>Define conformance statements unrelated to data exchange (such as user interface requirements, logging requirements, etc.)</li>
+<li>Are successfully deployed in production</li>
+</ol>
+<p>We are having a discussion about whether it is appropriate for a FHIR IG to impose conformance requirements that are unrelated to data exchange.  I'd like to identify an examples where that was done successfully (where success = actual deployment, not just drafting a spec that gathered dust).</p>
+    </div>
+</blockquote>
+
+For context, the guy asking this is from Epic, the big US EMR company that is, if not good, at least not nearly as bad as the alternatives, and probably meets a lot of constraints that most of us don't even know exist. The Epic guy is sceptical FHIR IGs can require elements in the UI rather than stick to the exchange layer, and asks if this has ever actually worked. The strongest example of a FHIR IG poking out into the UI layer is probably <a href="https://build.fhir.org/ig/HL7/sdc/en/">Structured Data Capture</a> which defines forms in FHIR, including <a href="https://build.fhir.org/ig/HL7/sdc/en/#scope-and-purpose">rendering considerations, enhanced behavior, and automatic population</a>, and is tempting if you want to do everything in FHIR.
+</p>
+
+<h3>Sounds like fun?</h3>
+
+<p>This is the part where I plug a little ad for my thing :) if you read all this and didn't run away screaming, try <a href="https://fhir.hexdocs.pm/">fhir in gleam</a>! Is it good? Uh, other projects such as <a href="https://fire.ly/">firely</a> and <a href="https://hapifhir.io/">hapi</a> are probably better, they definitely cover more and have more real use...still, gleam is a nice little language that is (imo) suited for a nice approach to FHIR. Rather than make you check if data has a valid structure right before using it, the approach in gleam is to <a href="https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/">check if it's valid when first parsing it into a type</a>. Plus nice composable error messages. But yeah, it's a health care standard for data exchange, thrilling stuff!</p>
