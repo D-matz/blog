@@ -50,7 +50,7 @@
 </blockquote>
 </p>
 
-<p>Systems do this by profiling fhir, which restricts resources in ways that keep the restricted resource valid for the original. For instance the default <a href="https://hl7.org/FHIR/patient.html#resource">Patient</a> may have zero names (0..*), whereas a <a href="https://build.fhir.org/ig/HL7/US-Core/StructureDefinition-us-core-patient.html#profile">US Core Patient</a> must have at least one name (1..*). So any US Core Patient is a valid base Patient, but the reverse isn't true. A Patient with no names would not be a valid US core patient. Because FHIR is a platform for profiling, resources can have a lot of elements or very generic elements such as Observation.component, which profiles can then restrict to a smaller useful subset.</p>
+<p>Systems do this by profiling fhir, which restricts resources in ways that keep the restricted resource valid for the original. For instance the default <a href="https://hl7.org/FHIR/patient.html#resource">Patient</a> may have zero names (0..*), whereas a <a href="https://build.fhir.org/ig/HL7/US-Core/StructureDefinition-us-core-patient.html#profile">US Core Patient</a> must have at least one name (1..*). So any US Core Patient is a valid base Patient. But the reverse isn't true: a Patient with no names would not be a valid US core patient. Because FHIR is a platform for profiling, resources can have a lot of elements or very generic elements such as Observation.component, which profiles can then restrict to a smaller useful subset.</p>
 
 <p>"terminologies" means defining the set of strings a value can come from, which can be <a href="https://en.wikipedia.org/wiki/SNOMED_CT">very complex</a>.</p>
 
@@ -64,7 +64,7 @@
 
 <blockquote>All the flexibility is required in various exchange scenarios, but it can present challenges for application design when building a coherent data store with resources.</blockquote>
 
-Which again the point of FHIR is exchange not storage, this is fair and probably good design for an exchange format to focus on exchange. At the same time, there's a strong urge to say "well if we're already using FHIR for exchange, why convert it into another format for storage, wouldn't it be so much simpler to use a FHIR server". Maybe you have to try just storing resource JSONs and stub your toe enough to not want to, or maybe it's a good idea, idk.</p>
+Which again the point of FHIR is exchange not storage, this is fair and probably good design for an exchange format to focus on exchange. At the same time, there's a strong urge to say "well if we're already using FHIR for exchange, why convert it into another format for storage, wouldn't it be so much simpler to store data in a FHIR server". Maybe you have to try just storing resource JSONs and stub your toe enough to not want to, or maybe it's a good idea, idk.</p>
 
 <p>Also on the list of things FHIR maybe should not be responsible for, but it's ohh so tempting to try FHIR for it, is data <em>presentation</em>. A <a href="https://chat.fhir.org/#narrow/channel/179166-implementers/topic/FHIR.20IGs.20with.20non-interop.20conformance.20statements">thread on chat.fhir.org</a> asks <blockquote>
 <div>
