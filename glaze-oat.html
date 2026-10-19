@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="healthy -&gt; life, wealthy -&gt; liberty, wise -&gt; pursuit of happiness">
+    <meta name="keywords" content="Gleam, CSS, JSS, Oat, Basecoat, glaze_oat">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="healthy -&gt; life, wealthy -&gt; liberty, wise -&gt; pursuit of happiness">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/lucy_square.svg">
+	<link rel="stylesheet" href="/static/oat.min.css">
+	<script src="/static/oat.min.js" defer></script>
+</head>
+<body>
+<h1><a href="/">Correct Arity</a></h1>
+<button class="outline small" onclick="toggleTheme()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-light" role="img" aria-label="Light mode">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-dark" role="img" aria-label="Dark mode">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+
+        Switch theme
+      </button>
+<h2>Gleam - First import glaze/oat, then make it work</h2>
+<h3>First make it beautiful</h3>
+
+<p>To stop bikeshedding, quickly <code>gleam add glaze_oat</code>, then make it work!</p>
+
+<p><blockquote>make it work, then make it beautiful</blockquote>
+Seems like popular and good advice on Gleam discord (from Joe Armstrong at some point? idk the exact source). In general yeah it's true. However when writing application pages I just can't bring myself to stop bikeshedding how pages look. It really slows me down because I'm not good at CSS so it takes me hours to get it looking right (which ofc is all wasted when I later throw the whole thing away to do something else), but I'm also unable to just say ok well it works I'll make it beautiful later. It's also very demotivating for pages to look ugly. This is especially true when looking for validation for non software people (ie my wife) who care much more how it looks than, idk, if the API to get a patient returns typesafe error variants. Finally the "first make it work" approach is definitely true for algorithms and such, but maybe for UIs figuring out figuring out what to do <em>is</em> figuring out what looks good. So I've wasted a lot of time messing around with CSS...</p>
+
+<p><a href="https://glaze-oat.hexdocs.pm/">glaze_oat</a> cuts down that time by a lot by providing Lustre components from <a href="https://oat.ink/">Oat UI</a>, which are elements like button, dialog, table, etc. that come with nice premade styling and behavior.</p>
+
+<h3>Why Oat vs alternatives</h3>
+
+<p>Ofc one way is to ask chatgpt to spit out some CSS or tailwind or whatever. Honestly this tempts me, I don't really love CSS or care to understand it. That said for PotatoEMR I want to keep "no AI written code in the application itself" a simple rule (maybe not totally simple because the FHIR library's code generator is total slop, but ????).</p>
+
+<p>At first I tried classless css stylesheets, hoping I could just slap those on and write HTML, and swapping between <a href="https://www.cssbed.com/">various classless stylesheets</a> would be easy in <a href="https://csszengarden.com/">CSS zen garden</a> kind of way. But they ended up needing a lot of fiddling with specific things and didn't provide a sidebar. Also none of them seemed designed for phones. I would like to just write HTML but classless CSS feels much more for blogs and stuff than applications, oh well.</p>
+
+<p>Another alternative is <a href="https://glaze-basecoat.hexdocs.pm/">glaze_basecoat</a> which binds to <a href="https://basecoatui.com/>Basecoat</a>. Basecoat seems bigger, I like that Oat bills itself as small: "Semantic, minimal, and zero-dependencies, with just 10KB of CSS and JS". Claude informs me oat css+js is actually 11KB gzipped, but ok 1KB more won't kill you, at least they have "Light like an oat flake" as a goal. Basecoat might have some components Oat doesn't eg <a href="https://basecoatui.com/components/combobox/">Combobox</a>, Oat instead has a <a href="https://oat.ink/components/#autocomplete">TagInput</a> with autocomplete using native datalist, idk will probably see eventually if I'm missing something important with Oat but for now it seems good. I also felt like basecoat docs eg <a href="https://basecoatui.com/components/sidebar/">Sidebar</a> felt a bit AI generated:
+
+<blockquote>Sidebar uses a native <code>&lt;aside&gt;</code> next to your page content. Basecoat owns the fixed positioning, overlay behavior, active states, nested lists, and details submenu styling. Your app still owns the navigation data and current route.</blockquote>
+
+It's not terrible, there's definitely worse AI text and idk what even puts me on edge about it, maybe the use of "owns". But between that and Basecoat having <a href="https://github.com/hunvreus/basecoat/blob/main/AGENTS.md">AGENTS.md</a> whereas Oat feels 100% human, it's a point in Oat's favor. Not to malign Basecoat too much though, it's not slop and there's a real guy behind it/owning it so it could totally be a good choice.</p>
+
+<h3>Some customization required</h3>
+
+<p>Ideally you can just slap Oat on it and not have to mess around with custom styling. But maybe you do want some particular style, ok just put standard Lustre attributes. The one exception I was not happy with is hover styling, for some reason CSS can't do hover as inline style, so I have this garbage:</p>
+
+<pre><code>
+      table.container([], [
+        h.style(
+          [],
+          // can't do hover style inline
+          // oat puts hover on row, but for calendar we want it on individual cell, and not first hour cell
+          "
+              .highlight-one-cell tbody tr {
+                    &:hover {
+                        background-color: transparent;
+                    }
+                }
+              .highlight-one-cell tbody td:not(:first-child) {
+                  transition: background-color var(--transition-fast);
+                  &:hover {
+                      background-color: rgb(from var(--muted) r g b / .5)
+                  }
+              }
+          ",
+        ),
+		...
+</pre></code>
+
+<p>In general I like Oat's default of hover higlighting table row, which makes sense for patient lookup, but for selecting individual calendar cell obviously need to change that, which is all fine, I just wish you could use inline style from Lustre attribute directly on the element instead of some class. Just my rant but I can never reason about what CSS class is applied from where; tracking Gleam function composition feels much (for me).</p>
+
+</body></html>
