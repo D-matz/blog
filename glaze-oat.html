@@ -11,6 +11,16 @@
     <link rel="icon" type="image/svg+xml" href="/static/lucy_square.svg">
 	<link rel="stylesheet" href="/static/oat.min.css">
 	<script src="/static/oat.min.js" defer></script>
+	<script>
+		function toggleTheme() {
+		  var cs = document.documentElement.style.colorScheme;
+		  var isDark = cs === 'dark' || (!cs && matchMedia('(prefers-color-scheme: dark)').matches);
+		  var theme = isDark ? 'light' : 'dark';
+		  document.documentElement.style.colorScheme = theme;
+		  document.documentElement.setAttribute('data-theme', theme);
+		  localStorage.setItem('theme', theme);
+		}
+	</script>
 </head>
 <body>
 <h1><a href="/">Correct Arity</a></h1>
