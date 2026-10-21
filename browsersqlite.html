@@ -24,12 +24,14 @@
 
 <p>One case that can really upset average size, packages of Gleam bindings to some giant API, should be excluded. The right design for Gleam is a code generator that lets the user create code for only the parts of the API they need (for <a href="https://fhir.hexdocs.pm/">fhir</a> I originally made this mistake and generated types, decoders, etc for all ~150 resources...now I'm trying to make it so user can generate only what's in their profile). And for text search you might want the output of code generator, not generator itself (well, you might want some random utility fn or something from the generator itself; idk what you want).</p>
 
-<p>So let's say 10MB - 40MB of text. However to make text nicely searchable with <a href="https://sqlite.org/fts5.html"> the index will, per ChatGPT, maybe take 100% of the size of the original text, so double it to 20MB-80MB.</p>
+<p>So let's say 10MB - 40MB of text. However to make text nicely searchable with <a href="https://sqlite.org/fts5.html">FTS5</a> the index will, per ChatGPT, maybe take 100% of the size of the original text, so double it to 20MB-80MB.</p>
 
 <p>And between I don't know what I'm talking about + AI who knows, let's say fudge factor of 1-25, so 20MB-2000MB.</p>
 
 <p>2000MB = 2GB is kind of a lot but still even in this worst case, ChatGPT mentions <a href="https://www.SQLite.org/wasm/doc/trunk/persistence.md#opfs">Origin-Private FileSystem</a> as a solution. I don't know what OFPS is and ideally we wouldn't need it, but maybe if needed it would be there.</p>
 
+<p>Of course over time people will publish more Gleam packages so maybe eventually this will not be feasible — for instance, you probably couldn't fit all the Python packages in browser — but again not all packages are good; by list.filter keeping only packages I like, the size will increase slowly enough we won't hit a limit for a while</p>
+	
 <h3>But why?</h3>
 
 <p>Sometimes I get bored and read what's new on <a href="https://packages.gleam.run/">packages.gleam.run</a>, just out of curiousity, it's better than reading reddit and rotting. It might be nice to have a list of packages more filtered by if I actually like them and searchable for types/functions similar to <a href="https://gloogle.run/">gloogle</a>.</p>
