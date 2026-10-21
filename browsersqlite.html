@@ -20,7 +20,7 @@
 
 <p>Of those packages, many are slop or superseded, let's say there are only around 200-800 good packages.</p>
 
-<p>ChatGPT estimates 50KB of text per Gleam package, maybe <code>1430 lines * 35 bytes/line</code>. That might be too low, but imo package quality is inversely correlated with size.</p>
+<p>ChatGPT estimates 50KB of text per Gleam package, maybe <code>1430 lines * 35 bytes/line</code>. That might be too low, but imo package quality is inversely correlated with size. There are exceptions, eg if lustre wants to use 20k lines of code sure it's doing a lot, but generally good libraries <a href="https://en.wikipedia.org/wiki/Unix_philosophy#Do_One_Thing_and_Do_It_Well">"do one thing well"</a>; big libraries trying to do everything in the world, so much you can't even understand what it's for, are an early sign of psychosis imo (althoug I do like <a href="/layering">layered APIs</a>)</p>
 
 <p>One case that can really upset average size, packages of Gleam bindings to some giant API, should be excluded. The right design for Gleam is a code generator that lets the user create code for only the parts of the API they need (for <a href="https://fhir.hexdocs.pm/">fhir</a> I originally made this mistake and generated types, decoders, etc for all ~150 resources...now I'm trying to make it so user can generate only what's in their profile). And for text search you might want the output of code generator, not generator itself (well, you might want some random utility fn or something from the generator itself; idk what you want).</p>
 
