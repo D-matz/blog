@@ -7172,7 +7172,7 @@ function get3(url, handler) {
 async function open(bits2) {
   let worker2;
   try {
-    worker2 = new Worker("/sqlite-loader.js");
+    worker2 = new Worker("/static/jooc/sqlite-loader.js");
     const failed = new Promise((_, reject2) => {
       worker2.onerror = (e) => reject2(e.message);
     });
