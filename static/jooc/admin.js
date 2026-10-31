@@ -746,6 +746,11 @@ function insert(dict, key, value) {
   }
   return new Dict(globalTransient.size, root);
 }
+function destructiveTransientInsert(key, value, transient) {
+  const hash = getHash(key);
+  transient.root = insertIntoNode(transient, transient.root, key, value, hash, 0);
+  return transient;
+}
 function insertIntoNode(transient, node, key, value, hash, shift) {
   const data = node.data;
   const generation = transient.generation;
@@ -871,6 +876,24 @@ function hashbit(hash, shift) {
 }
 
 // build/dev/javascript/gleam_stdlib/gleam/dict.mjs
+function from_list_loop(loop$transient, loop$list) {
+  while (true) {
+    let transient = loop$transient;
+    let list = loop$list;
+    if (list instanceof Empty) {
+      return fromTransient(transient);
+    } else {
+      let rest = list.tail;
+      let key = list.head[0];
+      let value = list.head[1];
+      loop$transient = destructiveTransientInsert(key, value, transient);
+      loop$list = rest;
+    }
+  }
+}
+function from_list(list) {
+  return from_list_loop(toTransient(make()), list);
+}
 function delete$(dict, key) {
   let _pipe = toTransient(dict);
   let _pipe$1 = ((_capture) => {
@@ -2739,6 +2762,11 @@ function set_method(req, method) {
 function new$2() {
   return new Request(new Get, toList([]), "", new Https, "localhost", new None, "", new None);
 }
+function to(url) {
+  let _pipe = url;
+  let _pipe$1 = parse(_pipe);
+  return try$(_pipe$1, from_uri);
+}
 function set_scheme(req, scheme) {
   return new Request(req.method, req.headers, req.body, scheme, req.host, req.port, req.path, req.query);
 }
@@ -2747,6 +2775,30 @@ function set_host(req, host) {
 }
 function set_path(req, path) {
   return new Request(req.method, req.headers, req.body, req.scheme, req.host, req.port, path, req.query);
+}
+
+// build/dev/javascript/gleam_http/gleam/http/response.mjs
+class Response extends CustomType {
+  constructor(status, headers, body) {
+    super();
+    this.status = status;
+    this.headers = headers;
+    this.body = body;
+  }
+}
+var Response$Response = (status, headers, body) => new Response(status, headers, body);
+function get_header(response, key) {
+  return key_find(response.headers, lowercase(key));
+}
+function set_body2(response, body) {
+  return new Response(response.status, response.headers, body);
+}
+function map6(response, transform) {
+  let _pipe = response.body;
+  let _pipe$1 = transform(_pipe);
+  return ((_capture) => {
+    return set_body2(response, _capture);
+  })(_pipe$1);
 }
 // build/dev/javascript/gleam_json/gleam_json_ffi.mjs
 function json_to_string(json) {
@@ -3487,23 +3539,23 @@ function batch(effects) {
 function empty4() {
   return null;
 }
-function get2(map6, key) {
-  return map6?.get(key);
+function get2(map7, key) {
+  return map7?.get(key);
 }
-function get_or_compute(map6, key, compute) {
-  return map6?.get(key) ?? compute();
+function get_or_compute(map7, key, compute) {
+  return map7?.get(key) ?? compute();
 }
-function has_key(map6, key) {
-  return map6 && map6.has(key);
+function has_key(map7, key) {
+  return map7 && map7.has(key);
 }
-function insert2(map6, key, value) {
-  map6 ??= new Map;
-  map6.set(key, value);
-  return map6;
+function insert2(map7, key, value) {
+  map7 ??= new Map;
+  map7.set(key, value);
+  return map7;
 }
-function remove(map6, key) {
-  map6?.delete(key);
-  return map6;
+function remove(map7, key) {
+  map7?.delete(key);
+  return map7;
 }
 
 // build/dev/javascript/lustre/lustre/internals/ref.ffi.mjs
@@ -3675,7 +3727,7 @@ function element(key, namespace, tag, attributes, children, keyed_children, self
 function text(key, content) {
   return new Text(text_kind, key, content);
 }
-function map6(element2, mapper) {
+function map7(element2, mapper) {
   if (element2 instanceof Map2) {
     let child_mapper = element2.mapper;
     return new Map2(map_kind, element2.key, (handler) => {
@@ -3705,8 +3757,8 @@ function memo2(dependencies, view) {
 function ref(value) {
   return identity3(value);
 }
-function map7(element3, f) {
-  return map6(element3, f);
+function map8(element3, f) {
+  return map7(element3, f);
 }
 
 // build/dev/javascript/lustre/lustre/element/html.mjs
@@ -6024,20 +6076,20 @@ class Reconciler {
       }
     }
   }
-  #updateDebounceThrottle(map8, name, delay) {
-    const debounceOrThrottle = map8.get(name);
+  #updateDebounceThrottle(map9, name, delay) {
+    const debounceOrThrottle = map9.get(name);
     if (delay > 0) {
       if (debounceOrThrottle) {
         debounceOrThrottle.delay = delay;
       } else {
-        map8.set(name, { delay });
+        map9.set(name, { delay });
       }
     } else if (debounceOrThrottle) {
       const { timeout } = debounceOrThrottle;
       if (timeout) {
         clearTimeout(timeout);
       }
-      map8.delete(name);
+      map9.delete(name);
     }
   }
   #handleEvent(attribute3, event3) {
@@ -6281,7 +6333,7 @@ var virtualiseMap = (metaParent, domParent, node, index4) => {
   const child2 = virtualiseNextChild(meta2, domParent, node, 0);
   if (!child2)
     return null;
-  const vnode = map7(child2.vnode, (x) => x);
+  const vnode = map8(child2.vnode, (x) => x);
   return childResult(key, vnode, child2.next);
 };
 var virtualiseMemo = (meta2, domParent, node, index4) => {
@@ -6790,30 +6842,6 @@ function on_input(message) {
     return success(message(value));
   }));
 }
-
-// build/dev/javascript/gleam_http/gleam/http/response.mjs
-class Response extends CustomType {
-  constructor(status, headers, body) {
-    super();
-    this.status = status;
-    this.headers = headers;
-    this.body = body;
-  }
-}
-var Response$Response = (status, headers, body) => new Response(status, headers, body);
-function get_header(response, key) {
-  return key_find(response.headers, lowercase(key));
-}
-function set_body2(response, body) {
-  return new Response(response.status, response.headers, body);
-}
-function map8(response, transform) {
-  let _pipe = response.body;
-  let _pipe$1 = transform(_pipe);
-  return ((_capture) => {
-    return set_body2(response, _capture);
-  })(_pipe$1);
-}
 // build/dev/javascript/gleam_javascript/gleam_javascript_ffi.mjs
 class PromiseLayer {
   constructor(promise) {
@@ -6906,7 +6934,7 @@ async function read_bytes_body(response) {
     return Result$Error(FetchError$UnableToReadBody());
   }
   body = BitArray$BitArray(new Uint8Array(body));
-  return Result$Ok(map8(response, () => body));
+  return Result$Ok(map6(response, () => body));
 }
 async function read_text_body(response) {
   let body;
@@ -6915,7 +6943,7 @@ async function read_text_body(response) {
   } catch (error) {
     return Result$Error(FetchError$UnableToReadBody());
   }
-  return Result$Ok(map8(response, () => body));
+  return Result$Ok(map6(response, () => body));
 }
 function arrayToList2(array3) {
   let list4 = List$Empty();
@@ -7140,6 +7168,42 @@ function get3(url, handler) {
     return reject(err, handler);
   }
 }
+// build/dev/javascript/shared/sqlite_ffi.mjs
+async function open(bits2) {
+  let worker2;
+  try {
+    worker2 = new Worker("/sqlite-loader.js");
+    const failed = new Promise((_, reject2) => {
+      worker2.onerror = (e) => reject2(e.message);
+    });
+    const loading = globalThis.sqlite3Worker1Promiser.v2({ worker: worker2 });
+    worker2.postMessage(bits2.rawBuffer);
+    const promiser = await Promise.race([loading, failed]);
+    const { dbId } = await promiser("open", { filename: "/data.sqlite" });
+    return new Ok({ promiser, dbId });
+  } catch (e) {
+    worker2?.terminate();
+    return new Error(e?.result?.message ?? String(e));
+  }
+}
+
+// build/dev/javascript/shared/sqlite.mjs
+function perform2(task, to_msg) {
+  return from2((dispatch2) => {
+    let _block;
+    let _pipe = task();
+    let _pipe$1 = map_promise(_pipe, to_msg);
+    _block = tap(_pipe$1, dispatch2);
+    let $ = _block;
+    return;
+  });
+}
+function open2(bytes, to_msg) {
+  return perform2(() => {
+    return open(bytes);
+  }, to_msg);
+}
+
 // build/dev/javascript/shared/storage.mjs
 class Package extends CustomType {
   constructor(name, description, repository, updated_at, owners, total_downloads, recent_downloads) {
@@ -7291,16 +7355,17 @@ function put_object_effect(host, access_key_id, secret_access_key, bucket, key, 
 }
 
 // build/dev/javascript/admin/admin.mjs
-var FILEPATH = "src/admin.gleam";
+var FILEPATH = "src\\admin.gleam";
 
 class Model extends CustomType {
-  constructor(all2, already_read, upload_message, access_key_id, secret_access_key) {
+  constructor(all2, already_read, upload_message, access_key_id, secret_access_key, packages_db) {
     super();
     this.all = all2;
     this.already_read = already_read;
     this.upload_message = upload_message;
     this.access_key_id = access_key_id;
     this.secret_access_key = secret_access_key;
+    this.packages_db = packages_db;
   }
 }
 
@@ -7349,9 +7414,27 @@ class UploadSucceeded extends CustomType {
 }
 
 class UploadFailed extends CustomType {
+  constructor($0) {
+    super();
+    this[0] = $0;
+  }
 }
 
 class UserEnteredBucketInfo extends CustomType {
+  constructor($0) {
+    super();
+    this[0] = $0;
+  }
+}
+
+class ServerReturnedDatabase extends CustomType {
+  constructor($0) {
+    super();
+    this[0] = $0;
+  }
+}
+
+class BrowserOpenedDatabase extends CustomType {
   constructor($0) {
     super();
     this[0] = $0;
@@ -7396,7 +7479,7 @@ function pkg_judged_to_json(already_read) {
   ]));
 }
 function init(_) {
-  let model = new Model(toList([]), new Judged(toList([]), toList([]), toList([])), new None, new None, new None);
+  let model = new Model(toList([]), new Judged(toList([]), toList([]), toList([])), new None, new None, new None, new None);
   let get_all = get_pkgs_all("https://proxy.cors.dev/https://packages.gleam.run/api/packages", (var0) => {
     return new ReturnedPackagesAll(var0);
   });
@@ -7410,24 +7493,24 @@ function update2(model, message2) {
     let $ = message2[0];
     if ($ instanceof Ok) {
       let all2 = $[0];
-      let model$1 = new Model(all2, model.already_read, model.upload_message, model.access_key_id, model.secret_access_key);
+      let model$1 = new Model(all2, model.already_read, model.upload_message, model.access_key_id, model.secret_access_key, model.packages_db);
       return [model$1, none()];
     } else {
       let err = $[0];
-      echo(err, undefined, "src/admin.gleam", 140);
-      throw makeError("panic", FILEPATH, "admin", 141, "update", "error getting all packages", {});
+      echo(err, undefined, "src\\admin.gleam", 147);
+      throw makeError("panic", FILEPATH, "admin", 148, "update", "error getting all packages", {});
     }
   } else if (message2 instanceof ReturnedPackagesRead) {
     let $ = message2[0];
     if ($ instanceof Ok) {
       let already_read = $[0];
-      let model$1 = new Model(model.all, already_read, model.upload_message, model.access_key_id, model.secret_access_key);
+      let model$1 = new Model(model.all, already_read, model.upload_message, model.access_key_id, model.secret_access_key, model.packages_db);
       return [model$1, none()];
     } else {
       let err = $[0];
-      echo("what", undefined, "src/admin.gleam", 148);
-      echo(err, undefined, "src/admin.gleam", 149);
-      throw makeError("panic", FILEPATH, "admin", 150, "update", "error getting read packages", {});
+      echo("what", undefined, "src\\admin.gleam", 155);
+      echo(err, undefined, "src\\admin.gleam", 156);
+      throw makeError("panic", FILEPATH, "admin", 157, "update", "error getting read packages", {});
     }
   } else if (message2 instanceof UserClickedJudge) {
     let pkg = message2.pkg;
@@ -7444,23 +7527,56 @@ function update2(model, message2) {
       _block = new Judged(_record.good, _record.bad, prepend(pkg, model.already_read.unsure));
     }
     let already_read = _block;
-    let model$1 = new Model(model.all, already_read, model.upload_message, model.access_key_id, model.secret_access_key);
+    let model$1 = new Model(model.all, already_read, model.upload_message, model.access_key_id, model.secret_access_key, model.packages_db);
     return [model$1, none()];
   } else if (message2 instanceof UserClickedUpload) {
-    echo(model.access_key_id, undefined, "src/admin.gleam", 172);
+    let _block;
+    let _pipe = map2(model.all, (pkg) => {
+      return [pkg.name, pkg];
+    });
+    _block = from_list(_pipe);
+    let all_by_name = _block;
+    let update_pkg_metadata = (pkgs) => {
+      return map2(pkgs, (pkg) => {
+        let $ = (() => {
+          let _pipe$12 = all_by_name;
+          return get(_pipe$12, pkg.name);
+        })();
+        if ($ instanceof Ok) {
+          let found_pkg = $[0];
+          return found_pkg;
+        } else {
+          echo("already_read missing " + pkg.name, undefined, "src\\admin.gleam", 188);
+          return pkg;
+        }
+      });
+    };
+    let _block$1;
+    let _pipe$1 = model.already_read.good;
+    _block$1 = update_pkg_metadata(_pipe$1);
+    let good = _block$1;
+    let _block$2;
+    let _pipe$2 = model.already_read.bad;
+    _block$2 = update_pkg_metadata(_pipe$2);
+    let bad = _block$2;
+    let _block$3;
+    let _pipe$3 = model.already_read.unsure;
+    _block$3 = update_pkg_metadata(_pipe$3);
+    let unsure = _block$3;
+    let model$1 = new Model(model.all, new Judged(good, bad, unsure), model.upload_message, model.access_key_id, model.secret_access_key, model.packages_db);
     return [
-      model,
+      model$1,
       put_object_effect("21d22098b8563166bdc93387685252e4.r2.cloudflarestorage.com", (() => {
-        let _pipe = model.access_key_id;
-        return unwrap(_pipe, "no access key id");
+        let _pipe$4 = model$1.access_key_id;
+        return unwrap(_pipe$4, "no access key id");
       })(), (() => {
-        let _pipe = model.secret_access_key;
-        return unwrap(_pipe, "no secret access key");
+        let _pipe$4 = model$1.secret_access_key;
+        return unwrap(_pipe$4, "no secret access key");
       })(), "pkglist", "already_read.json", (() => {
-        let _pipe = model.already_read;
-        let _pipe$1 = pkg_judged_to_json(_pipe);
-        let _pipe$2 = to_string3(_pipe$1);
-        return bit_array_from_string(_pipe$2);
+        let _pipe$4 = model$1.already_read;
+        let _pipe$5 = pkg_judged_to_json(_pipe$4);
+        let _pipe$6 = to_string3(_pipe$5);
+        return bit_array_from_string(_pipe$6);
       })(), (var0) => {
         return new RequestBuilt(var0);
       }, "application/json")
@@ -7473,7 +7589,8 @@ function update2(model, message2) {
         if (result instanceof Ok) {
           return new UploadSucceeded;
         } else {
-          return new UploadFailed;
+          let err = result[0];
+          return new UploadFailed(err);
         }
       }))
     ];
@@ -7482,18 +7599,35 @@ function update2(model, message2) {
     let _pipe = system_time2();
     _block = to_rfc3339(_pipe, empty2);
     let now = _block;
-    let model$1 = new Model(model.all, model.already_read, new Some("good upload (" + now + ")"), model.access_key_id, model.secret_access_key);
-    return [model$1, none()];
+    let model$1 = new Model(model.all, model.already_read, new Some("good json upload (" + now + ")"), model.access_key_id, model.secret_access_key, model.packages_db);
+    let $ = to("https://bucket.correctarity.com/packages.db");
+    let req;
+    if ($ instanceof Ok) {
+      req = $[0];
+    } else {
+      throw makeError("let_assert", FILEPATH, "admin", 235, "update", "Pattern match failed, no pattern matched the value.", {
+        value: $,
+        start: 6969,
+        end: 7055,
+        pattern_start: 6980,
+        pattern_end: 6987
+      });
+    }
+    let get_db = send_bits2(set_body(req, toBitArray([])), expect_ok_response((var0) => {
+      return new ServerReturnedDatabase(var0);
+    }));
+    return [model$1, get_db];
   } else if (message2 instanceof UploadFailed) {
+    let err = message2[0];
+    echo(err, undefined, "src\\admin.gleam", 244);
     let _block;
     let _pipe = system_time2();
     _block = to_rfc3339(_pipe, empty2);
     let now = _block;
-    let model$1 = new Model(model.all, model.already_read, new Some("UPLOAD FAILED AT " + now), model.access_key_id, model.secret_access_key);
+    let model$1 = new Model(model.all, model.already_read, new Some("UPLOAD FAILED AT " + now), model.access_key_id, model.secret_access_key, model.packages_db);
     return [model$1, none()];
-  } else {
+  } else if (message2 instanceof UserEnteredBucketInfo) {
     let info = message2[0];
-    echo(split2(info, ","), undefined, "src/admin.gleam", 216);
     let _block;
     let $ = split2(info, ",");
     if ($ instanceof Empty) {
@@ -7507,16 +7641,44 @@ function update2(model, message2) {
         if ($2 instanceof Empty) {
           let a2 = $.head;
           let b = $1.head;
-          _block = new Model(model.all, model.already_read, model.upload_message, new Some(a2), new Some(b));
+          _block = new Model(model.all, model.already_read, model.upload_message, new Some(a2), new Some(b), model.packages_db);
         } else {
           _block = model;
         }
       }
     }
     let model$1 = _block;
-    echo(model$1.access_key_id, undefined, "src/admin.gleam", 222);
-    echo(model$1.secret_access_key, undefined, "src/admin.gleam", 223);
     return [model$1, none()];
+  } else if (message2 instanceof ServerReturnedDatabase) {
+    let $ = message2[0];
+    if ($ instanceof Ok) {
+      let resp_db = $[0];
+      let open_db = open2(resp_db.body, (var0) => {
+        return new BrowserOpenedDatabase(var0);
+      });
+      return [model, open_db];
+    } else {
+      let err = $[0];
+      echo(err, undefined, "src\\admin.gleam", 259);
+      let _block;
+      let _pipe = system_time2();
+      _block = to_rfc3339(_pipe, empty2);
+      let now = _block;
+      let model$1 = new Model(model.all, model.already_read, new Some("DATABASE DOWNLOAD FAILED AT " + now), model.access_key_id, model.secret_access_key, model.packages_db);
+      return [model$1, none()];
+    }
+  } else {
+    let $ = message2[0];
+    if ($ instanceof Ok) {
+      let packages_db = $[0];
+      let model$1 = new Model(model.all, model.already_read, new Some("downloaded packages db"), model.access_key_id, model.secret_access_key, new Some(packages_db));
+      echo(model$1, undefined, "src\\admin.gleam", 289);
+      return [model$1, none()];
+    } else {
+      let err = $[0];
+      let model$1 = new Model(model.all, model.already_read, new Some("database downlaoded but failed to open: " + err), model.access_key_id, model.secret_access_key, model.packages_db);
+      return [model$1, none()];
+    }
   }
 }
 function view(model) {
@@ -7592,7 +7754,7 @@ function main2() {
   let app = application(init, update2, view);
   let $ = start4(app, "#app", undefined);
   if (!($ instanceof Ok)) {
-    throw makeError("let_assert", FILEPATH, "admin", 32, "main", "Pattern match failed, no pattern matched the value.", { value: $, start: 870, end: 919, pattern_start: 881, pattern_end: 886 });
+    throw makeError("let_assert", FILEPATH, "admin", 35, "main", "Pattern match failed, no pattern matched the value.", { value: $, start: 945, end: 994, pattern_start: 956, pattern_end: 961 });
   }
   return;
 }
