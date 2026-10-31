@@ -7729,9 +7729,25 @@ function update2(model, message2) {
     if (db_response instanceof Ok) {
       let db_pkg_rows = db_response[0];
       echo(db_pkg_rows, undefined, "src\\admin.gleam", 307);
-      echo(run(db_pkg_rows, list2(field("name", string2, success))), undefined, "src\\admin.gleam", 308);
-      echo(run(db_pkg_rows, list2(at(toList([0]), string2))), undefined, "src\\admin.gleam", 312);
-      return [model, none()];
+      let db_pkg_names = echo(run(db_pkg_rows, list2(at(toList([0]), string2))), undefined, "src\\admin.gleam", 309);
+      if (db_pkg_names instanceof Ok) {
+        let db_pkg_names$1 = db_pkg_names[0];
+        let db_pkg_names$2 = from_list2(db_pkg_names$1);
+        let _block;
+        let _pipe = model.already_read.good;
+        _block = filter(_pipe, (pkg) => {
+          return contains(db_pkg_names$2, pkg.name);
+        });
+        let from_json_add_to_db = _block;
+        echo(from_json_add_to_db, undefined, "src\\admin.gleam", 325);
+        throw makeError("panic", FILEPATH, "admin", 326, "update", "ok cool", {});
+        throw makeError("todo", FILEPATH, "admin", 327, "update", "`todo` expression evaluated. This code has not yet been implemented.", {});
+      } else {
+        let err = db_pkg_names[0];
+        echo(err, undefined, "src\\admin.gleam", 315);
+        let model$1 = new Model(model.all, model.already_read, new Some("error decoding names"), model.access_key_id, model.secret_access_key, model.packages_db);
+        return [model$1, none()];
+      }
     } else {
       let err = db_response[0];
       let model$1 = new Model(model.all, model.already_read, new Some(err), model.access_key_id, model.secret_access_key, model.packages_db);
