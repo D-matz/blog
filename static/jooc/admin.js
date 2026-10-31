@@ -1645,41 +1645,6 @@ function at(path, inner) {
 function field(field_name, field_decoder, next) {
   return subfield(toList([field_name]), field_decoder, next);
 }
-function optional_field(key, default$, field_decoder, next) {
-  return new Decoder((data) => {
-    let _block;
-    let _block$1;
-    let $1 = index2(data, key);
-    if ($1 instanceof Ok) {
-      let $22 = $1[0];
-      if ($22 instanceof Some) {
-        let data$1 = $22[0];
-        _block$1 = field_decoder.function(data$1);
-      } else {
-        _block$1 = [default$, toList([])];
-      }
-    } else {
-      let kind = $1[0];
-      _block$1 = [
-        default$,
-        toList([new DecodeError(kind, classify_dynamic(data), toList([]))])
-      ];
-    }
-    let _pipe = _block$1;
-    _block = push_path(_pipe, toList([key]));
-    let $ = _block;
-    let out;
-    let errors1;
-    out = $[0];
-    errors1 = $[1];
-    let $2 = next(out).function(data);
-    let out$1;
-    let errors2;
-    out$1 = $2[0];
-    errors2 = $2[1];
-    return [out$1, append(errors1, errors2)];
-  });
-}
 
 // build/dev/javascript/gleam_stdlib/gleam_stdlib.mjs
 function identity(x) {
@@ -7300,7 +7265,7 @@ function package_decoder() {
           return field("owners", list2(string2), (owners) => {
             return field("total-downloads", int2, (total_downloads) => {
               return field("recent-downloads", int2, (recent_downloads) => {
-                return optional_field("latest-version", new None, optional(string2), (latest_version) => {
+                return field("latest-version", string2, (latest_version) => {
                   return success(new Package(name, description, repository, updated_at, owners, total_downloads, recent_downloads, latest_version));
                 });
               });
@@ -7352,13 +7317,7 @@ function package_to_json(package$) {
     ["owners", array2(owners, string3)],
     ["total-downloads", int3(total_downloads)],
     ["recent-downloads", int3(recent_downloads)],
-    [
-      "latest-version",
-      string3((() => {
-        let _pipe = latest_version;
-        return unwrap(_pipe, "");
-      })())
-    ]
+    ["latest-version", string3(latest_version)]
   ]));
 }
 // build/dev/javascript/admin/slop_ffi.mjs
@@ -7791,7 +7750,7 @@ function update2(model, message2) {
           })() === false;
         });
         _block = map2(_pipe$1, (pkg) => {
-          let get_pkg_url = "https://repo.hex.pm/tarballs/" + pkg.name + "-" + "todo" + ".tar";
+          let get_pkg_url = "https://repo.hex.pm/tarballs/" + pkg.name + "-" + pkg.latest_version + ".tar";
           return get_pkg_url;
         });
         let from_json_add_to_db = _block;
