@@ -7750,12 +7750,15 @@ function update2(model, message2) {
           })() === false;
         });
         _block = map2(_pipe$1, (pkg) => {
-          let get_pkg_url = "https://repo.hex.pm/tarballs/" + pkg.name + "-" + pkg.latest_version + ".tar";
+          let get_pkg_url = "https://repo.hex.pm/tarballs/" + pkg.name + "-" + pkg.latest_version + (() => {
+            let _pipe$2 = ".tar";
+            return echo(_pipe$2, undefined, "src\\admin.gleam", 336);
+          })();
           return get_pkg_url;
         });
         let from_json_add_to_db = _block;
-        throw makeError("panic", FILEPATH, "admin", 337, "update", "ok cool", {});
-        throw makeError("todo", FILEPATH, "admin", 338, "update", "`todo` expression evaluated. This code has not yet been implemented.", {});
+        throw makeError("panic", FILEPATH, "admin", 338, "update", "ok cool", {});
+        throw makeError("todo", FILEPATH, "admin", 339, "update", "`todo` expression evaluated. This code has not yet been implemented.", {});
       } else {
         let err = db_pkg_names[0];
         echo(err, undefined, "src\\admin.gleam", 315);
