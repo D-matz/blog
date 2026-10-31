@@ -7242,7 +7242,7 @@ function query2(db, sql, to_msg) {
 
 // build/dev/javascript/shared/storage.mjs
 class Package extends CustomType {
-  constructor(name, description, repository, updated_at, owners, total_downloads, recent_downloads) {
+  constructor(name, description, repository, updated_at, owners, total_downloads, recent_downloads, latest_version) {
     super();
     this.name = name;
     this.description = description;
@@ -7251,6 +7251,7 @@ class Package extends CustomType {
     this.owners = owners;
     this.total_downloads = total_downloads;
     this.recent_downloads = recent_downloads;
+    this.latest_version = latest_version;
   }
 }
 function package_decoder() {
@@ -7264,7 +7265,9 @@ function package_decoder() {
           return field("owners", list2(string2), (owners) => {
             return field("total-downloads", int2, (total_downloads) => {
               return field("recent-downloads", int2, (recent_downloads) => {
-                return success(new Package(name, description, repository, updated_at, owners, total_downloads, recent_downloads));
+                return field("latest-version", optional(string2), (latest_version) => {
+                  return success(new Package(name, description, repository, updated_at, owners, total_downloads, recent_downloads, latest_version));
+                });
               });
             });
           });
@@ -7287,6 +7290,7 @@ function package_to_json(package$) {
   let owners;
   let total_downloads;
   let recent_downloads;
+  let latest_version;
   name = package$.name;
   description = package$.description;
   repository = package$.repository;
@@ -7294,6 +7298,7 @@ function package_to_json(package$) {
   owners = package$.owners;
   total_downloads = package$.total_downloads;
   recent_downloads = package$.recent_downloads;
+  latest_version = package$.latest_version;
   return object2(toList([
     ["name", string3(name)],
     ["description", string3(description)],
@@ -7311,7 +7316,14 @@ function package_to_json(package$) {
     ["updated-at", json_timestamp(updated_at)],
     ["owners", array2(owners, string3)],
     ["total-downloads", int3(total_downloads)],
-    ["recent-downloads", int3(recent_downloads)]
+    ["recent-downloads", int3(recent_downloads)],
+    [
+      "latest-version",
+      string3((() => {
+        let _pipe = latest_version;
+        return unwrap(_pipe, "");
+      })())
+    ]
   ]));
 }
 // build/dev/javascript/admin/slop_ffi.mjs
@@ -7737,16 +7749,19 @@ function update2(model, message2) {
         echo(model.already_read.good, undefined, "src\\admin.gleam", 323);
         let _block;
         let _pipe = model.already_read.good;
-        _block = filter(_pipe, (pkg) => {
+        let _pipe$1 = filter(_pipe, (pkg) => {
           return (() => {
-            let _pipe$1 = db_pkg_names$2;
-            return contains(_pipe$1, pkg.name);
+            let _pipe$12 = db_pkg_names$2;
+            return contains(_pipe$12, pkg.name);
           })() === false;
         });
+        _block = map2(_pipe$1, (pkg) => {
+          let get_pkg_url = "https://repo.hex.pm/tarballs/" + pkg.name + "-" + "todo" + ".tar";
+          return get_pkg_url;
+        });
         let from_json_add_to_db = _block;
-        echo(from_json_add_to_db, undefined, "src\\admin.gleam", 329);
-        throw makeError("panic", FILEPATH, "admin", 330, "update", "ok cool", {});
-        throw makeError("todo", FILEPATH, "admin", 331, "update", "`todo` expression evaluated. This code has not yet been implemented.", {});
+        throw makeError("panic", FILEPATH, "admin", 337, "update", "ok cool", {});
+        throw makeError("todo", FILEPATH, "admin", 338, "update", "`todo` expression evaluated. This code has not yet been implemented.", {});
       } else {
         let err = db_pkg_names[0];
         echo(err, undefined, "src\\admin.gleam", 315);
