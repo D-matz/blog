@@ -1628,6 +1628,20 @@ function subfield(field_path, field_decoder, next) {
     return [out$1, append(errors1, errors2)];
   });
 }
+function at(path, inner) {
+  return new Decoder((data) => {
+    return index3(path, toList([]), inner.function, data, (data2, position) => {
+      let $ = inner.function(data2);
+      let default$;
+      default$ = $[0];
+      let _pipe = [
+        default$,
+        toList([new DecodeError("Field", "Nothing", toList([]))])
+      ];
+      return push_path(_pipe, reverse(position));
+    });
+  });
+}
 function field(field_name, field_decoder, next) {
   return subfield(toList([field_name]), field_decoder, next);
 }
@@ -7186,6 +7200,23 @@ async function open(bits2) {
     return new Error(e?.result?.message ?? String(e));
   }
 }
+async function execute(db, sql, read) {
+  try {
+    const response = await db.promiser({
+      type: "exec",
+      dbId: db.dbId,
+      args: {
+        sql,
+        rowMode: "array",
+        resultRows: read ? [] : undefined
+      }
+    });
+    return new Ok(read ? response.result.resultRows : undefined);
+  } catch (e) {
+    return new Error(e?.result?.message ?? String(e));
+  }
+}
+var query = (db, sql) => execute(db, sql, true);
 
 // build/dev/javascript/shared/sqlite.mjs
 function perform2(task, to_msg) {
@@ -7201,6 +7232,11 @@ function perform2(task, to_msg) {
 function open2(bytes, to_msg) {
   return perform2(() => {
     return open(bytes);
+  }, to_msg);
+}
+function query2(db, sql, to_msg) {
+  return perform2(() => {
+    return query(db, sql);
   }, to_msg);
 }
 
@@ -7441,6 +7477,13 @@ class BrowserOpenedDatabase extends CustomType {
   }
 }
 
+class DatabaseReturnedNames extends CustomType {
+  constructor($0) {
+    super();
+    this[0] = $0;
+  }
+}
+
 class Good extends CustomType {
 }
 
@@ -7497,8 +7540,8 @@ function update2(model, message2) {
       return [model$1, none()];
     } else {
       let err = $[0];
-      echo(err, undefined, "src\\admin.gleam", 147);
-      throw makeError("panic", FILEPATH, "admin", 148, "update", "error getting all packages", {});
+      echo(err, undefined, "src\\admin.gleam", 149);
+      throw makeError("panic", FILEPATH, "admin", 150, "update", "error getting all packages", {});
     }
   } else if (message2 instanceof ReturnedPackagesRead) {
     let $ = message2[0];
@@ -7508,9 +7551,9 @@ function update2(model, message2) {
       return [model$1, none()];
     } else {
       let err = $[0];
-      echo("what", undefined, "src\\admin.gleam", 155);
-      echo(err, undefined, "src\\admin.gleam", 156);
-      throw makeError("panic", FILEPATH, "admin", 157, "update", "error getting read packages", {});
+      echo("what", undefined, "src\\admin.gleam", 157);
+      echo(err, undefined, "src\\admin.gleam", 158);
+      throw makeError("panic", FILEPATH, "admin", 159, "update", "error getting read packages", {});
     }
   } else if (message2 instanceof UserClickedJudge) {
     let pkg = message2.pkg;
@@ -7546,7 +7589,7 @@ function update2(model, message2) {
           let found_pkg = $[0];
           return found_pkg;
         } else {
-          echo("already_read missing " + pkg.name, undefined, "src\\admin.gleam", 188);
+          echo("already_read missing " + pkg.name, undefined, "src\\admin.gleam", 190);
           return pkg;
         }
       });
@@ -7605,12 +7648,12 @@ function update2(model, message2) {
     if ($ instanceof Ok) {
       req = $[0];
     } else {
-      throw makeError("let_assert", FILEPATH, "admin", 235, "update", "Pattern match failed, no pattern matched the value.", {
+      throw makeError("let_assert", FILEPATH, "admin", 237, "update", "Pattern match failed, no pattern matched the value.", {
         value: $,
-        start: 6969,
-        end: 7055,
-        pattern_start: 6980,
-        pattern_end: 6987
+        start: 7054,
+        end: 7140,
+        pattern_start: 7065,
+        pattern_end: 7072
       });
     }
     let get_db = send_bits2(set_body(req, toBitArray([])), expect_ok_response((var0) => {
@@ -7619,7 +7662,7 @@ function update2(model, message2) {
     return [model$1, get_db];
   } else if (message2 instanceof UploadFailed) {
     let err = message2[0];
-    echo(err, undefined, "src\\admin.gleam", 244);
+    echo(err, undefined, "src\\admin.gleam", 247);
     let _block;
     let _pipe = system_time2();
     _block = to_rfc3339(_pipe, empty2);
@@ -7659,7 +7702,7 @@ function update2(model, message2) {
       return [model, open_db];
     } else {
       let err = $[0];
-      echo(err, undefined, "src\\admin.gleam", 259);
+      echo(err, undefined, "src\\admin.gleam", 262);
       let _block;
       let _pipe = system_time2();
       _block = to_rfc3339(_pipe, empty2);
@@ -7667,16 +7710,31 @@ function update2(model, message2) {
       let model$1 = new Model(model.all, model.already_read, new Some("DATABASE DOWNLOAD FAILED AT " + now), model.access_key_id, model.secret_access_key, model.packages_db);
       return [model$1, none()];
     }
-  } else {
+  } else if (message2 instanceof BrowserOpenedDatabase) {
     let $ = message2[0];
     if ($ instanceof Ok) {
       let packages_db = $[0];
       let model$1 = new Model(model.all, model.already_read, new Some("downloaded packages db"), model.access_key_id, model.secret_access_key, new Some(packages_db));
-      echo(model$1, undefined, "src\\admin.gleam", 289);
-      return [model$1, none()];
+      let get_db_pkg_names = query2(packages_db, "SELECT name FROM packages", (var0) => {
+        return new DatabaseReturnedNames(var0);
+      });
+      return [model$1, get_db_pkg_names];
     } else {
       let err = $[0];
       let model$1 = new Model(model.all, model.already_read, new Some("database downlaoded but failed to open: " + err), model.access_key_id, model.secret_access_key, model.packages_db);
+      return [model$1, none()];
+    }
+  } else {
+    let db_response = message2[0];
+    if (db_response instanceof Ok) {
+      let db_pkg_rows = db_response[0];
+      echo(db_pkg_rows, undefined, "src\\admin.gleam", 307);
+      echo(run(db_pkg_rows, list2(field("name", string2, success))), undefined, "src\\admin.gleam", 308);
+      echo(run(db_pkg_rows, list2(at(toList([0]), string2))), undefined, "src\\admin.gleam", 312);
+      return [model, none()];
+    } else {
+      let err = db_response[0];
+      let model$1 = new Model(model.all, model.already_read, new Some(err), model.access_key_id, model.secret_access_key, model.packages_db);
       return [model$1, none()];
     }
   }
@@ -7754,7 +7812,7 @@ function main2() {
   let app = application(init, update2, view);
   let $ = start4(app, "#app", undefined);
   if (!($ instanceof Ok)) {
-    throw makeError("let_assert", FILEPATH, "admin", 35, "main", "Pattern match failed, no pattern matched the value.", { value: $, start: 945, end: 994, pattern_start: 956, pattern_end: 961 });
+    throw makeError("let_assert", FILEPATH, "admin", 36, "main", "Pattern match failed, no pattern matched the value.", { value: $, start: 981, end: 1030, pattern_start: 992, pattern_end: 997 });
   }
   return;
 }
