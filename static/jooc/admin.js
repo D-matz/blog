@@ -7733,6 +7733,8 @@ function update2(model, message2) {
       if (db_pkg_names instanceof Ok) {
         let db_pkg_names$1 = db_pkg_names[0];
         let db_pkg_names$2 = from_list2(db_pkg_names$1);
+        echo("ok", undefined, "src\\admin.gleam", 322);
+        echo(model.already_read.good, undefined, "src\\admin.gleam", 323);
         let _block;
         let _pipe = model.already_read.good;
         _block = filter(_pipe, (pkg) => {
@@ -7742,9 +7744,9 @@ function update2(model, message2) {
           })() === false;
         });
         let from_json_add_to_db = _block;
-        echo(from_json_add_to_db, undefined, "src\\admin.gleam", 327);
-        throw makeError("panic", FILEPATH, "admin", 328, "update", "ok cool", {});
-        throw makeError("todo", FILEPATH, "admin", 329, "update", "`todo` expression evaluated. This code has not yet been implemented.", {});
+        echo(from_json_add_to_db, undefined, "src\\admin.gleam", 329);
+        throw makeError("panic", FILEPATH, "admin", 330, "update", "ok cool", {});
+        throw makeError("todo", FILEPATH, "admin", 331, "update", "`todo` expression evaluated. This code has not yet been implemented.", {});
       } else {
         let err = db_pkg_names[0];
         echo(err, undefined, "src\\admin.gleam", 315);
