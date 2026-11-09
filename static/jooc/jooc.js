@@ -24348,11 +24348,11 @@ function parse_code(code2, search_text) {
       _block = 0;
     } else {
       let n$1 = $;
-      if (n$1 <= 12) {
+      if (n$1 <= 9) {
         _block = 1;
       } else {
         let n$2 = $;
-        if (n$2 <= 14) {
+        if (n$2 <= 13) {
           _block = 2;
         } else {
           let n$3 = $;
