@@ -23992,7 +23992,7 @@ function similar_pkg_names(query3, pkgs) {
             if (n$4 <= 50) {
               _block = 4;
             } else {
-              throw makeError("panic", FILEPATH3, "jooc", 528, "similar_pkg_names", "xdd", {});
+              throw makeError("panic", FILEPATH3, "jooc", 570, "similar_pkg_names", "xdd", {});
             }
           }
         }
@@ -24196,15 +24196,14 @@ function text_to_query(text4, model) {
         } else {
           let _block$1;
           let _pipe = text$1;
-          let _pipe$1 = string_length(_pipe);
-          _block$1 = identity(_pipe$1);
+          _block$1 = string_length(_pipe);
           let bm25_threshold = _block$1;
-          let bm25_threshold$1 = float_to_string(-0.75 * bm25_threshold - 4);
+          let bm25_threshold$1 = float_to_string(8 - identity(bm25_threshold) * 1.5);
           _block = query2(db, code_and_package, prepend(text$1, prepend(query_to_trigrams(text$1), prepend((() => {
-            let _pipe$2 = text$1;
-            let _pipe$3 = similar_pkg_names(_pipe$2, model$1.all_pkg_names);
-            let _pipe$4 = array2(_pipe$3, string3);
-            return to_string3(_pipe$4);
+            let _pipe$1 = text$1;
+            let _pipe$2 = similar_pkg_names(_pipe$1, model$1.all_pkg_names);
+            let _pipe$3 = array2(_pipe$2, string3);
+            return to_string3(_pipe$3);
           })(), prepend(bm25_threshold$1, List$Empty$const)))), (_capture) => {
             return new SqliteReturnedQuery(Query$QueryFuzzy$const, model$1.search_text, _capture);
           });
@@ -24319,6 +24318,16 @@ function canonical_result_decoder() {
     });
   });
 }
+function fuzzy_contains(text4, search, distance) {
+  let window3 = slice(text4, 0, string_length(search));
+  return levenshtein(window3, search) <= distance || (() => {
+    if (text4 === "") {
+      return false;
+    } else {
+      return fuzzy_contains(drop_start(text4, 1), search, distance);
+    }
+  })();
+}
 function parse_code_loop(seen, rest, search_text, acceptable_distance) {
   return try$(split_once(rest, "\x02"), (_use0) => {
     let before = _use0[0];
@@ -24329,9 +24338,20 @@ function parse_code_loop(seen, rest, search_text, acceptable_distance) {
     let _pipe$1 = replace(_pipe, "\x02", "");
     _block = replace(_pipe$1, "\x03", "");
     let text4 = _block;
-    let match = slice(text4, 0, string_length(search_text));
-    let $ = levenshtein(lowercase(match), search_text);
-    let d = $;
+    let len = string_length(search_text);
+    let $ = range(max(len - acceptable_distance, 1), len + acceptable_distance + 1, ["", 999], (best, l) => {
+      let m = slice(text4, 0, l);
+      let d2 = levenshtein(lowercase(m), search_text);
+      let $1 = d2 <= best[1];
+      if ($1) {
+        return [m, d2];
+      } else {
+        return best;
+      }
+    });
+    let match = $[0];
+    let distance = $[1];
+    let d = distance;
     if (d <= acceptable_distance) {
       return new Ok(new FuzzyMatch(seen$1, match, drop_start(text4, string_length(match))));
     } else {
@@ -24402,7 +24422,46 @@ function search_result_decoder(search_text) {
                           return success(new Error(undefined));
                         }
                       } else {
-                        return success(new Ok(new SearchResult(package$, List$Empty$const)));
+                        let search = lowercase(search_text);
+                        let _block;
+                        let $ = string_length(search_text);
+                        {
+                          let n = $;
+                          if (n <= 4) {
+                            _block = 1;
+                          } else {
+                            let n$1 = $;
+                            if (n$1 <= 9) {
+                              _block = 2;
+                            } else {
+                              let n$2 = $;
+                              if (n$2 <= 13) {
+                                _block = 3;
+                              } else {
+                                let n$3 = $;
+                                if (n$3 <= 20) {
+                                  _block = 4;
+                                } else {
+                                  let n$4 = $;
+                                  if (n$4 <= 50) {
+                                    _block = 5;
+                                  } else {
+                                    _block = 6;
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                        let acceptable_distance = _block;
+                        let matches2 = !(similar_pkg_names(search_text, prepend(name2, List$Empty$const)) instanceof Empty) || any(prepend(name2, prepend(owners, prepend(description, List$Empty$const))), (field3) => {
+                          return fuzzy_contains(lowercase(field3), search, acceptable_distance);
+                        });
+                        if (matches2) {
+                          return success(new Ok(new SearchResult(package$, List$Empty$const)));
+                        } else {
+                          return success(new Error(undefined));
+                        }
                       }
                     });
                   });
