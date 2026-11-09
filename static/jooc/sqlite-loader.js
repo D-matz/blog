@@ -1,4 +1,4 @@
-importScripts("sqlite3.js");
+importScripts("/static/jooc/sqlite3.js");
 
 self.onmessage = async ({ data: bytes }) => {
   try {
