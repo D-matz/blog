@@ -4602,12 +4602,6 @@ function wbr(attrs) {
 function img(attrs) {
   return element2("img", attrs, empty_list);
 }
-function col(attrs) {
-  return element2("col", attrs, empty_list);
-}
-function colgroup(attrs, children) {
-  return element2("colgroup", attrs, children);
-}
 function table(attrs, children) {
   return element2("table", attrs, children);
 }
@@ -23750,12 +23744,15 @@ function code_snippet(snippet) {
     }
   })()));
 }
-function td2(children) {
-  return td(prepend(styles(prepend(["padding", "0.75rem 1rem 0 0"], prepend(["vertical-align", "top"], prepend(["overflow-wrap", "anywhere"], List$Empty$const)))), List$Empty$const), children);
+function td2(children, desktop_only) {
+  return td(prepend(classes(prepend(["desktop-only", desktop_only], List$Empty$const)), prepend(styles(prepend(["padding", "0.75rem 1rem 0 0"], prepend(["vertical-align", "top"], prepend(["overflow-wrap", "anywhere"], List$Empty$const)))), List$Empty$const)), children);
 }
 function view_result(result, time_ago) {
   let package$ = result.package;
-  return tbody(List$Empty$const, prepend(tr(List$Empty$const, prepend(td2(prepend(span(prepend(style("font-size", "1.25rem"), List$Empty$const), prepend(text3(package$.name), prepend(wbr(List$Empty$const), prepend(text3("@" + package$.latest_version), List$Empty$const)))), List$Empty$const)), prepend(td2(prepend(text3(join(package$.owners, ", ")), List$Empty$const)), prepend(td2(prepend(div(prepend(styles(prepend(["display", "flex"], prepend(["flex-wrap", "wrap"], prepend(["gap", "0.25rem 0.75rem"], List$Empty$const)))), List$Empty$const), prepend(link("https://" + replace(package$.name, "_", "-") + ".hexdocs.pm", "docs"), prepend((() => {
+  let updated = text3(format(time_ago, package$.updated_at));
+  let author = text3(join(package$.owners, ", "));
+  let downloads = text3(to_string(package$.total_downloads));
+  return tbody(List$Empty$const, prepend(tr(List$Empty$const, prepend(td2(prepend(div(prepend(style("font-size", "1.25rem"), List$Empty$const), prepend(text3(package$.name), prepend(wbr(List$Empty$const), prepend(text3("@" + package$.latest_version), List$Empty$const)))), prepend(span(prepend(class$("mobile-only"), List$Empty$const), prepend(author, List$Empty$const)), List$Empty$const)), false), prepend(td2(prepend(author, List$Empty$const), true), prepend(td2(prepend(div(prepend(styles(prepend(["display", "flex"], prepend(["flex-wrap", "wrap"], prepend(["gap", "0.25rem 0.75rem"], List$Empty$const)))), List$Empty$const), prepend(link("https://" + replace(package$.name, "_", "-") + ".hexdocs.pm", "docs"), prepend((() => {
     let $ = package$.repository;
     if ($ instanceof Some) {
       let url = $[0];
@@ -23763,10 +23760,10 @@ function view_result(result, time_ago) {
     } else {
       return none2();
     }
-  })(), prepend(link("https://hex.pm/packages/" + package$.name, "hex"), List$Empty$const)))), List$Empty$const)), prepend(td2(prepend(text3(format(time_ago, package$.updated_at)), List$Empty$const)), prepend(td2(prepend(text3(to_string(package$.total_downloads)), List$Empty$const)), List$Empty$const)))))), prepend(tr(List$Empty$const, prepend(td(prepend(colspan(5), prepend(styles(prepend(["padding", "0.25rem 0 0.75rem"], prepend(["border-bottom", "1px solid #3a3a3a"], List$Empty$const))), List$Empty$const)), prepend(p(prepend(style("margin", "0"), List$Empty$const), prepend(text3(package$.description), List$Empty$const)), map2(result.snippet, code_snippet))), List$Empty$const)), List$Empty$const)));
+  })(), prepend(link("https://hex.pm/packages/" + package$.name, "hex"), List$Empty$const)))), List$Empty$const), false), prepend(td2(prepend(updated, List$Empty$const), true), prepend(td2(prepend(downloads, List$Empty$const), true), List$Empty$const)))))), prepend(tr(List$Empty$const, prepend(td(prepend(colspan(5), prepend(styles(prepend(["padding", "0.25rem 0 0.75rem"], prepend(["border-bottom", "1px solid #3a3a3a"], List$Empty$const))), List$Empty$const)), prepend(p(prepend(style("margin", "0"), List$Empty$const), prepend(text3(package$.description), prepend(span(prepend(class$("mobile-only"), List$Empty$const), prepend(text3("updated "), prepend(updated, prepend(text3(", "), prepend(downloads, prepend(text3(" downloads"), List$Empty$const)))))), List$Empty$const))), map2(result.snippet, code_snippet))), List$Empty$const)), List$Empty$const)));
 }
-function th2(label) {
-  return th(prepend(styles(prepend(["text-align", "left"], prepend(["padding", "0.5rem 1rem 0.5rem 0"], prepend(["border-bottom", "1px solid #3a3a3a"], List$Empty$const)))), List$Empty$const), prepend(text3(label), List$Empty$const));
+function th2(label, desktop_only) {
+  return th(prepend(styles(prepend(["text-align", "left"], prepend(["padding", "0.5rem 1rem 0.5rem 0"], prepend(["border-bottom", "1px solid #3a3a3a"], List$Empty$const)))), prepend(classes(prepend(["desktop-only", desktop_only], List$Empty$const)), List$Empty$const)), prepend(text3(label), List$Empty$const));
 }
 function view_results(model, time_ago) {
   let $ = model.database;
@@ -23780,9 +23777,9 @@ function view_results(model, time_ago) {
             return p(prepend(style("margin", "0"), List$Empty$const), prepend(text3("No matching packages found here, but this is not a complete index of all gleam packages. Maybe try "), prepend(link("https://packages.gleam.run?search=" + model.search_text, "https://packages.gleam.run?search=" + model.search_text), List$Empty$const)));
           } else {
             let search_results = $2;
-            return table(prepend(styles(prepend(["width", "100%"], prepend(["table-layout", "fixed"], prepend(["border-collapse", "collapse"], List$Empty$const)))), List$Empty$const), prepend(colgroup(List$Empty$const, prepend(col(prepend(style("width", "30%"), List$Empty$const)), prepend(col(prepend(style("width", "20%"), List$Empty$const)), prepend(col(prepend(style("width", "20%"), List$Empty$const)), prepend(col(prepend(style("width", "17%"), List$Empty$const)), prepend(col(prepend(style("width", "13%"), List$Empty$const)), List$Empty$const)))))), prepend(thead(List$Empty$const, prepend(tr(List$Empty$const, prepend(th2("package"), prepend(th2("author"), prepend(th2("links"), prepend(th2("updated"), prepend(th2("downloads"), List$Empty$const)))))), List$Empty$const)), map2(search_results, (search_result) => {
+            return table(prepend(styles(prepend(["width", "100%"], prepend(["border-collapse", "collapse"], List$Empty$const))), List$Empty$const), prepend(thead(List$Empty$const, prepend(tr(List$Empty$const, prepend(th2("package", false), prepend(th2("author", true), prepend(th2("links", false), prepend(th2("updated", true), prepend(th2("downloads", true), List$Empty$const)))))), List$Empty$const)), map2(search_results, (search_result) => {
               return view_result(search_result, time_ago);
-            }))));
+            })));
           }
         })(), prepend(footer(prepend(style("padding-top", "10px"), prepend(style("padding-bottom", "10px"), List$Empty$const)), toList([
           text3("This includes only Gleam packages that spark joy for me, i.e. not all packages are included. This package list is "),
@@ -23811,9 +23808,9 @@ function view_results(model, time_ago) {
           return p(prepend(style("margin", "0"), List$Empty$const), prepend(text3("No matching packages found here, but this is not a complete index of all gleam packages. Maybe try "), prepend(link("https://packages.gleam.run?search=" + model.search_text, "https://packages.gleam.run?search=" + model.search_text), List$Empty$const)));
         } else {
           let search_results = $2;
-          return table(prepend(styles(prepend(["width", "100%"], prepend(["table-layout", "fixed"], prepend(["border-collapse", "collapse"], List$Empty$const)))), List$Empty$const), prepend(colgroup(List$Empty$const, prepend(col(prepend(style("width", "30%"), List$Empty$const)), prepend(col(prepend(style("width", "20%"), List$Empty$const)), prepend(col(prepend(style("width", "20%"), List$Empty$const)), prepend(col(prepend(style("width", "17%"), List$Empty$const)), prepend(col(prepend(style("width", "13%"), List$Empty$const)), List$Empty$const)))))), prepend(thead(List$Empty$const, prepend(tr(List$Empty$const, prepend(th2("package"), prepend(th2("author"), prepend(th2("links"), prepend(th2("updated"), prepend(th2("downloads"), List$Empty$const)))))), List$Empty$const)), map2(search_results, (search_result) => {
+          return table(prepend(styles(prepend(["width", "100%"], prepend(["border-collapse", "collapse"], List$Empty$const))), List$Empty$const), prepend(thead(List$Empty$const, prepend(tr(List$Empty$const, prepend(th2("package", false), prepend(th2("author", true), prepend(th2("links", false), prepend(th2("updated", true), prepend(th2("downloads", true), List$Empty$const)))))), List$Empty$const)), map2(search_results, (search_result) => {
             return view_result(search_result, time_ago);
-          }))));
+          })));
         }
       })(), prepend(footer(prepend(style("padding-top", "10px"), prepend(style("padding-bottom", "10px"), List$Empty$const)), toList([
         text3("This includes only Gleam packages that spark joy for me, i.e. not all packages are included. This package list is "),
@@ -23999,7 +23996,7 @@ function similar_pkg_names(query3, pkgs) {
             if (n$4 <= 50) {
               _block = 4;
             } else {
-              throw makeError("panic", FILEPATH3, "jooc", 570, "similar_pkg_names", "xdd", {});
+              throw makeError("panic", FILEPATH3, "jooc", 575, "similar_pkg_names", "xdd", {});
             }
           }
         }
@@ -24255,12 +24252,12 @@ function handle_query_result(model, query_result, decoder) {
       _block$1 = resp;
     } else {
       let err = $2[0];
-      echo(err, undefined, "src/jooc.gleam", 252);
+      echo(err, undefined, "src/jooc.gleam", 257);
       _block$1 = List$Empty$const;
     }
   } else {
     let err = query_result[0];
-    echo(err, undefined, "src/jooc.gleam", 257);
+    echo(err, undefined, "src/jooc.gleam", 262);
     _block$1 = List$Empty$const;
   }
   let _pipe = _block$1;
@@ -24496,12 +24493,12 @@ function download_server_db(model) {
   if ($ instanceof Ok) {
     req = $[0];
   } else {
-    throw makeError("let_assert", FILEPATH3, "jooc", 296, "download_server_db", "Pattern match failed, no pattern matched the value.", {
+    throw makeError("let_assert", FILEPATH3, "jooc", 301, "download_server_db", "Pattern match failed, no pattern matched the value.", {
       value: $,
-      start: 8241,
-      end: 8282,
-      pattern_start: 8252,
-      pattern_end: 8259
+      start: 8438,
+      end: 8479,
+      pattern_start: 8449,
+      pattern_end: 8456
     });
   }
   let _block;
@@ -24599,7 +24596,9 @@ function update2(model, msg) {
         batch(prepend(save, prepend(open3, List$Empty$const)))
       ];
     } else {
-      let model$1 = new Model(new DbError("could not load data from " + data_src), model.search_result, model.lucy, model.all_pkg_names, model.search_text, model.query_from_initial_uri);
+      let err = load_result[0];
+      echo(err, undefined, "src/jooc.gleam", 175);
+      let model$1 = new Model(new DbError("Failed to load package database from " + data_src + ". Maybe the database is no longer available. You could try checking connection and reloading."), model.search_result, model.lucy, model.all_pkg_names, model.search_text, model.query_from_initial_uri);
       return [model$1, none()];
     }
   } else if (msg instanceof SqliteReturnedOpen) {
@@ -24615,9 +24614,9 @@ function update2(model, msg) {
           } else if ($1 instanceof DbLoadingFromServer) {
             return new DbLoaded(db, new Some(Animation$Finishing$const));
           } else if ($1 instanceof DbLoaded) {
-            throw makeError("panic", FILEPATH3, "jooc", 189, "update", "xd", {});
+            throw makeError("panic", FILEPATH3, "jooc", 194, "update", "xd", {});
           } else {
-            throw makeError("panic", FILEPATH3, "jooc", 190, "update", "xdd", {});
+            throw makeError("panic", FILEPATH3, "jooc", 195, "update", "xdd", {});
           }
         })(),
         query2(db, all_pkgs_by_recent, List$Empty$const, (_capture) => {
