@@ -23726,10 +23726,10 @@ function link(href2, label) {
   return a(prepend(href(href2), prepend(styles(prepend(["white-space", "nowrap"], List$Empty$const)), List$Empty$const)), prepend(text3(label), List$Empty$const));
 }
 function code_block(elts) {
-  return pre(prepend(styles(prepend(["margin", "0"], prepend(["margin-bottom", "0.5rem"], prepend(["padding", "0.5rem 0.75rem"], prepend(["background", "rgba(128, 128, 128, 0.15)"], prepend(["border-radius", "0.3rem"], prepend(["white-space", "pre-wrap"], prepend(["overflow-x", "auto"], List$Empty$const)))))))), List$Empty$const), prepend(code(List$Empty$const, elts), List$Empty$const));
+  return pre(prepend(styles(prepend(["margin", "0"], prepend(["margin-bottom", "0.5rem"], prepend(["padding", "0.5rem 0.75rem"], prepend(["background", "rgba(128, 128, 128, 0.15)"], prepend(["border-radius", "0.3rem"], prepend(["white-space", "pre"], prepend(["overflow-x", "auto"], List$Empty$const)))))))), List$Empty$const), prepend(code(List$Empty$const, elts), List$Empty$const));
 }
 function code_snippet(snippet) {
-  return div(prepend(styles(prepend(["margin", "0.75rem 0 0.75rem 1rem"], List$Empty$const)), List$Empty$const), prepend(p(prepend(styles(prepend(["margin", "0 0 0.25rem"], prepend(["font-weight", "600"], List$Empty$const))), List$Empty$const), prepend(text3(snippet.module_name), List$Empty$const)), (() => {
+  return div(prepend(styles(prepend(["margin", "0.75rem 0 0.75rem 1rem"], prepend(["width", "0"], prepend(["min-width", "calc(100% - 1rem)"], List$Empty$const)))), List$Empty$const), prepend(p(prepend(styles(prepend(["margin", "0 0 0.25rem"], prepend(["font-weight", "600"], List$Empty$const))), List$Empty$const), prepend(text3(snippet.module_name), List$Empty$const)), (() => {
     let $ = snippet.snippet;
     if ($ instanceof FuzzyMatch) {
       let before = $.before;
@@ -23760,7 +23760,7 @@ function view_result(result, time_ago) {
     } else {
       return none2();
     }
-  })(), prepend(link("https://hex.pm/packages/" + package$.name, "hex"), List$Empty$const)))), List$Empty$const), false), prepend(td2(prepend(updated, List$Empty$const), true), prepend(td2(prepend(downloads, List$Empty$const), true), List$Empty$const)))))), prepend(tr(List$Empty$const, prepend(td(prepend(colspan(5), prepend(styles(prepend(["padding", "0.25rem 0 0.75rem"], prepend(["border-bottom", "1px solid #3a3a3a"], List$Empty$const))), List$Empty$const)), prepend(p(prepend(style("margin", "0"), List$Empty$const), prepend(text3(package$.description), prepend(span(prepend(class$("mobile-only"), List$Empty$const), prepend(text3("updated "), prepend(updated, prepend(text3(", "), prepend(downloads, prepend(text3(" downloads"), List$Empty$const)))))), List$Empty$const))), map2(result.snippet, code_snippet))), List$Empty$const)), List$Empty$const)));
+  })(), prepend(link("https://hex.pm/packages/" + package$.name, "hex"), List$Empty$const)))), List$Empty$const), false), prepend(td2(prepend(updated, List$Empty$const), true), prepend(td2(prepend(downloads, List$Empty$const), true), List$Empty$const)))))), prepend(tr(List$Empty$const, prepend(td(prepend(colspan(5), prepend(styles(prepend(["padding", "0.25rem 0 0.75rem"], prepend(["border-bottom", "1px solid #3a3a3a"], prepend(["overflow-wrap", "anywhere"], List$Empty$const)))), List$Empty$const)), prepend(p(prepend(style("margin", "0"), List$Empty$const), prepend(text3(package$.description), prepend(span(prepend(class$("mobile-only"), List$Empty$const), prepend(span(prepend(style("white-space", "nowrap"), List$Empty$const), prepend(text3("updated "), prepend(updated, prepend(text3(", "), List$Empty$const)))), prepend(wbr(List$Empty$const), prepend(span(prepend(style("white-space", "nowrap"), List$Empty$const), prepend(downloads, prepend(text3(" downloads"), List$Empty$const))), List$Empty$const)))), List$Empty$const))), map2(result.snippet, code_snippet))), List$Empty$const)), List$Empty$const)));
 }
 function th2(label, desktop_only) {
   return th(prepend(styles(prepend(["text-align", "left"], prepend(["padding", "0.5rem 1rem 0.5rem 0"], prepend(["border-bottom", "1px solid #3a3a3a"], List$Empty$const)))), prepend(classes(prepend(["desktop-only", desktop_only], List$Empty$const)), List$Empty$const)), prepend(text3(label), List$Empty$const));
@@ -23774,7 +23774,7 @@ function view_results(model, time_ago) {
         return div(List$Empty$const, prepend((() => {
           let $2 = model.search_result;
           if ($2 instanceof Empty) {
-            return p(prepend(style("margin", "0"), List$Empty$const), prepend(text3("No matching packages found here, but this is not a complete index of all gleam packages. Maybe try "), prepend(link("https://packages.gleam.run?search=" + model.search_text, "https://packages.gleam.run?search=" + model.search_text), List$Empty$const)));
+            return p(prepend(style("margin", "0"), List$Empty$const), prepend(text3("No matching packages found here, but this is not a complete index of all gleam packages. Maybe try "), prepend(link("https://packages.gleam.run?search=" + model.search_text, "packages.gleam.run"), List$Empty$const)));
           } else {
             let search_results = $2;
             return table(prepend(styles(prepend(["width", "100%"], prepend(["border-collapse", "collapse"], List$Empty$const))), List$Empty$const), prepend(thead(List$Empty$const, prepend(tr(List$Empty$const, prepend(th2("package", false), prepend(th2("author", true), prepend(th2("links", false), prepend(th2("updated", true), prepend(th2("downloads", true), List$Empty$const)))))), List$Empty$const)), map2(search_results, (search_result) => {
@@ -23805,7 +23805,7 @@ function view_results(model, time_ago) {
       return div(List$Empty$const, prepend((() => {
         let $2 = model.search_result;
         if ($2 instanceof Empty) {
-          return p(prepend(style("margin", "0"), List$Empty$const), prepend(text3("No matching packages found here, but this is not a complete index of all gleam packages. Maybe try "), prepend(link("https://packages.gleam.run?search=" + model.search_text, "https://packages.gleam.run?search=" + model.search_text), List$Empty$const)));
+          return p(prepend(style("margin", "0"), List$Empty$const), prepend(text3("No matching packages found here, but this is not a complete index of all gleam packages. Maybe try "), prepend(link("https://packages.gleam.run?search=" + model.search_text, "packages.gleam.run"), List$Empty$const)));
         } else {
           let search_results = $2;
           return table(prepend(styles(prepend(["width", "100%"], prepend(["border-collapse", "collapse"], List$Empty$const))), List$Empty$const), prepend(thead(List$Empty$const, prepend(tr(List$Empty$const, prepend(th2("package", false), prepend(th2("author", true), prepend(th2("links", false), prepend(th2("updated", true), prepend(th2("downloads", true), List$Empty$const)))))), List$Empty$const)), map2(search_results, (search_result) => {
@@ -23922,7 +23922,7 @@ function main_view(model) {
     _block$1 = List$Empty$const;
   }
   let spin_events = _block$1;
-  return div(prepend(classes(prepend(["done", done && animated], List$Empty$const)), prepend(styles(prepend(["--w", "770px"], prepend(["box-sizing", "border-box"], prepend(["max-width", "var(--w)"], prepend(["margin", "0 auto"], prepend(["padding", "2rem 1.2rem 0"], List$Empty$const)))))), List$Empty$const)), prepend(view_star(done, animated, spin_events, model), prepend(input(prepend(value(model.search_text), prepend(type_("search"), prepend(placeholder("search package by name, code, type, fn"), prepend(disabled(!done), prepend((() => {
+  return div(prepend(classes(prepend(["done", done && animated], List$Empty$const)), prepend(styles(prepend(["--w", "770px"], prepend(["box-sizing", "border-box"], prepend(["max-width", "var(--w)"], prepend(["margin", "0 auto"], prepend(["padding", "2rem 1.2rem 0"], List$Empty$const)))))), List$Empty$const)), prepend(view_star(done, animated, spin_events, model), prepend(input(prepend(value(model.search_text), prepend(type_("search"), prepend(placeholder("name, code, type, or fn"), prepend(disabled(!done), prepend((() => {
     let _pipe = on_input((var0) => {
       return new UserTypedQuery(var0);
     });
@@ -23933,7 +23933,7 @@ function main_view(model) {
     ["height", "3.5rem"],
     ["margin", "0 0 1rem"],
     ["padding", "0 1rem 0 3rem"],
-    ["font-size", "1rem"],
+    ["font-size", "1.1rem"],
     ["border", "1px solid #3a3a3a"],
     ["border-radius", "1.75rem"],
     ["background", "var(--bg)"],
