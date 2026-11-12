@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Minimal examples vs motivational examples">
+    <meta name="keywords" content="Minimal, motivational, example, Gleam, application, project, library, package">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="Minimal examples vs motivational examples">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/lucy_square.svg">
+</head>
+<body>
+<h1><a href="/">Correct Arity</a></h1>
+<h2>Minimal examples vs motivational examples</h2>
+<p>I have been reading a lot of READMEs to compile <a href="https://correctarity.com/spark-joy">a list of Gleam packages I like</a>, and I personally would like if libraries gave more examples motivating their use. That is, not only a minimal example of the most basic usage, but an example application doing something interesting, maybe slightly opinionated or bringing in other dependencies, to demonstrate a cool use for the library. Now, maybe if someone looked for your library then they already know what it's for and don't need a lengthy introduction to the subject, but idk maybe there are potential readers who could benefit from such an introduction.</p>
+
+<p>I will pick on <a href="https://collie.hexdocs.pm/">collie</a> because it is actually good, in many ways a lot better than most packages I looked at. So this is not me saying collie is bad, just my personal pet peeve/wanting handholding! It says "A WebSocket client for Gleam." and my question is ok, I know websockets are some kind of persistent two way connection, but what would I use this for, why would it be nice in Gleam, etc? The first thing it tells me is
+
+<blockquote>
+<h2>Autobahn</h2>
+<p>Collie passes all Autobahn WebSocket test suite cases, ensuring full compliance with the WebSocket protocol specification. You can view detailed test results and compare them with other Gleam WebSocket implementations like Stratus at:</p>
+<p><strong><a rel="nofollow" href="https://vshakitskiy.github.io/collie">https://vshakitskiy.github.io/collie</a></strong></p>
+</blockquote>
+
+I'm sure the Autobahn WebSocket test suite is great stuff for websocket enjoyers and wiskiy put a lot of work into performance, passing all the tests, etc. And these benchmarks are great and make the library more credible, and it's great that there's a mention of existing alternatives. But, what I really want to know is what can I <em>do</em> with websockets that I couldn't before? Is it a low level library for other libraries to build some kind of server framework on? Is it for me to make a Lustre app with? A videogame? A <a href="https://correctarity.com/glisglord">discord clone</a>?</p>
+
+<p>The basic usage is a good start, it is good to see a basic example of sending "ping" to "https://echo.websocket.org". I'm glad READMEs tend to have some sort of quick-start example. I would like to see more of what projects are for, with real examples.</p>
+
+<p>To some extent I can google it myself and read other docs, it's not your job to teach me everything about websockets or suggest project ideas for me. At the same time as an unfamiliar user, introducing "what are websockets for, what can you do with websockets in gleam" helps me more than 100% spec completeness or 7% faster performance (although those are seriously cool too).</p>
+
+<p>That said, don't let me be overly entitled: you make a correct and fast websocket, and I complain because you don't hold my hand whole time! Well, fair enough, a wise man once <a href="https://blog.nytsoi.net/2026/04/03/say-no-to-zero-ver/">said</a> I can't demand anything of you as I don't pay your bills.</p>
+
+</body></html>
