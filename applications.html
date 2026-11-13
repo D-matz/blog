@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CRUD apps are cool and important">
+    <meta name="keywords" content="Application, App, Library, Framework, CRUD, reuse, code, complexity">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="CRUD apps are cool and important">
+    <meta property="og:image" content="https://correctarity.com/static/code_lifespan_2x.png">
+    <meta property="og:image:type" content="image/png">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/lucy_square.svg">
+</head>
+<body>
+<h1><a href="/">Correct Arity</a></h1>
+<img alt="It took some extra work to build, but now we'll be able to use it for all our future projects - how to ensure your code is never reused. Let's not overthink it; if the code is still in use that far in the future, we'll have far bigger problems - how to ensure your code lives forever." src="/static/code_lifespan_2x.png" title="Surely (no one/everyone) will (recognize how flexible and useful this architecture is/spend a huge amount of effort painstakingly preserving and updating this garbage I wrote in 20 minutes)">
+
+
+<div><small>
+  By <a href="https://xkcd.com/about/">Randall Munroe</a>,
+  <a href="https://creativecommons.org/licenses/by-nc/2.5/">
+    CC BY-NC 2.5
+  </a>, <a href="https://xkcd.com/2730/">Link</a>
+</small></div>
+
+<h2>CRUD apps are cool and important</h2>
+
+<p>Projects that do some concrete thing — solve a real problem in the world — are very cool! Good software, including reusable software, comes from them.</p>
+
+<p>I sometimes see purely technical projects (eg distributed KV store) on Reddit, Discord, etc. that (imo) go the wrong direction: they begin with some supposedly reusable library that lacks even one real use, rather than go problem -> CRUD app -> reusable library. I think this comes from the mistaken assumption that "CRUD" (create, read, update, delete) apps are formulaic and uninteresting. Imo this is not true, any application that does something useful in the world will have interesting business logic at the very least. Also useful projects often need reusable technical bits which you can pull out into a library or framework.</p>
+
+<p>For example, Django came out of a local newspaper's website, similarly Rails came out of a project management website. They didn't first sit down and pull "a web framework for perfectionists with deadlines" out of the ether and say ah it should have an ORM and routes and admin page and so on; they wanted a Python content management system for a newspaper, and realized they could open source these technical bits to reuse them elsewhere. And it turned out lots of people wanted to make a web app with a database quickly in Python. That need for CRUD apps over the years drove work on Django.</p>
+
+<p>This is a bit squishy to quantify but a good metric would be the ratio of complexity in the reusable code vs number of solutions to real problems in the world. For example there is a lot of junk in Lustre, but it's also used a fair amount. I mean some types of things like <a href="https://en.wikipedia.org/wiki/UTF-8">UTF-8</a> can be both simple and used a ton, which is beautiful, but ok a library for websites has to have a fair amount of junk in it, fine. So again this is kind of squishy, it's not like you can just calculate <code>quality = number of uses / lines of code</code>. But it's good to ask "for the sort of thing this is, does it have good examples to justify the complexity?" And it's not like it necessarily needs a huge number of examples; a few high quality examples, ie examples where the library solves a lot of problems nicely in the world.</p>
+
+<p>So for instance (not saying my project is particularly high quality, but), I used Lustre, SQLite, and Cloudflare R2 for <a href="https://correctarity.com/spark-joy">correctarity.com/spark-joy</a>. It lets you search Gleam packages by name/code/type/fn, and runs entirely in your browser which is bad in that it makes you initially load 150MB but good in that it's totally free and easy for me to host. It's important to me that it's as painless as host as possible, so I like that the database is just a static file and the work happens in browser. So it's cool SQLite can do that. Cloudflare R2 is whatever, I'm not not an expert and I'm sure there are plenty of alternatives, Cloudflare just seems like it has a nice free tier and easy UI. Most importantly, Lustre "clicks" for me for stateful websites much more than other ways I've tried. It's not like this is an objective claim that <a href="https://guide.elm-lang.org/architecture/">MVU</a> is objectively the greatest or anything; just for me it makes sense: you type in input, that triggers SQL query, query comes back and puts results in model, and search results are always shown in HTML as a function of the model. </p> 
+
+<p>(Again not saying my project is particularly good, and for SQLite in particular my silly little page made 2 weeks ago is a drop in the bucket when they can <a href="https://www.sqlite.org/mostdeployed.html">estimate one trillion SQLite databases</a>...)</p>
+
+<p>On Lustre specifically, the docs have some basic examples but I would be interested in a list of projects eg <a href="https://surtoget.no/">surtoget.no</a> that use it.</p>
+
+<p>Applications aren't just good as evidence that the reusable pieces are good; making applications is how you figure out which reusable pieces are good and useful. For example on the <a href="https://www.youtube.com/watch?v=57Vhx7FHk34&t=22s">BEAM There, Done That podcast</a> Giacomo wants to first make fun <a href="https://orbital.hexdocs.pm/">Gleam AtomVM</a> projects, and only after that see which parts would be good to extract out. Without having done applications, trying to write an API would mean shoving everything in or guessing what's needed, whereas after having gotten applications to work a good API design will hopefully follow naturally.</p>
+
+<p>This is not to say researching new things is bad; rather, good taste in software research comes from dealing with problems in the real world. <a href="https://en.wikipedia.org/wiki/Michael_Stonebraker">Stonebraker's</a> "10 fears about the future of the DBMS field" include customers no longer attending DBMS conferences — "<a href="https://www.jfsowa.com/ikl/Stonebraker.pdf">A very dangerous state of affairs, indeed!!!!</a>". For programming languages, libraries, etc., new things can be cool to try, but taste/motivation comes from the frustation that existing tools don't fit your problems as well as they could, and the <a href="https://correctarity.com/pudding">proof in the pudding</a> that new tools are good is applications using them. I feel like I say "in the world" every paragraph but yeah, solving a real problem forces idk, a minimum level of usefulness and intolerance of needless complexity.</p>
+
+<p>Also not all apps do all of create/read/update/delete exactly, often there will be a database but that's not the main thing...I realize I talk a lot here about why applications come first and then libraries and don't say anything about how business logic is itself interesting...I guess the incentives to open source business logic are not there whereas it's a much better deal to open source generic reusable bits, but that's a separate conversation.</p>
+
+</body></html>
