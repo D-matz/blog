@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+	<title>Correct Arity</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gleam - neat thing about graph API">
+    <meta name="keywords" content="phantom, type, gleam, graph, function, api, directed, undirected">
+    <meta property="og:title" content="Correct Arity">
+    <meta property="og:description" content="Gleam - neat thing about graph API">
+    <meta property="og:image" content="https://correctarity.com/static/094.png">
+    <meta property="og:image:type" content="image/png">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/lucy_square.svg">
+    <script src="/static/searchdemo.js" type="module"></script>
+</head>
+<body>
+<h1><a href="/">Correct Arity</a></h1><img title="BOO!" alt="Gengar" src="/static/094.png">
+<h2>Neat thing about Gleam graph API</h2>
+
+<p>On <a href="https://graph.hexdocs.pm/graph.html#Graph">graph.hexdocs.pm</a> <code>pub opaque type Graph(direction, value, label)</code> is public but opaque, meaning you can use it but not construct it directly, so that the package can ensure whenever you construct a <code>Graph</code> certain things are true.</p>
+
+<p>Ok "certain things"? Well say you want to have</p>
+
+<ul>
+<li>directed graphs, where each edge goes in one direction from its source node to its target node</li>
+<li>undirected graphs, where edges just have a pair of nodes, no particular direction</li>
+</ul>
+
+<p>You could make two different types <code>GraphDirected</code> and <code>GraphUndirected</code>, but there might be functions you want both to share eg <code>graph.size</code>. You could add a direction field in the type itself, but then what if someone calls <code>insert_undirected_edge</code> when <code>mygraph.direction</code> is <code>Directed</code>? Kind of a meaningless/impossible situation, can only return error, so now the whole fn has to return <code>Result(Graph, Err)</code>, and we handle errors at runtime, clearly bad. Two separate types might be ok, but of course because you're reading this post the graph type has a <a href="https://graph.hexdocs.pm/graph.html#Graph">clever answer</a>:</p>
+
+<blockquote><p>The graph also carries along its <code>direction</code> (either <code>Directed</code> or
+<code>Undirected</code>) in its type so that it’s impossible to mix up <code>Directed</code> and
+<code>Undirected</code> graphs inadvertently.</p></blockquote>
+
+<p>That is, <code>insert_directed_edge</code> can only be called on graphs with type <code>Directed</code>:</p>
+
+<pre><code><span>pub fn </span><span>insert_directed_edge</span>(
+  <span>graph</span>: <span>Graph</span>(<span><mark>Directed</mark></span>, <span>value</span>, <span>label</span>),
+  <span>labelled label</span>: <span>label</span>,
+  <span>from source</span>: <span>Int</span>,
+  <span>to destination</span>: <span>Int</span>,
+) -> <span>Graph</span>(<span>Directed</span>, <span>value</span>, <span>label</span>)</code></pre>
+
+<p>The <a href="https://tour.gleam.run/data-types/generic-custom-types/">type parameter</a> direction is not actually used anywhere in the type itself, but prevents you from compiling code that mixes up directed/undirected.</p>
+
+<p>So ok, here's some code, try doing <code>gleam add graph</code> and <code>gleam run</code> on this will work.</p>
+
+<pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0">
+  <code>
+	<span class="line"><span style="color:#D73A49">import</span><span style="color:#24292e"> graph.</span><span style="color:#D73A49">{</span><span style="color:#24292e">Node</span><span style="color:#D73A49">}</span></span>
+	<span class="line"></span>
+	<span class="line"><span style="color:#D73A49">pub fn</span><span style="color:#6F42C1"> main</span><span style="color:#24292e">() {</span></span>
+	<span class="line"><span style="color:#D73A49">  let</span><span style="color:#24292e"> _mygraph1 </span><span style="color:#D73A49">=</span></span>
+	<span class="line"><span style="color:#24292e">    graph.</span><span style="color:#6F42C1">new</span><span style="color:#24292e">()</span></span>
+	<span class="line"><span style="color:#24292e">    </span><span style="color:#D73A49">|&gt;</span><span style="color:#24292e"> graph.</span><span style="color:#6F42C1">insert_node</span><span style="color:#24292e">(Node(</span><span style="color:#005CC5">1</span><span style="color:#24292e">, </span><span style="color:#032F62">"A"</span><span style="color:#24292e">))</span></span>
+	<span class="line"><span style="color:#24292e">    </span><span style="color:#D73A49">|&gt;</span><span style="color:#24292e"> graph.</span><span style="color:#6F42C1">insert_node</span><span style="color:#24292e">(Node(</span><span style="color:#005CC5">2</span><span style="color:#24292e">, </span><span style="color:#032F62">"B"</span><span style="color:#24292e">))</span></span>
+	<span class="line"><span style="color:#24292e">    </span><span style="color:#D73A49">|&gt;</span><span style="color:#24292e"> graph.</span><span style="color:#6F42C1">insert_node</span><span style="color:#24292e">(Node(</span><span style="color:#005CC5">3</span><span style="color:#24292e">, </span><span style="color:#032F62">"C"</span><span style="color:#24292e">))</span></span>
+	<span class="line"><span style="color:#24292e">    </span><span style="color:#D73A49">|&gt;</span><span style="color:#24292e"> graph.</span><span style="color:#6F42C1">insert_directed_edge</span><span style="color:#24292e">(labelled: </span><span style="color:#032F62">"A -&gt; B"</span><span style="color:#24292e">, from: </span><span style="color:#005CC5">1</span><span style="color:#24292e">, to: </span><span style="color:#005CC5">2</span><span style="color:#24292e">)</span></span>
+	<span class="line"><span style="color:#24292e">    </span><span style="color:#D73A49">|&gt;</span><span style="color:#24292e"> graph.</span><span style="color:#6F42C1">insert_directed_edge</span><span style="color:#24292e">(labelled: </span><span style="color:#032F62">"B -&gt; C"</span><span style="color:#24292e">, from: </span><span style="color:#005CC5">2</span><span style="color:#24292e">, to: </span><span style="color:#005CC5">3</span><span style="color:#24292e">)</span></span>
+	<span class="line"></span>
+	<span class="line"><span style="color:#D73A49">  let</span><span style="color:#24292e"> _mygraph2 </span><span style="color:#D73A49">=</span></span>
+	<span class="line"><span style="color:#24292e">    graph.</span><span style="color:#6F42C1">new</span><span style="color:#24292e">()</span></span>
+	<span class="line"><span style="color:#24292e">    </span><span style="color:#D73A49">|&gt;</span><span style="color:#24292e"> graph.</span><span style="color:#6F42C1">insert_node</span><span style="color:#24292e">(Node(</span><span style="color:#005CC5">1</span><span style="color:#24292e">, </span><span style="color:#032F62">"A"</span><span style="color:#24292e">))</span></span>
+	<span class="line"><span style="color:#24292e">    </span><span style="color:#D73A49">|&gt;</span><span style="color:#24292e"> graph.</span><span style="color:#6F42C1">insert_node</span><span style="color:#24292e">(Node(</span><span style="color:#005CC5">2</span><span style="color:#24292e">, </span><span style="color:#032F62">"B"</span><span style="color:#24292e">))</span></span>
+	<span class="line"><span style="color:#24292e">    </span><span style="color:#D73A49">|&gt;</span><span style="color:#24292e"> graph.</span><span style="color:#6F42C1">insert_node</span><span style="color:#24292e">(Node(</span><span style="color:#005CC5">3</span><span style="color:#24292e">, </span><span style="color:#032F62">"C"</span><span style="color:#24292e">))</span></span>
+	<span class="line"><span style="color:#24292e">    </span><span style="color:#D73A49">|&gt;</span><span style="color:#24292e"> graph.</span><span style="color:#6F42C1">insert_undirected_edge</span><span style="color:#24292e">(labelled: </span><span style="color:#032F62">"A - B"</span><span style="color:#24292e">, between: </span><span style="color:#005CC5">1</span><span style="color:#24292e">, and: </span><span style="color:#005CC5">2</span><span style="color:#24292e">)</span></span>
+	<span class="line"><span style="color:#24292e">    </span><span style="color:#D73A49">|&gt;</span><span style="color:#24292e"> graph.</span><span style="color:#6F42C1">insert_undirected_edge</span><span style="color:#24292e">(labelled: </span><span style="color:#032F62">"B - C"</span><span style="color:#24292e">, between: </span><span style="color:#005CC5">2</span><span style="color:#24292e">, and: </span><span style="color:#005CC5">3</span><span style="color:#24292e">)</span></span>
+	<span class="line"></span>
+	<span class="line"><span style="color:#D73A49">  let</span><span style="color:#24292e"> _mygraph3 </span><span style="color:#D73A49">=</span></span>
+	<span class="line"><span style="color:#24292e">    graph.</span><span style="color:#6F42C1">new</span><span style="color:#24292e">()</span></span>
+	<span class="line"><span style="color:#24292e">    </span><span style="color:#D73A49">|&gt;</span><span style="color:#24292e"> graph.</span><span style="color:#6F42C1">insert_node</span><span style="color:#24292e">(Node(</span><span style="color:#005CC5">1</span><span style="color:#24292e">, </span><span style="color:#032F62">"A"</span><span style="color:#24292e">))</span></span>
+	<span class="line"><span style="color:#24292e">    </span><span style="color:#D73A49">|&gt;</span><span style="color:#24292e"> graph.</span><span style="color:#6F42C1">insert_node</span><span style="color:#24292e">(Node(</span><span style="color:#005CC5">2</span><span style="color:#24292e">, </span><span style="color:#032F62">"B"</span><span style="color:#24292e">))</span></span>
+	<span class="line"><span style="color:#24292e">    </span><span style="color:#D73A49">|&gt;</span><span style="color:#24292e"> graph.</span><span style="color:#6F42C1">insert_node</span><span style="color:#24292e">(Node(</span><span style="color:#005CC5">3</span><span style="color:#24292e">, </span><span style="color:#032F62">"C"</span><span style="color:#24292e">))</span></span>
+	<span class="line"><span style="color:#24292e">    </span><span style="color:#D73A49">|&gt;</span><span style="color:#24292e"> graph.</span><span style="color:#6F42C1">insert_undirected_edge</span><span style="color:#24292e">(labelled: </span><span style="color:#032F62">"A - B"</span><span style="color:#24292e">, between: </span><span style="color:#005CC5">1</span><span style="color:#24292e">, and: </span><span style="color:#005CC5">2</span><span style="color:#24292e">)</span></span>
+	<span class="line"><span style="color:#6A737D">  //    |&gt; graph.insert_directed_edge(labelled: "B -&gt; C", from: 2, to: 3)</span></span>
+	<span class="line"><span style="color:#24292e">}</span></span>
+  </code>
+</pre>
+
+<p>But if you uncomment the last line, the compiler will complain</p>
+<pre>
+Expected type:
+
+    graph.Graph(graph.Directed, a, String)
+
+Found type:
+
+    graph.Graph(graph.Undirected, String, String)
+</pre>
+
+<p>which is cool - the compiler catches us adding undirected and directed edges to the same graph!</p>
+
+<p>It turns out there's a name for "type parameter used just to restrict what fns you can call" - <strong>phantom types</strong> - <a href="https://exercism.org/tracks/gleam/concepts/phantom-types">for instance</a> you have a <code>Length(unit)</code> type that has some fns that work on any unit, but also some fns that can only be called with <code>Length(Inches)</code>.</p> 
+
+<p>Is this perhaps too neat? From <a href="https://grugbrain.dev/#grug-on-type-systems">grugbrain.dev</a>:</p>
+
+<blockquote>
+<p>generics especially dangerous here, grug try limit generics to container classes for most part where most value add</p>
+<p>temptation generics very large is trick!  spirit demon complex love this one trick! beware!</p>
+</blockquote>
+
+<p>But perhaps Grug is just down on types...</p>
+
+<blockquote><p>danger abstraction too high, big brain type system code become astral projection of platonic generic turing model of
+computation into code base.  grug confused and agree some level very elegant but also very hard do anything like
+record number of club inventory for Grug Inc. task at hand</p></blockquote>
+
+<p>Can't really prove types enforce correctness vs are useless/confusing; it's more an <a href="pudding">empirical question</a> of whenever someone manages to actually ship something that works they score a point.</p>
+</body></html>
+
+
+
