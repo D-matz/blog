@@ -41,7 +41,7 @@
   <span>to destination</span>: <span>Int</span>,
 ) -> <span>Graph</span>(<span>Directed</span>, <span>value</span>, <span>label</span>)</code></pre>
 
-<p>The <a href="https://tour.gleam.run/data-types/generic-custom-types/">type parameter</a> direction is not actually used anywhere in the type itself, but prevents you from compiling code that mixes up directed/undirected.</p>
+<p>The <a href="https://tour.gleam.run/data-types/generic-custom-types/">type parameter</a> direction is not actually used anywhere in the type itself, you can't print it or anything like you'd use a field. But as a type parameter, it prevents you from compiling code that mixes up directed/undirected.</p>
 
 <p>So ok, here's some code, try doing <code>gleam add graph</code> and <code>gleam run</code> on this will work.</p>
 
