@@ -23384,10 +23384,10 @@ var canonical = `SELECT
   p.name, p.description, p.repository, p.updated_at, p.owners,
   p.total_downloads, p.recent_downloads, p.latest_version,
   m.name AS module,
-  char(2) || CAST(
+  CAST(
     substr(CAST(m.source AS BLOB), d.start_pos + 1, d.end_pos - d.start_pos)
     AS TEXT
-  ) || char(3) AS snippet
+  ) AS snippet
 FROM canonical_forms c
 JOIN definitions d ON d.canonical_id = c.id
 JOIN modules m ON m.id = d.module_id
