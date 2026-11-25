@@ -412,6 +412,15 @@ class Gt extends CustomType {
 }
 var Order$Gt$const = new Gt;
 var Order$Gt = () => Order$Gt$const;
+function negate(order) {
+  if (order instanceof Lt) {
+    return Order$Gt$const;
+  } else if (order instanceof Eq) {
+    return order;
+  } else {
+    return Order$Lt$const;
+  }
+}
 function break_tie(order, other) {
   if (order instanceof Lt) {
     return order;
@@ -429,12 +438,14 @@ class Some extends CustomType {
     this[0] = $0;
   }
 }
+var Option$Some = ($0) => new Some($0);
 var Option$isSome = (value) => value instanceof Some;
 var Option$Some$0 = (value) => value[0];
 
 class None extends CustomType {
 }
 var Option$None$const = new None;
+var Option$None = () => Option$None$const;
 function reverse_and_prepend(loop$prefix, loop$suffix) {
   while (true) {
     let prefix = loop$prefix;
@@ -2065,6 +2076,7 @@ class Decoder extends CustomType {
 var float2 = /* @__PURE__ */ new Decoder(decode_float);
 var int2 = /* @__PURE__ */ new Decoder(decode_int);
 var string2 = /* @__PURE__ */ new Decoder(decode_string);
+var bool = /* @__PURE__ */ new Decoder(decode_bool);
 function run(data, decoder) {
   let $ = decoder.function(data);
   let maybe_invalid_data = $[0];
@@ -2244,6 +2256,19 @@ function decode_error(expected, found) {
 function field(field_name, field_decoder, next) {
   return subfield(prepend(field_name, List$Empty$const), field_decoder, next);
 }
+function decode_bool(data) {
+  let $ = isEqual(identity(true), data);
+  if ($) {
+    return [true, List$Empty$const];
+  } else {
+    let $1 = isEqual(identity(false), data);
+    if ($1) {
+      return [false, List$Empty$const];
+    } else {
+      return [false, decode_error("Bool", data)];
+    }
+  }
+}
 function optional(inner) {
   return new Decoder((data) => {
     let $ = is_null(data);
@@ -2255,11 +2280,6 @@ function optional(inner) {
       let errors = $1[1];
       return [new Some(data$1), errors];
     }
-  });
-}
-function failure(placeholder, name) {
-  return new Decoder((d) => {
-    return [placeholder, decode_error(name, d)];
   });
 }
 
@@ -2368,6 +2388,9 @@ function string_grapheme_slice(string3, idx, len) {
 function string_codeunit_slice(str, from2, length3) {
   return str.slice(from2, from2 + length3);
 }
+function contains_string(haystack, needle) {
+  return haystack.indexOf(needle) >= 0;
+}
 function starts_with(haystack, needle) {
   return haystack.startsWith(needle);
 }
@@ -2400,6 +2423,15 @@ function trim_start(string3) {
 }
 function trim_end(string3) {
   return string3.replace(trim_end_regex, "");
+}
+function bit_array_byte_size(bit_array2) {
+  return bit_array2.byteSize;
+}
+function bit_array_concat(bit_arrays) {
+  return toBitArray(bit_arrays.toArray());
+}
+function round2(float3) {
+  return Math.round(float3);
 }
 function unsafe_percent_decode(string3) {
   return decodeURIComponent(string3 || "");
@@ -2710,6 +2742,19 @@ function isList(data) {
 }
 function isResult(data) {
   return Result$isOk(data) || Result$isError(data);
+}
+
+// build/dev/javascript/gleam_stdlib/gleam/float.mjs
+function negate2(x) {
+  return -1 * x;
+}
+function round(x) {
+  let $ = x >= 0;
+  if ($) {
+    return round2(x);
+  } else {
+    return 0 - round2(negate2(x));
+  }
 }
 
 // build/dev/javascript/gleam_stdlib/gleam/int.mjs
@@ -3676,18 +3721,129 @@ function array(list3) {
   }
   return array2;
 }
+function decode(string3) {
+  try {
+    const result = JSON.parse(string3);
+    return Result$Ok(result);
+  } catch (err) {
+    return Result$Error(getJsonDecodeError(err, string3));
+  }
+}
+function getJsonDecodeError(stdErr, json) {
+  if (isUnexpectedEndOfInput(stdErr))
+    return DecodeError$UnexpectedEndOfInput();
+  return toUnexpectedByteError(stdErr, json);
+}
+function isUnexpectedEndOfInput(err) {
+  const unexpectedEndOfInputRegex = /((unexpected (end|eof))|(end of data)|(unterminated string)|(json( parse error|\.parse)\: expected '(\:|\}|\])'))/i;
+  return unexpectedEndOfInputRegex.test(err.message);
+}
+function toUnexpectedByteError(err, json) {
+  let converters = [
+    v8UnexpectedByteError,
+    oldV8UnexpectedByteError,
+    jsCoreUnexpectedByteError,
+    spidermonkeyUnexpectedByteError
+  ];
+  for (let converter of converters) {
+    let result = converter(err, json);
+    if (result)
+      return result;
+  }
+  return DecodeError$UnexpectedByte("");
+}
+function v8UnexpectedByteError(err) {
+  const regex = /unexpected token '(.)', ".+" is not valid JSON/i;
+  const match = regex.exec(err.message);
+  if (!match)
+    return null;
+  const byte = toHex(match[1]);
+  return DecodeError$UnexpectedByte(byte);
+}
+function oldV8UnexpectedByteError(err) {
+  const regex = /unexpected token (.) in JSON at position (\d+)/i;
+  const match = regex.exec(err.message);
+  if (!match)
+    return null;
+  const byte = toHex(match[1]);
+  return DecodeError$UnexpectedByte(byte);
+}
+function spidermonkeyUnexpectedByteError(err, json) {
+  const regex = /(unexpected character|expected .*) at line (\d+) column (\d+)/i;
+  const match = regex.exec(err.message);
+  if (!match)
+    return null;
+  const line = Number(match[2]);
+  const column = Number(match[3]);
+  const position = getPositionFromMultiline(line, column, json);
+  const byte = toHex(json[position]);
+  return DecodeError$UnexpectedByte(byte);
+}
+function jsCoreUnexpectedByteError(err) {
+  const regex = /unexpected (identifier|token) "(.)"/i;
+  const match = regex.exec(err.message);
+  if (!match)
+    return null;
+  const byte = toHex(match[2]);
+  return DecodeError$UnexpectedByte(byte);
+}
+function toHex(char) {
+  return "0x" + char.charCodeAt(0).toString(16).toUpperCase();
+}
+function getPositionFromMultiline(line, column, string3) {
+  if (line === 1)
+    return column - 1;
+  let currentLn = 1;
+  let position = 0;
+  string3.split("").find((char, idx) => {
+    if (char === `
+`)
+      currentLn += 1;
+    if (currentLn === line) {
+      position = idx + column;
+      return true;
+    }
+    return false;
+  });
+  return position;
+}
 
 // build/dev/javascript/gleam_json/gleam/json.mjs
 class UnexpectedEndOfInput extends CustomType {
 }
 var DecodeError$UnexpectedEndOfInput$const = new UnexpectedEndOfInput;
+var DecodeError$UnexpectedEndOfInput = () => DecodeError$UnexpectedEndOfInput$const;
+class UnexpectedByte extends CustomType {
+  constructor($0) {
+    super();
+    this[0] = $0;
+  }
+}
+var DecodeError$UnexpectedByte = ($0) => new UnexpectedByte($0);
+class UnableToDecode extends CustomType {
+  constructor($0) {
+    super();
+    this[0] = $0;
+  }
+}
+function do_parse(json, decoder) {
+  return try$(decode(json), (dynamic_value) => {
+    let _pipe = run(dynamic_value, decoder);
+    return map_error(_pipe, (var0) => {
+      return new UnableToDecode(var0);
+    });
+  });
+}
+function parse3(json, decoder) {
+  return do_parse(json, decoder);
+}
 function to_string3(json) {
   return json_to_string(json);
 }
 function string3(input) {
   return identity2(input);
 }
-function bool(input) {
+function bool2(input) {
   return identity2(input);
 }
 function preprocessed_array(from2) {
@@ -3892,6 +4048,9 @@ function normalise2(timestamp) {
     return new Timestamp(seconds2 - 1, multiplier + nanoseconds2);
   }
 }
+function compare4(left, right) {
+  return break_tie(compare3(left.seconds, right.seconds), compare3(left.nanoseconds, right.nanoseconds));
+}
 function system_time2() {
   let $ = system_time();
   let seconds2 = $[0];
@@ -3996,7 +4155,7 @@ function singleton_list(item) {
 var GT = /* @__PURE__ */ Order$Gt();
 var LT = /* @__PURE__ */ Order$Lt();
 var EQ = /* @__PURE__ */ Order$Eq();
-function compare4(a, b) {
+function compare5(a, b) {
   if (a.name === b.name) {
     return EQ;
   } else if (a.name < b.name) {
@@ -4166,7 +4325,7 @@ function prepare(attributes) {
   } else {
     let _pipe = attributes;
     let _pipe$1 = sort(_pipe, (a, b) => {
-      return compare4(b, a);
+      return compare5(b, a);
     });
     return merge(_pipe$1, empty_list);
   }
@@ -4183,7 +4342,7 @@ function boolean_attribute(name, value) {
   if (value) {
     return attribute2(name, "");
   } else {
-    return property2(name, bool(false));
+    return property2(name, bool2(false));
   }
 }
 function class$(name) {
@@ -4256,8 +4415,8 @@ function href(url) {
 function src(url) {
   return attribute2("src", url);
 }
-function disabled(is_disabled) {
-  return boolean_attribute("disabled", is_disabled);
+function checked(is_checked) {
+  return boolean_attribute("checked", is_checked);
 }
 function placeholder(text) {
   return attribute2("placeholder", text);
@@ -4572,11 +4731,17 @@ function footer(attrs, children) {
 function div(attrs, children) {
   return element2("div", attrs, children);
 }
+function li(attrs, children) {
+  return element2("li", attrs, children);
+}
 function p(attrs, children) {
   return element2("p", attrs, children);
 }
 function pre(attrs, children) {
   return element2("pre", attrs, children);
+}
+function ul(attrs, children) {
+  return element2("ul", attrs, children);
 }
 function a(attrs, children) {
   return element2("a", attrs, children);
@@ -4625,6 +4790,9 @@ function button(attrs, children) {
 }
 function input(attrs) {
   return element2("input", attrs, empty_list);
+}
+function label(attrs, children) {
+  return element2("label", attrs, children);
 }
 
 // build/dev/javascript/gleam_stdlib/gleam/set.mjs
@@ -5711,7 +5879,7 @@ function diff_attributes(loop$controlled, loop$path, loop$events, loop$old, loop
       let remaining_old = old.tail;
       let next = new$7.head;
       let remaining_new = new$7.tail;
-      let $ = compare4(prev, next);
+      let $ = compare5(prev, next);
       if ($ instanceof Lt) {
         if (prev instanceof Event2) {
           let name = prev.name;
@@ -7165,16 +7333,16 @@ var virtualiseAttributes = (node) => {
 var INPUT_ELEMENTS = ["input", "select", "textarea"];
 var virtualiseInputEvents = (tag, node) => {
   const value2 = node.value;
-  const checked = node.checked;
-  if (tag === "input" && node.type === "checkbox" && !checked)
+  const checked2 = node.checked;
+  if (tag === "input" && node.type === "checkbox" && !checked2)
     return;
-  if (tag === "input" && node.type === "radio" && !checked)
+  if (tag === "input" && node.type === "radio" && !checked2)
     return;
   if (node.type !== "checkbox" && node.type !== "radio" && !value2)
     return;
   queueMicrotask(() => {
     node.value = value2;
-    node.checked = checked;
+    node.checked = checked2;
     node.dispatchEvent(new Event("input", { bubbles: true }));
     node.dispatchEvent(new Event("change", { bubbles: true }));
     if (globalThis.document.activeElement !== node) {
@@ -7644,6 +7812,11 @@ function on_input(message) {
     return success(message(value2));
   }));
 }
+function on_check(message) {
+  return on("change", subfield(prepend("target", prepend("checked", List$Empty$const)), bool, (checked2) => {
+    return success(message(checked2));
+  }));
+}
 // build/dev/javascript/modem/modem.ffi.mjs
 var initial_location = globalThis?.window?.location?.href;
 var do_initial_uri = () => {
@@ -7766,16 +7939,6 @@ function make_headers(headersList) {
     headers.append(k.toLowerCase(), v);
   return headers;
 }
-async function read_bytes_body(response) {
-  let body;
-  try {
-    body = await response.body.arrayBuffer();
-  } catch (error) {
-    return Result$Error(FetchError$UnableToReadBody());
-  }
-  body = BitArray$BitArray(new Uint8Array(body));
-  return Result$Ok(map6(response, () => body));
-}
 async function read_text_body(response) {
   let body;
   try {
@@ -7784,6 +7947,24 @@ async function read_text_body(response) {
     return Result$Error(FetchError$UnableToReadBody());
   }
   return Result$Ok(map6(response, () => body));
+}
+function stream_body(response) {
+  try {
+    const reader = response.body.body.getReader();
+    return Result$Ok(reader);
+  } catch (error) {
+    return Result$Error(FetchError$UnableToReadBody());
+  }
+}
+async function read_chunk(reader) {
+  try {
+    const { done, value: value2 } = await reader.read();
+    if (done)
+      return Result$Ok(Option$None());
+    return Result$Ok(Option$Some(BitArray$BitArray(value2)));
+  } catch (error) {
+    return Result$Error(FetchError$UnableToReadBody());
+  }
 }
 function arrayToList2(array3) {
   let list4 = List$Empty();
@@ -7834,6 +8015,12 @@ class HttpError extends CustomType {
     this[0] = $0;
   }
 }
+class JsonError extends CustomType {
+  constructor($0) {
+    super();
+    this[0] = $0;
+  }
+}
 class NetworkError2 extends CustomType {
 }
 var Error$NetworkError$const = new NetworkError2;
@@ -7848,6 +8035,13 @@ class Handler2 extends CustomType {
     super();
     this.run = run2;
   }
+}
+function decode_json_body(response, decoder) {
+  let _pipe = response.body;
+  let _pipe$1 = parse3(_pipe, decoder);
+  return map_error(_pipe$1, (var0) => {
+    return new JsonError(var0);
+  });
 }
 function expect_ok_response(handler) {
   return new Handler2((result) => {
@@ -7865,6 +8059,34 @@ function expect_ok_response(handler) {
         }
       }
     }));
+  });
+}
+function expect_json_response(handler) {
+  return expect_ok_response((result) => {
+    return handler(try$(result, (response) => {
+      let $ = get_header(response, "content-type");
+      if ($ instanceof Ok) {
+        let $1 = $[0];
+        if ($1 === "application/json") {
+          return new Ok(response);
+        } else if ($1.startsWith("application/json;")) {
+          return new Ok(response);
+        } else {
+          return new Error(new UnhandledResponse(response));
+        }
+      } else {
+        return new Error(new UnhandledResponse(response));
+      }
+    }));
+  });
+}
+function expect_json(decoder, handler) {
+  return expect_json_response((result) => {
+    let _pipe = result;
+    let _pipe$1 = try$(_pipe, (_capture) => {
+      return decode_json_body(_capture, decoder);
+    });
+    return handler(_pipe$1);
   });
 }
 function do_send(request, handler) {
@@ -7892,32 +8114,6 @@ function do_send(request, handler) {
 }
 function send3(request, handler) {
   return do_send(request, handler);
-}
-function do_send_bits(request, handler) {
-  return from2((dispatch2) => {
-    let _pipe = send_bits(request);
-    let _pipe$1 = try_await(_pipe, read_bytes_body);
-    let _pipe$2 = map_promise(_pipe$1, (_capture) => {
-      return map_error(_capture, (error) => {
-        if (error instanceof NetworkError) {
-          return Error$NetworkError$const;
-        } else if (error instanceof UnableToReadBody) {
-          return Error$BadBody$const;
-        } else {
-          return Error$BadBody$const;
-        }
-      });
-    });
-    let _pipe$3 = rescue(_pipe$2, (_) => {
-      return new Error(Error$NetworkError$const);
-    });
-    let _pipe$4 = map_promise(_pipe$3, handler.run);
-    tap(_pipe$4, dispatch2);
-    return;
-  });
-}
-function send_bits2(request, handler) {
-  return do_send_bits(request, handler);
 }
 // build/dev/javascript/glexer/glexer.ffi.mjs
 function slice_bytes(string5, start5, size3) {
@@ -12377,11 +12573,11 @@ class RecordUpdate extends CustomType {
   }
 }
 class FieldAccess extends CustomType {
-  constructor(location, container, label) {
+  constructor(location, container, label2) {
     super();
     this.location = location;
     this.container = container;
-    this.label = label;
+    this.label = label2;
   }
 }
 class Call extends CustomType {
@@ -12401,10 +12597,10 @@ class TupleIndex extends CustomType {
   }
 }
 class FnCapture extends CustomType {
-  constructor(location, label, function$, arguments_before, arguments_after) {
+  constructor(location, label2, function$, arguments_before, arguments_after) {
     super();
     this.location = location;
-    this.label = label;
+    this.label = label2;
     this.function = function$;
     this.arguments_before = arguments_before;
     this.arguments_after = arguments_after;
@@ -12635,9 +12831,9 @@ class FnParameter extends CustomType {
   }
 }
 class FunctionParameter extends CustomType {
-  constructor(label, name, type_2) {
+  constructor(label2, name, type_2) {
     super();
-    this.label = label;
+    this.label = label2;
     this.name = name;
     this.type_ = type_2;
   }
@@ -12717,17 +12913,17 @@ class Variant extends CustomType {
   }
 }
 class RecordUpdateField extends CustomType {
-  constructor(label, item) {
+  constructor(label2, item) {
     super();
-    this.label = label;
+    this.label = label2;
     this.item = item;
   }
 }
 class LabelledVariantField extends CustomType {
-  constructor(item, label) {
+  constructor(item, label2) {
     super();
     this.item = item;
-    this.label = label;
+    this.label = label2;
   }
 }
 class UnlabelledVariantField extends CustomType {
@@ -12737,17 +12933,17 @@ class UnlabelledVariantField extends CustomType {
   }
 }
 class LabelledField extends CustomType {
-  constructor(label, label_location, item) {
+  constructor(label2, label_location, item) {
     super();
-    this.label = label;
+    this.label = label2;
     this.label_location = label_location;
     this.item = item;
   }
 }
 class ShorthandField extends CustomType {
-  constructor(label, location) {
+  constructor(label2, location) {
     super();
-    this.label = label;
+    this.label = label2;
     this.location = location;
   }
 }
@@ -14809,14 +15005,14 @@ function use_pattern(tokens) {
     });
   });
 }
-function fn_capture(label, function$, before, after, tokens) {
+function fn_capture(label2, function$, before, after, tokens) {
   if (tokens instanceof Empty) {
     return new Error(Error$UnexpectedEndOfInput$const);
   } else if (tokens.head[0] instanceof RightParen) {
     let tokens$1 = tokens.tail;
     let end = tokens.head[1].byte_offset;
     let span2 = new Span(function$.location.start, end + 1);
-    let capture = new FnCapture(span2, label, function$, before, reverse2(after));
+    let capture = new FnCapture(span2, label2, function$, before, reverse2(after));
     return after_expression(capture, tokens$1);
   } else {
     return try$(field2(tokens, expression), (_use0) => {
@@ -14831,11 +15027,11 @@ function fn_capture(label, function$, before, after, tokens) {
           let tokens$2 = tokens$1.tail;
           let end = tokens$1.head[1].byte_offset;
           let span2 = new Span(function$.location.start, end + 1);
-          let call$1 = new FnCapture(span2, label, function$, before, reverse2(after$1));
+          let call$1 = new FnCapture(span2, label2, function$, before, reverse2(after$1));
           return after_expression(call$1, tokens$2);
         } else if ($ instanceof Comma) {
           let tokens$2 = tokens$1.tail;
-          return fn_capture(label, function$, before, after$1, tokens$2);
+          return fn_capture(label2, function$, before, after$1, tokens$2);
         } else {
           let other = $;
           let position = tokens$1.head[1];
@@ -14910,9 +15106,9 @@ function call(arguments$, function$, tokens) {
             if ($1.head[0] instanceof Colon) {
               let $4 = $2.head[0];
               if ($4 instanceof DiscardName && $4[0] === "") {
-                let label = $[0];
+                let label2 = $[0];
                 let tokens$1 = $3;
-                return fn_capture(new Some(label), function$, reverse2(arguments$), List$Empty$const, tokens$1);
+                return fn_capture(new Some(label2), function$, reverse2(arguments$), List$Empty$const, tokens$1);
               } else {
                 return try$(field2(tokens, expression), (_use0) => {
                   let argument = _use0[0];
@@ -14974,11 +15170,11 @@ function call(arguments$, function$, tokens) {
                   let $6 = $3.head[0];
                   if ($6 instanceof RightParen) {
                     if ($5[0] === "") {
-                      let label = $[0];
+                      let label2 = $[0];
                       let tokens$1 = $4;
                       let end = $3.head[1].byte_offset;
                       let span2 = new Span(function$.location.start, end + 1);
-                      let capture = new FnCapture(span2, new Some(label), function$, reverse2(arguments$), List$Empty$const);
+                      let capture = new FnCapture(span2, new Some(label2), function$, reverse2(arguments$), List$Empty$const);
                       return after_expression(capture, tokens$1);
                     } else {
                       return try$(field2(tokens, expression), (_use0) => {
@@ -15008,9 +15204,9 @@ function call(arguments$, function$, tokens) {
                     }
                   } else if ($6 instanceof Comma) {
                     if ($5[0] === "") {
-                      let label = $[0];
+                      let label2 = $[0];
                       let tokens$1 = $4;
-                      return fn_capture(new Some(label), function$, reverse2(arguments$), List$Empty$const, tokens$1);
+                      return fn_capture(new Some(label2), function$, reverse2(arguments$), List$Empty$const, tokens$1);
                     } else {
                       return try$(field2(tokens, expression), (_use0) => {
                         let argument = _use0[0];
@@ -15038,9 +15234,9 @@ function call(arguments$, function$, tokens) {
                       });
                     }
                   } else if ($5[0] === "") {
-                    let label = $[0];
+                    let label2 = $[0];
                     let tokens$1 = $3;
-                    return fn_capture(new Some(label), function$, reverse2(arguments$), List$Empty$const, tokens$1);
+                    return fn_capture(new Some(label2), function$, reverse2(arguments$), List$Empty$const, tokens$1);
                   } else {
                     return try$(field2(tokens, expression), (_use0) => {
                       let argument = _use0[0];
@@ -15125,11 +15321,11 @@ function call(arguments$, function$, tokens) {
                 let $6 = $3.head[0];
                 if ($6 instanceof RightParen) {
                   if ($5[0] === "") {
-                    let label = $[0];
+                    let label2 = $[0];
                     let tokens$1 = $4;
                     let end = $3.head[1].byte_offset;
                     let span2 = new Span(function$.location.start, end + 1);
-                    let capture = new FnCapture(span2, new Some(label), function$, reverse2(arguments$), List$Empty$const);
+                    let capture = new FnCapture(span2, new Some(label2), function$, reverse2(arguments$), List$Empty$const);
                     return after_expression(capture, tokens$1);
                   } else {
                     return try$(field2(tokens, expression), (_use0) => {
@@ -15160,11 +15356,11 @@ function call(arguments$, function$, tokens) {
                 } else if ($6 instanceof Comma) {
                   if ($4.head[0] instanceof RightParen) {
                     if ($5[0] === "") {
-                      let label = $[0];
+                      let label2 = $[0];
                       let tokens$1 = $4.tail;
                       let end = $4.head[1].byte_offset;
                       let span2 = new Span(function$.location.start, end + 1);
-                      let capture = new FnCapture(span2, new Some(label), function$, reverse2(arguments$), List$Empty$const);
+                      let capture = new FnCapture(span2, new Some(label2), function$, reverse2(arguments$), List$Empty$const);
                       return after_expression(capture, tokens$1);
                     } else {
                       return try$(field2(tokens, expression), (_use0) => {
@@ -15193,9 +15389,9 @@ function call(arguments$, function$, tokens) {
                       });
                     }
                   } else if ($5[0] === "") {
-                    let label = $[0];
+                    let label2 = $[0];
                     let tokens$1 = $4;
-                    return fn_capture(new Some(label), function$, reverse2(arguments$), List$Empty$const, tokens$1);
+                    return fn_capture(new Some(label2), function$, reverse2(arguments$), List$Empty$const, tokens$1);
                   } else {
                     return try$(field2(tokens, expression), (_use0) => {
                       let argument = _use0[0];
@@ -15223,9 +15419,9 @@ function call(arguments$, function$, tokens) {
                     });
                   }
                 } else if ($5[0] === "") {
-                  let label = $[0];
+                  let label2 = $[0];
                   let tokens$1 = $3;
-                  return fn_capture(new Some(label), function$, reverse2(arguments$), List$Empty$const, tokens$1);
+                  return fn_capture(new Some(label2), function$, reverse2(arguments$), List$Empty$const, tokens$1);
                 } else {
                   return try$(field2(tokens, expression), (_use0) => {
                     let argument = _use0[0];
@@ -15623,17 +15819,17 @@ function after_expression(loop$parsed, loop$tokens) {
           if ($2 instanceof Name) {
             let tokens$1 = $.tail;
             let label_start = $.head[1].byte_offset;
-            let label = $2[0];
-            let span2 = new Span(parsed.location.start, string_offset(label_start, label));
-            let expression$1 = new FieldAccess(span2, parsed, label);
+            let label2 = $2[0];
+            let span2 = new Span(parsed.location.start, string_offset(label_start, label2));
+            let expression$1 = new FieldAccess(span2, parsed, label2);
             loop$parsed = expression$1;
             loop$tokens = tokens$1;
           } else if ($2 instanceof UpperName) {
             let tokens$1 = $.tail;
             let label_start = $.head[1].byte_offset;
-            let label = $2[0];
-            let span2 = new Span(parsed.location.start, string_offset(label_start, label));
-            let expression$1 = new FieldAccess(span2, parsed, label);
+            let label2 = $2[0];
+            let span2 = new Span(parsed.location.start, string_offset(label_start, label2));
+            let expression$1 = new FieldAccess(span2, parsed, label2);
             loop$parsed = expression$1;
             loop$tokens = tokens$1;
           } else if ($2 instanceof Int) {
@@ -17108,14 +17304,14 @@ function function_parameter(tokens) {
           let $2 = $.head[0];
           if ($2 instanceof Name) {
             let tokens$1 = $.tail;
-            let label = $1[0];
+            let label2 = $1[0];
             let name$1 = $2[0];
-            return new Ok([new Some(label), new Named(name$1), tokens$1]);
+            return new Ok([new Some(label2), new Named(name$1), tokens$1]);
           } else if ($2 instanceof DiscardName) {
             let tokens$1 = $.tail;
-            let label = $1[0];
+            let label2 = $1[0];
             let name$1 = $2[0];
-            return new Ok([new Some(label), new Discarded(name$1), tokens$1]);
+            return new Ok([new Some(label2), new Discarded(name$1), tokens$1]);
           } else {
             let tokens$1 = $;
             let name$1 = $1[0];
@@ -17133,13 +17329,13 @@ function function_parameter(tokens) {
       }
     }
   })(), (_use0) => {
-    let label = _use0[0];
+    let label2 = _use0[0];
     let parameter = _use0[1];
     let tokens$1 = _use0[2];
     return try$(optional_type_annotation(tokens$1), (_use02) => {
       let type_$1 = _use02[0];
       let tokens$2 = _use02[1];
-      return new Ok([new FunctionParameter(label, parameter, type_$1), tokens$2]);
+      return new Ok([new FunctionParameter(label2, parameter, type_$1), tokens$2]);
     });
   });
 }
@@ -18272,8 +18468,8 @@ function pattern_names(pattern2) {
         let p2 = field3.item;
         return pattern_names(p2);
       } else if (field3 instanceof ShorthandField) {
-        let label = field3.label;
-        return prepend(label, List$Empty$const);
+        let label2 = field3.label;
+        return prepend(label2, List$Empty$const);
       } else {
         let p2 = field3.item;
         return pattern_names(p2);
@@ -18308,8 +18504,8 @@ function in_fields(fields, bound, acc) {
       let item = field3.item;
       return in_expr(item, bound, acc2);
     } else if (field3 instanceof ShorthandField) {
-      let label = field3.label;
-      return value2(acc2, bound, label);
+      let label2 = field3.label;
+      return value2(acc2, bound, label2);
     } else {
       let item = field3.item;
       return in_expr(item, bound, acc2);
@@ -18681,10 +18877,10 @@ class NoSuchExport extends CustomType {
   }
 }
 class NoSuchField extends CustomType {
-  constructor(type_name, label) {
+  constructor(type_name, label2) {
     super();
     this.type_name = type_name;
-    this.label = label;
+    this.label = label2;
   }
 }
 class NotARecord extends CustomType {
@@ -18700,9 +18896,9 @@ class TupleIndexOutOfRange extends CustomType {
   }
 }
 class UnknownLabel extends CustomType {
-  constructor(label) {
+  constructor(label2) {
     super();
-    this.label = label;
+    this.label = label2;
   }
 }
 class AmbiguousCall extends CustomType {
@@ -18742,10 +18938,10 @@ class Dropped extends CustomType {
   }
 }
 class RecordField extends CustomType {
-  constructor(receiver, label) {
+  constructor(receiver, label2) {
     super();
     this.receiver = receiver;
-    this.label = label;
+    this.label = label2;
   }
 }
 class ModuleFn extends CustomType {
@@ -18819,10 +19015,10 @@ class State extends CustomType {
 }
 
 class PendingField extends CustomType {
-  constructor(container, label, result) {
+  constructor(container, label2, result) {
     super();
     this.container = container;
-    this.label = label;
+    this.label = label2;
     this.result = result;
   }
 }
@@ -18845,10 +19041,10 @@ class Reference extends CustomType {
 }
 
 class ResolvedField extends CustomType {
-  constructor(record, label) {
+  constructor(record, label2) {
     super();
     this.record = record;
-    this.label = label;
+    this.label = label2;
   }
 }
 
@@ -18864,10 +19060,10 @@ class ResolvedDeferred extends CustomType {
 var Resolved$ResolvedDeferred$const = new ResolvedDeferred;
 
 class Spans extends CustomType {
-  constructor(span2, label, container) {
+  constructor(span2, label2, container) {
     super();
     this.span = span2;
-    this.label = label;
+    this.label = label2;
     this.container = container;
   }
 }
@@ -19110,8 +19306,8 @@ function to_public(type_3) {
 function publish_resolution(st, resolved) {
   if (resolved instanceof ResolvedField) {
     let receiver = resolved.record;
-    let label = resolved.label;
-    return new RecordField(to_public(zonk(st, receiver)), label);
+    let label2 = resolved.label;
+    return new RecordField(to_public(zonk(st, receiver)), label2);
   } else if (resolved instanceof ResolvedValue) {
     let $ = resolved.variant;
     if ($ instanceof LocalValue) {
@@ -19939,7 +20135,7 @@ function accessors_of_module(env, module2) {
     }
   }
 }
-function accessor(env, record, label) {
+function accessor(env, record, label2) {
   if (record instanceof Named2) {
     let module2 = record.module;
     let name2 = record.name;
@@ -19948,14 +20144,14 @@ function accessor(env, record, label) {
     let $ = get(accessors, name2);
     if ($ instanceof Ok) {
       let found = $[0];
-      let $1 = get(accessors_for_variant(found, variant), label);
+      let $1 = get(accessors_for_variant(found, variant), label2);
       if ($1 instanceof Ok) {
         return $1;
       } else {
-        return new Error(new NoSuchField(name2, label));
+        return new Error(new NoSuchField(name2, label2));
       }
     } else {
-      return new Error(new NoSuchField(name2, label));
+      return new Error(new NoSuchField(name2, label2));
     }
   } else {
     return new Error(Error$NotARecord$const);
@@ -19964,12 +20160,12 @@ function accessor(env, record, label) {
 function resolve_one(env, st, item) {
   if (item instanceof PendingField) {
     let container = item.container;
-    let label = item.label;
+    let label2 = item.label;
     let field3 = item.result;
     let $ = resolve2(st, container);
     if ($ instanceof Named2) {
       let record$1 = $;
-      return try$(accessor(env, record$1, label), (scheme) => {
+      return try$(accessor(env, record$1, label2), (scheme) => {
         let $1 = instantiate(st, scheme);
         let accessor_type = $1[0];
         let st$1 = $1[1];
@@ -20273,18 +20469,18 @@ function indices_loop(i, acc) {
 function indices(n) {
   return indices_loop(n - 1, List$Empty$const);
 }
-function label_index(index_of, label) {
-  let $ = get(index_of, label);
+function label_index(index_of, label2) {
+  let $ = get(index_of, label2);
   if ($ instanceof Ok) {
     return $;
   } else {
-    return new Error(new UnknownLabel(label));
+    return new Error(new UnknownLabel(label2));
   }
 }
 function label_indices(labels) {
-  return index_fold(labels, make(), (acc, label, index5) => {
-    if (label instanceof Some) {
-      let name2 = label[0];
+  return index_fold(labels, make(), (acc, label2, index5) => {
+    if (label2 instanceof Some) {
+      let name2 = label2[0];
       return insert(acc, name2, index5);
     } else {
       return acc;
@@ -20295,16 +20491,16 @@ function order_pattern_args(labels, arguments$, arity) {
   let index_of = label_indices(labels);
   return try$(try_fold(arguments$, make(), (placed, field3) => {
     if (field3 instanceof LabelledField) {
-      let label = field3.label;
+      let label2 = field3.label;
       let item = field3.item;
-      return try$(label_index(index_of, label), (index5) => {
+      return try$(label_index(index_of, label2), (index5) => {
         return new Ok(insert(placed, index5, item));
       });
     } else if (field3 instanceof ShorthandField) {
-      let label = field3.label;
+      let label2 = field3.label;
       let location = field3.location;
-      return try$(label_index(index_of, label), (index5) => {
-        return new Ok(insert(placed, index5, new PatternVariable(location, label)));
+      return try$(label_index(index_of, label2), (index5) => {
+        return new Ok(insert(placed, index5, new PatternVariable(location, label2)));
       });
     } else {
       return new Ok(placed);
@@ -20724,16 +20920,16 @@ function reorder(fields, labels, shorthand) {
   let index_of = label_indices(labels);
   return try$(try_fold(fields, make(), (placed, field3) => {
     if (field3 instanceof LabelledField) {
-      let label = field3.label;
+      let label2 = field3.label;
       let item = field3.item;
-      return try$(label_index(index_of, label), (index5) => {
+      return try$(label_index(index_of, label2), (index5) => {
         return new Ok(insert(placed, index5, item));
       });
     } else if (field3 instanceof ShorthandField) {
-      let label = field3.label;
+      let label2 = field3.label;
       let location = field3.location;
-      return try$(label_index(index_of, label), (index5) => {
-        return new Ok(insert(placed, index5, shorthand(label, location)));
+      return try$(label_index(index_of, label2), (index5) => {
+        return new Ok(insert(placed, index5, shorthand(label2, location)));
       });
     } else {
       return new Ok(placed);
@@ -20790,8 +20986,8 @@ function order_fields(labels, fields, shorthand) {
   });
 }
 function place_arguments(st, fn_type2, labels, slots, wrap, check_slot) {
-  return try$(order_fields(labels, slots, (label, location) => {
-    return wrap(new Variable(location, label));
+  return try$(order_fields(labels, slots, (label2, location) => {
+    return wrap(new Variable(location, label2));
   }), (ordered) => {
     let $ = fresh_n(st, length(ordered));
     let holes = $[0];
@@ -20810,10 +21006,10 @@ function place_arguments(st, fn_type2, labels, slots, wrap, check_slot) {
 }
 function map_field(field3, wrap) {
   if (field3 instanceof LabelledField) {
-    let label = field3.label;
+    let label2 = field3.label;
     let location = field3.label_location;
     let item = field3.item;
-    return new LabelledField(label, location, wrap(item));
+    return new LabelledField(label2, location, wrap(item));
   } else if (field3 instanceof ShorthandField) {
     return field3;
   } else {
@@ -20829,10 +21025,10 @@ function instantiate_in(env, st, name2, scheme) {
     return instantiate(st, scheme);
   }
 }
-function record_access(st, spans, label, access) {
+function record_access(st, spans, label2, access) {
   if (access instanceof Field) {
     let record$1 = access.record;
-    return reference(st, spans, new ResolvedField(record$1, label));
+    return reference(st, spans, new ResolvedField(record$1, label2));
   } else if (access instanceof Export) {
     let variant = access.variant;
     return reference(st, spans, new ResolvedValue(variant));
@@ -20840,15 +21036,15 @@ function record_access(st, spans, label, access) {
     return reference(st, spans, Resolved$ResolvedDeferred$const);
   }
 }
-function pending_field(st, container_type, label) {
+function pending_field(st, container_type, label2) {
   let $ = fresh(st);
   let field3 = $[0];
   let st$1 = $[1];
-  let st$2 = new State(st$1.next_id, st$1.subst, st$1.annotations, st$1.references, prepend(new PendingField(container_type, label, field3), st$1.pending), st$1.rigid);
+  let st$2 = new State(st$1.next_id, st$1.subst, st$1.annotations, st$1.references, prepend(new PendingField(container_type, label2, field3), st$1.pending), st$1.rigid);
   return new Ok([field3, Access$Deferred$const, st$2]);
 }
-function field_type(env, st, record2, label) {
-  return try$(accessor(env, resolve2(st, record2), label), (accessor_scheme) => {
+function field_type(env, st, record2, label2) {
+  return try$(accessor(env, resolve2(st, record2), label2), (accessor_scheme) => {
     let $ = instantiate(st, accessor_scheme);
     let accessor_type = $[0];
     let st$1 = $[1];
@@ -20866,17 +21062,17 @@ function module_export(st, entry) {
   let st$1 = $[1];
   return new Ok([type_3, new Export(entry.variant), st$1]);
 }
-function module_access(env, name2, label) {
+function module_access(env, name2, label2) {
   let $ = get(env.modules, name2);
   if ($ instanceof Ok) {
     let interface$ = $[0];
-    return from_result(get(interface$.values, label));
+    return from_result(get(interface$.values, label2));
   } else {
     return Option$None$const;
   }
 }
-function access_spans(access, container, label) {
-  return new Spans(access, new Span(access.end - byte_size(label), access.end), span2(container));
+function access_spans(access, container, label2) {
+  return new Spans(access, new Span(access.end - byte_size(label2), access.end), span2(container));
 }
 function erase_binding(st, env, name2) {
   let $ = get(env.values, name2);
@@ -20968,9 +21164,9 @@ function field_item(field3) {
     let item = field3.item;
     return item;
   } else if (field3 instanceof ShorthandField) {
-    let label = field3.label;
+    let label2 = field3.label;
     let location = field3.location;
-    return new Variable(location, label);
+    return new Variable(location, label2);
   } else {
     let item = field3.item;
     return item;
@@ -21112,7 +21308,7 @@ function check_callback(env, st, use_patterns, rest, expected) {
     });
   });
 }
-function module_or_record(env, st, container, label, export$) {
+function module_or_record(env, st, container, label2, export$) {
   if (export$ instanceof Some) {
     let export$1 = export$[0];
     return module_export(st, export$1);
@@ -21123,29 +21319,29 @@ function module_or_record(env, st, container, label, export$) {
       let $ = resolve2(st$1, container_type);
       if ($ instanceof Named2) {
         let record$1 = $;
-        return try$(field_type(env, st$1, record$1, label), (_use02) => {
+        return try$(field_type(env, st$1, record$1, label2), (_use02) => {
           let field3 = _use02[0];
           let st$2 = _use02[1];
           return new Ok([field3, new Field(record$1), st$2]);
         });
       } else if ($ instanceof Var) {
-        return pending_field(st$1, container_type, label);
+        return pending_field(st$1, container_type, label2);
       } else {
         return new Error(Error$NotARecord$const);
       }
     });
   }
 }
-function value_field(env, st, container, label, export$) {
+function value_field(env, st, container, label2, export$) {
   return try$(infer_expr(env, st, container), (_use0) => {
     let container_type = _use0[0];
     let st$1 = _use0[1];
     let $ = resolve2(st$1, container_type);
     if ($ instanceof Named2) {
       let record$1 = $;
-      let $1 = accessor(env, record$1, label);
+      let $1 = accessor(env, record$1, label2);
       if ($1 instanceof Ok) {
-        return try$(field_type(env, st$1, record$1, label), (_use02) => {
+        return try$(field_type(env, st$1, record$1, label2), (_use02) => {
           let field3 = _use02[0];
           let st$2 = _use02[1];
           return new Ok([field3, new Field(record$1), st$2]);
@@ -21164,7 +21360,7 @@ function value_field(env, st, container, label, export$) {
         let export$1 = export$[0];
         return module_export(st$1, export$1);
       } else {
-        return pending_field(st$1, container_type, label);
+        return pending_field(st$1, container_type, label2);
       }
     } else {
       if (export$ instanceof Some) {
@@ -21176,26 +21372,26 @@ function value_field(env, st, container, label, export$) {
     }
   });
 }
-function infer_field_access(env, st, access, container, label) {
-  let spans = access_spans(access, container, label);
+function infer_field_access(env, st, access, container, label2) {
+  let spans = access_spans(access, container, label2);
   return try$((() => {
     if (container instanceof Variable) {
       let name2 = container.name;
-      let export$ = module_access(env, name2, label);
+      let export$ = module_access(env, name2, label2);
       let $ = has(env.values, name2);
       if ($) {
-        return value_field(env, st, container, label, export$);
+        return value_field(env, st, container, label2, export$);
       } else {
-        return module_or_record(env, st, container, label, export$);
+        return module_or_record(env, st, container, label2, export$);
       }
     } else {
-      return module_or_record(env, st, container, label, Option$None$const);
+      return module_or_record(env, st, container, label2, Option$None$const);
     }
   })(), (_use0) => {
     let type_3 = _use0[0];
     let branch = _use0[1];
     let st$1 = _use0[2];
-    return new Ok([type_3, branch, record_access(st$1, spans, label, branch)]);
+    return new Ok([type_3, branch, record_access(st$1, spans, label2, branch)]);
   });
 }
 function infer_callee(env, st, function$) {
@@ -21221,8 +21417,8 @@ function infer_callee(env, st, function$) {
   } else if (function$ instanceof FieldAccess) {
     let access_span = function$.location;
     let container = function$.container;
-    let label = function$.label;
-    return try$(infer_field_access(env, st, access_span, container, label), (_use0) => {
+    let label2 = function$.label;
+    return try$(infer_field_access(env, st, access_span, container, label2), (_use0) => {
       let type_3 = _use0[0];
       let access = _use0[1];
       let st$1 = _use0[2];
@@ -21493,8 +21689,8 @@ function infer_record_update(env, st, module2, constructor, record2, fields) {
       let label_types = fold2(zip(labels, field_types), make(), (acc, pair) => {
         let $22 = pair[0];
         if ($22 instanceof Some) {
-          let label = $22[0];
-          return insert(acc, label, pair[1]);
+          let label2 = $22[0];
+          return insert(acc, label2, pair[1]);
         } else {
           return acc;
         }
@@ -21514,9 +21710,9 @@ function infer_record_update(env, st, module2, constructor, record2, fields) {
           }), (st3) => {
             let to_record_params = from_list(zip(filter_map(type_parameters, var_id), record_parameters));
             return try$(try_fold(to_list(label_types), st3, (st4, pair) => {
-              let label = pair[0];
+              let label2 = pair[0];
               let expected = pair[1];
-              let $3 = contains(updated, label);
+              let $3 = contains(updated, label2);
               if ($3) {
                 return new Ok(st4);
               } else {
@@ -21879,7 +22075,7 @@ function infer_binop(env, st, span3, op, left, right) {
     });
   }
 }
-function infer_capture(env, st, span3, label, function$, before, after) {
+function infer_capture(env, st, span3, label2, function$, before, after) {
   return try$(infer_callee(env, st, function$), (_use0) => {
     let fn_type2 = _use0[0];
     let labels = _use0[1];
@@ -21888,8 +22084,8 @@ function infer_capture(env, st, span3, label, function$, before, after) {
     let hole = $[0];
     let st$2 = $[1];
     let _block;
-    if (label instanceof Some) {
-      let name2 = label[0];
+    if (label2 instanceof Some) {
+      let name2 = label2[0];
       _block = new LabelledField(name2, span3, CallSlot$Implicit$const);
     } else {
       _block = new UnlabelledField(CallSlot$Implicit$const);
@@ -22036,8 +22232,8 @@ function infer_expr_inner(env, st, expr) {
   } else if (expr instanceof FieldAccess) {
     let access = expr.location;
     let container = expr.container;
-    let label = expr.label;
-    return try$(infer_field_access(env, st, access, container, label), (_use0) => {
+    let label2 = expr.label;
+    return try$(infer_field_access(env, st, access, container, label2), (_use0) => {
       let type_3 = _use0[0];
       let st$1 = _use0[2];
       return new Ok([type_3, st$1]);
@@ -22075,11 +22271,11 @@ function infer_expr_inner(env, st, expr) {
     });
   } else if (expr instanceof FnCapture) {
     let span$1 = expr.location;
-    let label = expr.label;
+    let label2 = expr.label;
     let function$ = expr.function;
     let before = expr.arguments_before;
     let after = expr.arguments_after;
-    return infer_capture(env, st, span$1, label, function$, before, after);
+    return infer_capture(env, st, span$1, label2, function$, before, after);
   } else if (expr instanceof BitString) {
     let segments = expr.segments;
     return try$(try_fold(segments, st, (st2, segment) => {
@@ -22528,8 +22724,8 @@ function variant_accessors(fields, param_ids, return_type) {
     let $ = field3[0];
     if ($ instanceof Some) {
       let field_type$1 = field3[1];
-      let label = $[0];
-      return insert(accessors, label, new Scheme(param_ids, new Fn3(prepend(return_type, List$Empty$const), field_type$1)));
+      let label2 = $[0];
+      return insert(accessors, label2, new Scheme(param_ids, new Fn3(prepend(return_type, List$Empty$const), field_type$1)));
     } else {
       return accessors;
     }
@@ -22549,8 +22745,8 @@ function shared_accessors(variants2, param_ids, return_type) {
         let $ = field3[0];
         if ($ instanceof Some) {
           let field_type$1 = field3[1];
-          let label = $[0];
-          return insert(accessors, label, new Scheme(param_ids, new Fn3(prepend(return_type, List$Empty$const), field_type$1)));
+          let label2 = $[0];
+          return insert(accessors, label2, new Scheme(param_ids, new Fn3(prepend(return_type, List$Empty$const), field_type$1)));
         } else {
           return accessors;
         }
@@ -22602,13 +22798,13 @@ function register_custom_type(env, st, custom_type2) {
       let st$4 = $32[1];
       let _block2;
       if (field3 instanceof LabelledVariantField) {
-        let label2 = field3.label;
-        _block2 = new Some(label2);
+        let label3 = field3.label;
+        _block2 = new Some(label3);
       } else {
         _block2 = Option$None$const;
       }
-      let label = _block2;
-      return [prepend([label, t], fields2), st$4];
+      let label2 = _block2;
+      return [prepend([label2, t], fields2), st$4];
     });
     let rev_fields = $2[0];
     let st$3 = $2[1];
@@ -23207,6 +23403,28 @@ class Package extends CustomType {
     this.latest_version = latest_version;
   }
 }
+function package_decoder() {
+  return field("name", string2, (name2) => {
+    return field("description", string2, (description) => {
+      return field("repository", optional(string2), (repository) => {
+        return field("updated-at", (() => {
+          let _pipe = int2;
+          return map3(_pipe, from_unix_seconds);
+        })(), (updated_at) => {
+          return field("owners", list2(string2), (owners) => {
+            return field("total-downloads", int2, (total_downloads) => {
+              return field("recent-downloads", int2, (recent_downloads) => {
+                return field("latest-version", string2, (latest_version) => {
+                  return success(new Package(name2, description, repository, updated_at, owners, total_downloads, recent_downloads, latest_version));
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
 // build/dev/javascript/timeago/timeago.mjs
 class TimeAgo extends CustomType {
   constructor(now, locale) {
@@ -23362,6 +23580,49 @@ function format(time_ago, timestamp) {
   let tense = _block;
   return time_ago.locale(tense, unit, magnitude);
 }
+// build/dev/javascript/jooc/localstorage_ffi.mjs
+function set_autodownload(value3) {
+  localStorage.setItem("sqlite-db-autodownload", value3);
+}
+function get_autodownload() {
+  return localStorage.getItem("sqlite-db-autodownload") === "true";
+}
+
+// build/dev/javascript/jooc/range_map.mjs
+function range_loop_reversed(loop$current, loop$stop, loop$increment, loop$acc, loop$num_to_thing) {
+  while (true) {
+    let current = loop$current;
+    let stop = loop$stop;
+    let increment = loop$increment;
+    let acc = loop$acc;
+    let num_to_thing = loop$num_to_thing;
+    let $ = current === stop;
+    if ($) {
+      return acc;
+    } else {
+      let acc$1 = prepend(num_to_thing(current), acc);
+      let current$1 = current + increment;
+      loop$current = current$1;
+      loop$stop = stop;
+      loop$increment = increment;
+      loop$acc = acc$1;
+      loop$num_to_thing = num_to_thing;
+    }
+  }
+}
+function range2(start5, stop, num_to_thing) {
+  let _block;
+  let $ = start5 < stop;
+  if ($) {
+    _block = 1;
+  } else {
+    _block = -1;
+  }
+  let increment = _block;
+  let _pipe = range_loop_reversed(start5, stop, increment, List$Empty$const, num_to_thing);
+  return reverse2(_pipe);
+}
+
 // build/dev/javascript/jooc/sql.mjs
 var all2 = `SELECT
   p.name, p.description, p.repository, p.updated_at, p.owners,
@@ -23562,18 +23823,99 @@ function save_cached2(etag, bits2) {
   });
 }
 
+// build/dev/javascript/jooc/streamer.mjs
+var FILEPATH3 = "src/streamer.gleam";
+function read_chunks(resp, reader, chunks, received, total, dispatch2, progress_message) {
+  return try_await(read_chunk(reader), (chunk) => {
+    if (chunk instanceof Some) {
+      let bytes = chunk[0];
+      let received$1 = received + bit_array_byte_size(bytes);
+      let progress = divideFloat(identity(received$1), identity(total));
+      dispatch2(progress_message(progress));
+      return read_chunks(resp, reader, prepend(bytes, chunks), received$1, total, dispatch2, progress_message);
+    } else {
+      let body = bit_array_concat(reverse2(chunks));
+      return resolve(new Ok(set_body2(resp, body)));
+    }
+  });
+}
+function load_bits(request, progress_message, run_handler) {
+  return from2((dispatch2) => {
+    let _pipe = send_bits(request);
+    let _pipe$1 = try_await(_pipe, (resp) => {
+      let $ = get_header(resp, "content-length");
+      let content_length;
+      if ($ instanceof Ok) {
+        content_length = $[0];
+      } else {
+        throw makeError("let_assert", FILEPATH3, "streamer", 22, "load_bits", "Pattern match failed, no pattern matched the value.", {
+          value: $,
+          start: 583,
+          end: 658,
+          pattern_start: 594,
+          pattern_end: 612
+        });
+      }
+      let $1 = parse_int(content_length);
+      let total;
+      if ($1 instanceof Ok) {
+        total = $1[0];
+      } else {
+        throw makeError("let_assert", FILEPATH3, "streamer", 23, "load_bits", "Pattern match failed, no pattern matched the value.", {
+          value: $1,
+          start: 663,
+          end: 711,
+          pattern_start: 674,
+          pattern_end: 683
+        });
+      }
+      let $2 = stream_body(resp);
+      let reader;
+      if ($2 instanceof Ok) {
+        reader = $2[0];
+      } else {
+        throw makeError("let_assert", FILEPATH3, "streamer", 24, "load_bits", "Pattern match failed, no pattern matched the value.", {
+          value: $2,
+          start: 716,
+          end: 763,
+          pattern_start: 727,
+          pattern_end: 737
+        });
+      }
+      return read_chunks(resp, reader, List$Empty$const, 0, total, dispatch2, progress_message);
+    });
+    let _pipe$2 = map_promise(_pipe$1, (_capture) => {
+      return map_error(_capture, (error) => {
+        if (error instanceof NetworkError) {
+          return Error$NetworkError$const;
+        } else if (error instanceof UnableToReadBody) {
+          return Error$BadBody$const;
+        } else {
+          return Error$BadBody$const;
+        }
+      });
+    });
+    let _pipe$3 = rescue(_pipe$2, (_) => {
+      return new Error(Error$NetworkError$const);
+    });
+    let _pipe$4 = map_promise(_pipe$3, run_handler);
+    tap(_pipe$4, dispatch2);
+    return;
+  });
+}
+
 // build/dev/javascript/jooc/jooc.mjs
-var FILEPATH3 = "src/jooc.gleam";
+var FILEPATH4 = "src/jooc.gleam";
 
 class Model extends CustomType {
-  constructor(database, search_result, lucy, all_pkg_names, search_text, query_from_initial_uri) {
+  constructor(database, search_result, lucy, all_pkg_names, search_text, auto_download_sqlite) {
     super();
     this.database = database;
     this.search_result = search_result;
     this.lucy = lucy;
     this.all_pkg_names = all_pkg_names;
     this.search_text = search_text;
-    this.query_from_initial_uri = query_from_initial_uri;
+    this.auto_download_sqlite = auto_download_sqlite;
   }
 }
 
@@ -23602,26 +23944,21 @@ class FuzzyMatch extends CustomType {
   }
 }
 
-class Canonical extends CustomType {
+class Definitions extends CustomType {
   constructor(definitions) {
     super();
     this.definitions = definitions;
   }
 }
 
-class DbLoadingFromCache extends CustomType {
+class DbLoading extends CustomType {
 }
-var Db$DbLoadingFromCache$const = new DbLoadingFromCache;
-
-class DbLoadingFromServer extends CustomType {
-}
-var Db$DbLoadingFromServer$const = new DbLoadingFromServer;
+var Db$DbLoading$const = new DbLoading;
 
 class DbLoaded extends CustomType {
-  constructor(db, animation) {
+  constructor($0) {
     super();
-    this.db = db;
-    this.animation = animation;
+    this[0] = $0;
   }
 }
 
@@ -23632,13 +23969,30 @@ class DbError extends CustomType {
   }
 }
 
-class Finishing extends CustomType {
+class Metadata extends CustomType {
+  constructor(db, loading_percent) {
+    super();
+    this.db = db;
+    this.loading_percent = loading_percent;
+  }
 }
-var Animation$Finishing$const = new Finishing;
 
-class Done extends CustomType {
+class Code extends CustomType {
+  constructor(db) {
+    super();
+    this.db = db;
+  }
 }
-var Animation$Done$const = new Done;
+
+class PackageLowercase extends CustomType {
+  constructor(package$, name2, description, owners) {
+    super();
+    this.package = package$;
+    this.name = name2;
+    this.description = description;
+    this.owners = owners;
+  }
+}
 
 class Searching extends CustomType {
 }
@@ -23670,7 +24024,25 @@ class CacheLoaded extends CustomType {
   }
 }
 
-class ServerReturnedData extends CustomType {
+class ServerReturnedMetadata extends CustomType {
+  constructor($0) {
+    super();
+    this[0] = $0;
+  }
+}
+
+class UserClickedDownloadCode extends CustomType {
+}
+var Msg$UserClickedDownloadCode$const = new UserClickedDownloadCode;
+
+class ServerReturnedCode extends CustomType {
+  constructor($0) {
+    super();
+    this[0] = $0;
+  }
+}
+
+class ServerReturnedLoadProgress extends CustomType {
   constructor($0) {
     super();
     this[0] = $0;
@@ -23683,10 +24055,6 @@ class SqliteReturnedOpen extends CustomType {
     this[0] = $0;
   }
 }
-
-class SpinFinished extends CustomType {
-}
-var Msg$SpinFinished$const = new SpinFinished;
 
 class SqliteReturnedQuery extends CustomType {
   constructor(query_was, search_text_was, got) {
@@ -23711,19 +24079,44 @@ class UserClickedButton extends CustomType {
   }
 }
 
-class QueryFuzzy extends CustomType {
+class UserCheckedAutomaticallyDownloadSqlite extends CustomType {
+  constructor($0) {
+    super();
+    this[0] = $0;
+  }
 }
-var Query$QueryFuzzy$const = new QueryFuzzy;
 
-class QueryCanonical extends CustomType {
+class Names extends CustomType {
 }
-var Query$QueryCanonical$const = new QueryCanonical;
+var SqliteQuery$Names$const = new Names;
+
+class Query extends CustomType {
+  constructor($0) {
+    super();
+    this[0] = $0;
+  }
+}
+
+class Canonical extends CustomType {
+}
+var SqliteSearch$Canonical$const = new Canonical;
+
+class Fuzzy extends CustomType {
+}
+var SqliteSearch$Fuzzy$const = new Fuzzy;
+var metadata_src_json = "https://bucket.correctarity.com/good.json";
 var data_src = "https://bucket.correctarity.com/packages.sqlite";
-function btn(text4, premade_query) {
-  return button(prepend(on_click(new UserClickedButton(premade_query)), prepend(style("margin", "5px"), prepend(style("padding", "5px 10px"), prepend(style("color", "var(--text)"), prepend(style("cursor", "pointer"), List$Empty$const))))), prepend(text3(text4), List$Empty$const));
+function btn_styles() {
+  return prepend(style("margin", "5px"), prepend(style("padding", "5px 10px"), prepend(style("color", "var(--text)"), prepend(style("cursor", "pointer"), List$Empty$const))));
 }
-function link(href2, label) {
-  return a(prepend(href(href2), prepend(styles(prepend(["white-space", "nowrap"], List$Empty$const)), List$Empty$const)), prepend(text3(label), List$Empty$const));
+function pressable() {
+  return class$("pressable");
+}
+function btn(text4, premade_query) {
+  return button(prepend(pressable(), prepend(on_click(new UserClickedButton(premade_query)), btn_styles())), prepend(text3(text4), List$Empty$const));
+}
+function link(href2, label2) {
+  return a(prepend(href(href2), prepend(styles(prepend(["white-space", "nowrap"], List$Empty$const)), List$Empty$const)), prepend(text3(label2), List$Empty$const));
 }
 function code_block(elts) {
   return pre(prepend(styles(prepend(["margin", "0"], prepend(["margin-bottom", "0.5rem"], prepend(["padding", "0.5rem 0.75rem"], prepend(["background", "rgba(128, 128, 128, 0.15)"], prepend(["border-radius", "0.3rem"], prepend(["white-space", "pre"], prepend(["overflow-x", "auto"], List$Empty$const)))))))), List$Empty$const), prepend(code(List$Empty$const, elts), List$Empty$const));
@@ -23762,167 +24155,81 @@ function view_result(result, time_ago) {
     }
   })(), prepend(link("https://hex.pm/packages/" + package$.name, "hex"), List$Empty$const)))), List$Empty$const), false), prepend(td2(prepend(updated, List$Empty$const), true), prepend(td2(prepend(downloads, List$Empty$const), true), List$Empty$const)))))), prepend(tr(List$Empty$const, prepend(td(prepend(colspan(5), prepend(styles(prepend(["padding", "0.25rem 0 0.75rem"], prepend(["border-bottom", "1px solid #3a3a3a"], prepend(["overflow-wrap", "anywhere"], List$Empty$const)))), List$Empty$const)), prepend(p(prepend(style("margin", "0"), List$Empty$const), prepend(text3(package$.description), prepend(span(prepend(class$("mobile-only"), List$Empty$const), prepend(span(prepend(style("white-space", "nowrap"), List$Empty$const), prepend(text3("updated "), prepend(updated, prepend(text3(", "), List$Empty$const)))), prepend(wbr(List$Empty$const), prepend(span(prepend(style("white-space", "nowrap"), List$Empty$const), prepend(downloads, prepend(text3(" downloads"), List$Empty$const))), List$Empty$const)))), List$Empty$const))), map2(result.snippet, code_snippet))), List$Empty$const)), List$Empty$const)));
 }
-function th2(label, desktop_only) {
-  return th(prepend(styles(prepend(["text-align", "left"], prepend(["padding", "0.5rem 1rem 0.5rem 0"], prepend(["border-bottom", "1px solid #3a3a3a"], List$Empty$const)))), prepend(classes(prepend(["desktop-only", desktop_only], List$Empty$const)), List$Empty$const)), prepend(text3(label), List$Empty$const));
+function th2(label2, desktop_only) {
+  return th(prepend(styles(prepend(["text-align", "left"], prepend(["padding", "0.5rem 1rem 0.5rem 0"], prepend(["border-bottom", "1px solid #3a3a3a"], List$Empty$const)))), prepend(classes(prepend(["desktop-only", desktop_only], List$Empty$const)), List$Empty$const)), prepend(text3(label2), List$Empty$const));
 }
 function view_results(model, time_ago) {
-  let $ = model.database;
-  if ($ instanceof DbLoaded) {
-    let $1 = $.animation;
-    if ($1 instanceof Some) {
-      if ($1[0] instanceof Done) {
-        return div(List$Empty$const, prepend((() => {
-          let $2 = model.search_result;
-          if ($2 instanceof Empty) {
-            return p(prepend(style("margin", "0"), List$Empty$const), prepend(text3("No matching packages found here, but this is not a complete index of all gleam packages. Maybe try "), prepend(link("https://packages.gleam.run?search=" + model.search_text, "packages.gleam.run"), List$Empty$const)));
+  return div(List$Empty$const, prepend((() => {
+    let $ = model.search_result;
+    if ($ instanceof Empty) {
+      return p(prepend(style("margin", "0"), List$Empty$const), prepend(text3("No matching packages found here, but this is not a complete index of all gleam packages. Maybe try "), prepend(link("https://packages.gleam.run?search=" + model.search_text, "packages.gleam.run"), List$Empty$const)));
+    } else {
+      let search_results = $;
+      return table(prepend(styles(prepend(["width", "100%"], prepend(["border-collapse", "collapse"], List$Empty$const))), List$Empty$const), prepend(thead(List$Empty$const, prepend(tr(List$Empty$const, prepend(th2("package", false), prepend(th2("author", true), prepend(th2("links", false), prepend(th2("updated", true), prepend(th2("downloads", true), List$Empty$const)))))), List$Empty$const)), map2(search_results, (search_result) => {
+        return view_result(search_result, time_ago);
+      })));
+    }
+  })(), prepend(footer(prepend(style("padding-top", "10px"), prepend(style("padding-bottom", "10px"), List$Empty$const)), toList([
+    text3("This includes only Gleam packages that spark joy for me, i.e. not all packages are included. This package list is "),
+    strong(List$Empty$const, prepend(text3("not maintained by the Gleam team"), List$Empty$const)),
+    text3(", it is not official or objective or anything. "),
+    link("https://packages.gleam.run", "packages.gleam.run"),
+    text3(" Is Gleam's official site for seeing all packages. Thanks also to "),
+    link("https://hex.pm/", "hex.pm"),
+    text3(" and "),
+    link("https://gloogle.run", "gloogle.run"),
+    text3(".  Gleam Lucy starfish mascot © 2026 Louis Pilfold."),
+    br(List$Empty$const),
+    text3("See all packages ordered by: "),
+    span(prepend(style("display", "inline-block"), List$Empty$const), prepend(btn("new", all_pkgs_by_recent), prepend(btn("popular", all_pkgs_by_downloaded), prepend(btn("big", all_pkgs_by_big), prepend(btn("small", all_pkgs_by_small), List$Empty$const)))))
+  ])), List$Empty$const)));
+}
+function view_star(model) {
+  let _block;
+  let $ = model.lucy;
+  if ($ instanceof Searching) {
+    _block = "/static/jooc/lucyhappy.svg";
+  } else {
+    _block = "/static/jooc/lucy.svg";
+  }
+  let src2 = _block;
+  return img(prepend(src(src2), prepend(styles(prepend(["position", "absolute"], prepend(["left", "8px"], prepend(["top", "50%"], prepend(["transform", "translateY(-50%)"], prepend(["width", "32px"], prepend(["height", "32px"], prepend(["pointer-events", "none"], List$Empty$const)))))))), List$Empty$const)));
+}
+function main_view(model, pkg_db) {
+  return div(prepend(styles(prepend(["--w", "770px"], prepend(["box-sizing", "border-box"], prepend(["max-width", "var(--w)"], prepend(["margin", "0 auto"], prepend(["padding", "2rem 1.2rem 0"], List$Empty$const)))))), List$Empty$const), prepend(p(prepend(style("height", "8rem"), List$Empty$const), (() => {
+    if (pkg_db instanceof Metadata) {
+      let loading_percent = pkg_db.loading_percent;
+      if (loading_percent instanceof Some) {
+        let percent = loading_percent[0];
+        let percent$1 = round(percent * 20);
+        return range2(0, 20, (num) => {
+          let _block;
+          let $ = num < percent$1;
+          if ($) {
+            _block = "/static/jooc/lucy.svg";
           } else {
-            let search_results = $2;
-            return table(prepend(styles(prepend(["width", "100%"], prepend(["border-collapse", "collapse"], List$Empty$const))), List$Empty$const), prepend(thead(List$Empty$const, prepend(tr(List$Empty$const, prepend(th2("package", false), prepend(th2("author", true), prepend(th2("links", false), prepend(th2("updated", true), prepend(th2("downloads", true), List$Empty$const)))))), List$Empty$const)), map2(search_results, (search_result) => {
-              return view_result(search_result, time_ago);
-            })));
+            _block = "/static/jooc/lucy-empty-inside.svg";
           }
-        })(), prepend(footer(prepend(style("padding-top", "10px"), prepend(style("padding-bottom", "10px"), List$Empty$const)), toList([
-          text3("This includes only Gleam packages that spark joy for me, i.e. not all packages are included. This package list is "),
-          strong(List$Empty$const, prepend(text3("not maintained by the Gleam team"), List$Empty$const)),
-          text3(", it is not official or objective or anything. "),
-          link("https://packages.gleam.run", "packages.gleam.run"),
-          text3(" Is Gleam's official site for seeing all packages. Thanks also to "),
-          link("https://hex.pm/", "hex.pm"),
-          text3(" and "),
-          link("https://gloogle.run", "gloogle.run"),
-          text3(".  Gleam Lucy starfish mascot © 2026 Louis Pilfold."),
-          br(List$Empty$const),
-          text3("See all packages ordered by: "),
-          btn("new", all_pkgs_by_recent),
-          btn("popular", all_pkgs_by_downloaded),
-          btn("big", all_pkgs_by_big),
-          btn("small", all_pkgs_by_small)
-        ])), List$Empty$const)));
+          let src2 = _block;
+          return img(prepend(src(src2), prepend(style("width", "5%"), List$Empty$const)));
+        });
       } else {
-        return none2();
+        return prepend(button(prepend(pressable(), prepend(on_click(Msg$UserClickedDownloadCode$const), prepend(style("font-size", "1rem"), btn_styles()))), prepend(text3("enable search on type/fn"), prepend(br(List$Empty$const), prepend(text3("and on fuzzy code text"), prepend(br(List$Empty$const), prepend(text3("(downloads 150MB for"), prepend(br(List$Empty$const), prepend(text3("in-browser search)"), List$Empty$const)))))))), List$Empty$const);
       }
     } else {
-      return div(List$Empty$const, prepend((() => {
-        let $2 = model.search_result;
-        if ($2 instanceof Empty) {
-          return p(prepend(style("margin", "0"), List$Empty$const), prepend(text3("No matching packages found here, but this is not a complete index of all gleam packages. Maybe try "), prepend(link("https://packages.gleam.run?search=" + model.search_text, "packages.gleam.run"), List$Empty$const)));
-        } else {
-          let search_results = $2;
-          return table(prepend(styles(prepend(["width", "100%"], prepend(["border-collapse", "collapse"], List$Empty$const))), List$Empty$const), prepend(thead(List$Empty$const, prepend(tr(List$Empty$const, prepend(th2("package", false), prepend(th2("author", true), prepend(th2("links", false), prepend(th2("updated", true), prepend(th2("downloads", true), List$Empty$const)))))), List$Empty$const)), map2(search_results, (search_result) => {
-            return view_result(search_result, time_ago);
-          })));
-        }
-      })(), prepend(footer(prepend(style("padding-top", "10px"), prepend(style("padding-bottom", "10px"), List$Empty$const)), toList([
-        text3("This includes only Gleam packages that spark joy for me, i.e. not all packages are included. This package list is "),
-        strong(List$Empty$const, prepend(text3("not maintained by the Gleam team"), List$Empty$const)),
-        text3(", it is not official or objective or anything. "),
-        link("https://packages.gleam.run", "packages.gleam.run"),
-        text3(" Is Gleam's official site for seeing all packages. Thanks also to "),
-        link("https://hex.pm/", "hex.pm"),
-        text3(" and "),
-        link("https://gloogle.run", "gloogle.run"),
-        text3(".  Gleam Lucy starfish mascot © 2026 Louis Pilfold."),
-        br(List$Empty$const),
-        text3("See all packages ordered by: "),
-        btn("new", all_pkgs_by_recent),
-        btn("popular", all_pkgs_by_downloaded),
-        btn("big", all_pkgs_by_big),
-        btn("small", all_pkgs_by_small)
-      ])), List$Empty$const)));
+      return prepend(text3("code search enabled, for example:"), prepend(ul(prepend(style("margin", "0"), List$Empty$const), map2(prepend("type Wibble{Wobble(Int) Woo}", prepend("fn idk(x: String) -> Int", prepend("helo world", List$Empty$const))), (search_text) => {
+        return li(List$Empty$const, prepend(button(prepend(pressable(), prepend(on_click(new UserTypedQuery(search_text)), List$Empty$const)), prepend(text3(search_text), List$Empty$const)), List$Empty$const));
+      })), prepend(label(List$Empty$const, prepend(text3("if new packages available, automatically download to device"), prepend(input(prepend(type_("checkbox"), prepend(checked(model.auto_download_sqlite), prepend(on_check((var0) => {
+        return new UserCheckedAutomaticallyDownloadSqlite(var0);
+      }), List$Empty$const)))), List$Empty$const))), List$Empty$const)));
     }
-  } else if ($ instanceof DbError) {
-    let message2 = $[0];
-    return p(prepend(style("margin", "0"), List$Empty$const), prepend(text3(message2), List$Empty$const));
-  } else {
-    return none2();
-  }
-}
-function star_image(name2, src2) {
-  return img(prepend(class$(name2), prepend(src(src2), prepend(styles(prepend(["position", "absolute"], prepend(["width", "100%"], prepend(["height", "100%"], List$Empty$const)))), List$Empty$const))));
-}
-function view_star(done, animated, spin_events, model) {
-  let _block;
-  if (done) {
-    _block = prepend(["top", "3.75rem"], prepend(["left", "calc(max(0px, 50% - var(--w) / 2) + 1.2rem + 24px)"], prepend(["width", "32px"], prepend(["height", "32px"], List$Empty$const))));
-  } else {
-    _block = prepend(["top", "50%"], prepend(["left", "50%"], prepend(["width", "min(400px, 70vmin)"], prepend(["height", "min(400px, 70vmin)"], List$Empty$const))));
-  }
-  let position = _block;
-  return div(prepend(class$("mover"), prepend(styles(prepend(["position", "absolute"], prepend(["z-index", "1"], prepend(["transform", "translate(-50%, -50%)"], prepend([
-    "transition",
-    "top var(--move) ease-in-out, width var(--move) ease-in-out, height var(--move) ease-in-out"
-  ], position))))), List$Empty$const)), prepend(div(prepend(classes(prepend(["spin", animated], List$Empty$const)), prepend(styles(prepend(["position", "relative"], prepend(["width", "100%"], prepend(["height", "100%"], List$Empty$const)))), spin_events)), prepend((() => {
-    let _block$1;
-    let $ = model.lucy;
-    if ($ instanceof Searching) {
-      _block$1 = "/static/jooc/lucyhappy.svg";
+  })()), prepend(div(prepend(styles(prepend(["position", "relative"], prepend(["margin-bottom", "1rem"], List$Empty$const))), List$Empty$const), prepend(view_star(model), prepend(input(prepend(value(model.search_text), prepend(type_("search"), prepend(placeholder((() => {
+    if (pkg_db instanceof Metadata) {
+      return "name";
     } else {
-      let $1 = model.search_result;
-      let $2 = model.all_pkg_names;
-      if ($2 instanceof Empty) {
-        _block$1 = "/static/jooc/lucy.svg";
-      } else if ($1 instanceof Empty) {
-        _block$1 = "/static/jooc/lucydebugfail.svg";
-      } else {
-        _block$1 = "/static/jooc/lucy.svg";
-      }
+      return "name, code, type, or fn";
     }
-    let svg = _block$1;
-    return star_image((() => {
-      if (animated) {
-        return "normal";
-      } else {
-        return "";
-      }
-    })(), svg);
-  })(), prepend((() => {
-    if (animated) {
-      return star_image("happy", "/static/jooc/lucyhappy.svg");
-    } else {
-      return none2();
-    }
-  })(), List$Empty$const))), List$Empty$const));
-}
-function main_view(model) {
-  let _block;
-  let $1 = model.database;
-  if ($1 instanceof DbLoaded) {
-    let $22 = $1.animation;
-    if ($22 instanceof Some) {
-      if ($22[0] instanceof Done) {
-        _block = [true, true];
-      } else {
-        _block = [false, true];
-      }
-    } else {
-      _block = [true, false];
-    }
-  } else {
-    _block = [false, true];
-  }
-  let $ = _block;
-  let done = $[0];
-  let animated = $[1];
-  let _block$1;
-  let $2 = model.database;
-  if ($2 instanceof DbLoaded) {
-    let $3 = $2.animation;
-    if ($3 instanceof Some && $3[0] instanceof Finishing) {
-      _block$1 = prepend(on("animationiteration", field("animationName", string2, (name2) => {
-        if (name2 === "spin") {
-          return success(Msg$SpinFinished$const);
-        } else {
-          return failure(Msg$SpinFinished$const, "spin");
-        }
-      })), List$Empty$const);
-    } else {
-      _block$1 = List$Empty$const;
-    }
-  } else {
-    _block$1 = List$Empty$const;
-  }
-  let spin_events = _block$1;
-  return div(prepend(classes(prepend(["done", done && animated], List$Empty$const)), prepend(styles(prepend(["--w", "770px"], prepend(["box-sizing", "border-box"], prepend(["max-width", "var(--w)"], prepend(["margin", "0 auto"], prepend(["padding", "2rem 1.2rem 0"], List$Empty$const)))))), List$Empty$const)), prepend(view_star(done, animated, spin_events, model), prepend(input(prepend(value(model.search_text), prepend(type_("search"), prepend(placeholder("name, code, type, or fn"), prepend(disabled(!done), prepend((() => {
+  })()), prepend((() => {
     let _pipe = on_input((var0) => {
       return new UserTypedQuery(var0);
     });
@@ -23931,48 +24238,49 @@ function main_view(model) {
     ["box-sizing", "border-box"],
     ["width", "100%"],
     ["height", "3.5rem"],
-    ["margin", "0 0 1rem"],
+    ["display", "block"],
+    ["margin", "0"],
     ["padding", "0 1rem 0 3rem"],
     ["font-size", "1.1rem"],
     ["border", "1px solid #3a3a3a"],
     ["border-radius", "1.75rem"],
     ["background", "var(--bg)"],
-    ["color", "var(--text)"],
-    ["transition", "opacity 1s"],
-    [
-      "opacity",
-      (() => {
-        if (done) {
-          return "1";
-        } else {
-          return "0";
-        }
-      })()
-    ],
-    [
-      "pointer-events",
-      (() => {
-        if (done) {
-          return "auto";
-        } else {
-          return "none";
-        }
-      })()
-    ]
-  ])), List$Empty$const))))))), prepend(view_results(model, new$9()), List$Empty$const))));
+    ["color", "var(--text)"]
+  ])), List$Empty$const)))))), List$Empty$const))), prepend(view_results(model, new$9()), List$Empty$const))));
 }
 function view2(model) {
   let $ = model.database;
-  if ($ instanceof DbLoadingFromCache) {
+  if ($ instanceof DbLoading) {
     return none2();
-  } else if ($ instanceof DbLoadingFromServer) {
-    return main_view(model);
   } else if ($ instanceof DbLoaded) {
-    return main_view(model);
+    let pkg_db = $[0];
+    return main_view(model, pkg_db);
   } else {
     let err = $[0];
     return text3(err);
   }
+}
+function search_metadata(db, text4) {
+  let text$1 = lowercase(text4);
+  let contains_user_text = (check2) => {
+    let _pipe2 = check2;
+    return contains_string(_pipe2, text$1);
+  };
+  let _pipe = filter(db, (pkg) => {
+    return (() => {
+      let _pipe2 = pkg.name;
+      return contains_user_text(_pipe2);
+    })() || (() => {
+      let _pipe2 = pkg.description;
+      return contains_user_text(_pipe2);
+    })() || (() => {
+      let _pipe2 = pkg.owners;
+      return any(_pipe2, contains_user_text);
+    })();
+  });
+  return map2(_pipe, (pkg) => {
+    return new SearchResult(pkg.package, List$Empty$const);
+  });
 }
 function similar_pkg_names(query3, pkgs) {
   let $ = string_length(query3);
@@ -23996,7 +24304,7 @@ function similar_pkg_names(query3, pkgs) {
             if (n$4 <= 50) {
               _block = 4;
             } else {
-              throw makeError("panic", FILEPATH3, "jooc", 575, "similar_pkg_names", "xdd", {});
+              throw makeError("panic", FILEPATH4, "jooc", 686, "similar_pkg_names", "xdd", {});
             }
           }
         }
@@ -24169,58 +24477,66 @@ function parse_type_or_fn(query_chars) {
 }
 function text_to_query(text4, model) {
   let push_url = push("", new Some(percent_encode(text4)), Option$None$const);
-  let model$1 = new Model(model.database, model.search_result, model.lucy, model.all_pkg_names, text4, model.query_from_initial_uri);
+  let model$1 = new Model(model.database, model.search_result, model.lucy, model.all_pkg_names, text4, model.auto_download_sqlite);
   let text$1 = trim(text4);
-  let _block;
   let $ = model$1.database;
   if ($ instanceof DbLoaded) {
-    let db = $.db;
-    let chars = graphemes(text$1);
-    if (chars instanceof Empty) {
-      _block = query2(db, all_pkgs_by_recent, List$Empty$const, (_capture) => {
-        return new SqliteReturnedQuery(Query$QueryFuzzy$const, model$1.search_text, _capture);
-      });
+    let $1 = $[0];
+    if ($1 instanceof Metadata) {
+      let db = $1.db;
+      let search_result = search_metadata(db, text$1);
+      let model$2 = new Model(model$1.database, search_result, model$1.lucy, model$1.all_pkg_names, model$1.search_text, model$1.auto_download_sqlite);
+      return [model$2, push_url];
     } else {
-      let $1 = chars.tail;
-      if ($1 instanceof Empty) {
-        _block = query2(db, info_only, prepend(text$1, prepend(text$1, prepend(text$1, List$Empty$const))), (_capture) => {
-          return new SqliteReturnedQuery(Query$QueryFuzzy$const, model$1.search_text, _capture);
-        });
-      } else if ($1.tail instanceof Empty) {
-        _block = query2(db, info_only, prepend(text$1, prepend(text$1, prepend(text$1, List$Empty$const))), (_capture) => {
-          return new SqliteReturnedQuery(Query$QueryFuzzy$const, model$1.search_text, _capture);
+      let db = $1.db;
+      let chars = graphemes(text$1);
+      let _block;
+      if (chars instanceof Empty) {
+        _block = query2(db, all_pkgs_by_recent, List$Empty$const, (_capture) => {
+          return new SqliteReturnedQuery(new Query(SqliteSearch$Fuzzy$const), model$1.search_text, _capture);
         });
       } else {
-        let $2 = parse_type_or_fn(chars);
-        if ($2 instanceof Ok) {
-          let canonical2 = $2[0];
-          _block = query2(db, canonical, prepend(canonical2, List$Empty$const), (_capture) => {
-            return new SqliteReturnedQuery(Query$QueryCanonical$const, model$1.search_text, _capture);
+        let $2 = chars.tail;
+        if ($2 instanceof Empty) {
+          _block = query2(db, info_only, prepend(text$1, prepend(text$1, prepend(text$1, List$Empty$const))), (_capture) => {
+            return new SqliteReturnedQuery(new Query(SqliteSearch$Fuzzy$const), model$1.search_text, _capture);
+          });
+        } else if ($2.tail instanceof Empty) {
+          _block = query2(db, info_only, prepend(text$1, prepend(text$1, prepend(text$1, List$Empty$const))), (_capture) => {
+            return new SqliteReturnedQuery(new Query(SqliteSearch$Fuzzy$const), model$1.search_text, _capture);
           });
         } else {
-          let _block$1;
-          let _pipe = text$1;
-          _block$1 = string_length(_pipe);
-          let bm25_threshold = _block$1;
-          let bm25_threshold$1 = float_to_string(8 - identity(bm25_threshold) * 1.5);
-          _block = query2(db, code_and_package, prepend(text$1, prepend(query_to_trigrams(text$1), prepend((() => {
-            let _pipe$1 = text$1;
-            let _pipe$2 = similar_pkg_names(_pipe$1, model$1.all_pkg_names);
-            let _pipe$3 = array2(_pipe$2, string3);
-            return to_string3(_pipe$3);
-          })(), prepend(bm25_threshold$1, List$Empty$const)))), (_capture) => {
-            return new SqliteReturnedQuery(Query$QueryFuzzy$const, model$1.search_text, _capture);
-          });
+          let $3 = parse_type_or_fn(chars);
+          if ($3 instanceof Ok) {
+            let canonical2 = $3[0];
+            _block = query2(db, canonical, prepend(canonical2, List$Empty$const), (_capture) => {
+              return new SqliteReturnedQuery(new Query(SqliteSearch$Canonical$const), model$1.search_text, _capture);
+            });
+          } else {
+            let _block$1;
+            let _pipe = text$1;
+            _block$1 = string_length(_pipe);
+            let bm25_threshold = _block$1;
+            let bm25_threshold$1 = float_to_string(8 - identity(bm25_threshold) * 1.5);
+            _block = query2(db, code_and_package, prepend(text$1, prepend(query_to_trigrams(text$1), prepend((() => {
+              let _pipe$1 = text$1;
+              let _pipe$2 = similar_pkg_names(_pipe$1, model$1.all_pkg_names);
+              let _pipe$3 = array2(_pipe$2, string3);
+              return to_string3(_pipe$3);
+            })(), prepend(bm25_threshold$1, List$Empty$const)))), (_capture) => {
+              return new SqliteReturnedQuery(new Query(SqliteSearch$Fuzzy$const), model$1.search_text, _capture);
+            });
+          }
         }
       }
+      let exec = _block;
+      let effect = batch(prepend(exec, prepend(push_url, List$Empty$const)));
+      let model$2 = new Model(model$1.database, model$1.search_result, Search$Searching$const, model$1.all_pkg_names, model$1.search_text, model$1.auto_download_sqlite);
+      return [model$2, effect];
     }
   } else {
-    _block = none();
+    return [model$1, none()];
   }
-  let exec = _block;
-  let effect = batch(prepend(exec, prepend(push_url, List$Empty$const)));
-  let model$2 = new Model(model$1.database, model$1.search_result, Search$Searching$const, model$1.all_pkg_names, model$1.search_text, model$1.query_from_initial_uri);
-  return [model$2, effect];
 }
 function merge_modules_by_package(results) {
   let groups = group2(results, (r) => {
@@ -24245,43 +24561,29 @@ function handle_query_result(model, query_result, decoder) {
   let _block;
   let _block$1;
   if (query_result instanceof Ok) {
-    let query_resp2 = query_result[0];
-    let $2 = run(query_resp2, decoder);
-    if ($2 instanceof Ok) {
-      let resp = $2[0];
+    let query_resp = query_result[0];
+    let $ = run(query_resp, decoder);
+    if ($ instanceof Ok) {
+      let resp = $[0];
       _block$1 = resp;
     } else {
-      let err = $2[0];
-      echo(err, undefined, "src/jooc.gleam", 257);
+      let err = $[0];
+      echo(err, undefined, "src/jooc.gleam", 348);
       _block$1 = List$Empty$const;
     }
   } else {
     let err = query_result[0];
-    echo(err, undefined, "src/jooc.gleam", 262);
+    echo(err, undefined, "src/jooc.gleam", 353);
     _block$1 = List$Empty$const;
   }
   let _pipe = _block$1;
   let _pipe$1 = values3(_pipe);
   _block = merge_modules_by_package(_pipe$1);
-  let query_resp = _block;
-  let $ = model.all_pkg_names;
-  if ($ instanceof Empty) {
-    let all_pkg_names = map2(query_resp, (pkg) => {
-      return pkg.package.name;
-    });
-    let model$1 = new Model(model.database, model.search_result, model.lucy, all_pkg_names, model.search_text, model.query_from_initial_uri);
-    let $1 = model$1.query_from_initial_uri;
-    if ($1 instanceof Some) {
-      let text4 = $1[0];
-      return text_to_query(text4, model$1);
-    } else {
-      let model$2 = new Model(model$1.database, query_resp, Search$NotSearching$const, model$1.all_pkg_names, model$1.search_text, model$1.query_from_initial_uri);
-      return [model$2, none()];
-    }
-  } else {
-    let model$1 = new Model(model.database, query_resp, Search$NotSearching$const, model.all_pkg_names, model.search_text, model.query_from_initial_uri);
-    return [model$1, none()];
-  }
+  let search_result = _block;
+  return [
+    new Model(model.database, search_result, Search$NotSearching$const, model.all_pkg_names, model.search_text, model.auto_download_sqlite),
+    none()
+  ];
 }
 function canonical_result_decoder() {
   return field(0, string2, (name2) => {
@@ -24305,7 +24607,7 @@ function canonical_result_decoder() {
                       if (module_name2 instanceof Some && code2 instanceof Some) {
                         let module_name$1 = module_name2[0];
                         let code$1 = code2[0];
-                        _block = prepend(new ModuleSnippet(module_name$1, new Canonical(prepend(code$1, List$Empty$const))), List$Empty$const);
+                        _block = prepend(new ModuleSnippet(module_name$1, new Definitions(prepend(code$1, List$Empty$const))), List$Empty$const);
                       } else {
                         _block = List$Empty$const;
                       }
@@ -24478,6 +24780,46 @@ function search_result_decoder(search_text) {
     });
   });
 }
+function download_server_db(model) {
+  let $ = model.database;
+  if ($ instanceof DbLoaded) {
+    let $1 = $[0];
+    if ($1 instanceof Metadata) {
+      let db = $1.db;
+      let loading_percent = new Some(0);
+      let model$1 = new Model(new DbLoaded(new Metadata(db, loading_percent)), model.search_result, model.lucy, model.all_pkg_names, model.search_text, model.auto_download_sqlite);
+      let $2 = to(data_src);
+      let req;
+      if ($2 instanceof Ok) {
+        req = $2[0];
+      } else {
+        throw makeError("let_assert", FILEPATH4, "jooc", 373, "download_server_db", "Pattern match failed, no pattern matched the value.", {
+          value: $2,
+          start: 10461,
+          end: 10502,
+          pattern_start: 10472,
+          pattern_end: 10479
+        });
+      }
+      let _block;
+      let _pipe = req;
+      let _pipe$1 = set_body(_pipe, toBitArray([]));
+      _block = load_bits(_pipe$1, (var0) => {
+        return new ServerReturnedLoadProgress(var0);
+      }, (var0) => {
+        return new ServerReturnedCode(var0);
+      });
+      let download_effect = _block;
+      return [model$1, download_effect];
+    } else {
+      echo("should not be able to download server db from anything other than already have json", undefined, "src/jooc.gleam", 381);
+      return [model, none()];
+    }
+  } else {
+    echo("should not be able to download server db from anything other than already have json", undefined, "src/jooc.gleam", 381);
+    return [model, none()];
+  }
+}
 function open_db(model, sqlite_db) {
   return [
     model,
@@ -24486,29 +24828,28 @@ function open_db(model, sqlite_db) {
     })
   ];
 }
-function download_server_db(model) {
-  let model$1 = new Model(Db$DbLoadingFromServer$const, model.search_result, model.lucy, model.all_pkg_names, model.search_text, model.query_from_initial_uri);
-  let $ = to(data_src);
+function download_server_json(model) {
+  let $ = to(metadata_src_json);
   let req;
   if ($ instanceof Ok) {
     req = $[0];
   } else {
-    throw makeError("let_assert", FILEPATH3, "jooc", 301, "download_server_db", "Pattern match failed, no pattern matched the value.", {
+    throw makeError("let_assert", FILEPATH4, "jooc", 388, "download_server_json", "Pattern match failed, no pattern matched the value.", {
       value: $,
-      start: 8438,
-      end: 8479,
-      pattern_start: 8449,
-      pattern_end: 8456
+      start: 10879,
+      end: 10929,
+      pattern_start: 10890,
+      pattern_end: 10897
     });
   }
+  let handler = expect_json(list2(package_decoder()), (var0) => {
+    return new ServerReturnedMetadata(var0);
+  });
   let _block;
   let _pipe = req;
-  let _pipe$1 = set_body(_pipe, toBitArray([]));
-  _block = send_bits2(_pipe$1, expect_ok_response((var0) => {
-    return new ServerReturnedData(var0);
-  }));
+  _block = send3(_pipe, handler);
   let download_effect = _block;
-  return [model$1, download_effect];
+  return [model, download_effect];
 }
 function update2(model, msg) {
   if (msg instanceof CacheReturnedEtag) {
@@ -24520,12 +24861,12 @@ function update2(model, msg) {
       if ($ instanceof Ok) {
         req = $[0];
       } else {
-        throw makeError("let_assert", FILEPATH3, "jooc", 135, "update", "Pattern match failed, no pattern matched the value.", {
+        throw makeError("let_assert", FILEPATH4, "jooc", 162, "update", "Pattern match failed, no pattern matched the value.", {
           value: $,
-          start: 2920,
-          end: 2961,
-          pattern_start: 2931,
-          pattern_end: 2938
+          start: 3520,
+          end: 3561,
+          pattern_start: 3531,
+          pattern_end: 3538
         });
       }
       let _block;
@@ -24537,7 +24878,7 @@ function update2(model, msg) {
       let get_server_etag = _block;
       return [model, get_server_etag];
     } else {
-      return download_server_db(model);
+      return download_server_json(model);
     }
   } else if (msg instanceof ServerReturnedEtag) {
     let cached_etag = msg.cached;
@@ -24559,13 +24900,13 @@ function update2(model, msg) {
             })
           ];
         } else {
-          return download_server_db(model);
+          return download_server_json(model);
         }
       } else {
-        return download_server_db(model);
+        return download_server_json(model);
       }
     } else {
-      return download_server_db(model);
+      return download_server_json(model);
     }
   } else if (msg instanceof CacheLoaded) {
     let $ = msg[0];
@@ -24573,9 +24914,42 @@ function update2(model, msg) {
       let cache_data = $[0];
       return open_db(model, cache_data);
     } else {
-      return download_server_db(model);
+      return download_server_json(model);
     }
-  } else if (msg instanceof ServerReturnedData) {
+  } else if (msg instanceof ServerReturnedMetadata) {
+    let load_result = msg[0];
+    if (load_result instanceof Ok) {
+      let resp = load_result[0];
+      let _block;
+      let _pipe = sort(resp, (a2, b) => {
+        let _pipe2 = compare4(a2.updated_at, b.updated_at);
+        return negate(_pipe2);
+      });
+      _block = map2(_pipe, (pkg) => {
+        return new PackageLowercase(pkg, lowercase(pkg.name), lowercase(pkg.description), map2(pkg.owners, lowercase));
+      });
+      let resp$1 = _block;
+      let all_pkg_names = map2(resp$1, (pkg) => {
+        return pkg.name;
+      });
+      let model$1 = new Model(new DbLoaded(new Metadata(resp$1, Option$None$const)), model.search_result, model.lucy, all_pkg_names, model.search_text, model.auto_download_sqlite);
+      let search_result = search_metadata(resp$1, model$1.search_text);
+      let model$2 = new Model(model$1.database, search_result, model$1.lucy, model$1.all_pkg_names, model$1.search_text, model$1.auto_download_sqlite);
+      let $ = get_autodownload();
+      if ($) {
+        return download_server_db(model$2);
+      } else {
+        return [model$2, none()];
+      }
+    } else {
+      let err = load_result[0];
+      echo(err, undefined, "src/jooc.gleam", 247);
+      let model$1 = new Model(new DbError("Failed to load metadata json from " + metadata_src_json + ". Maybe good.json is no longer available. You could try checking connection and reloading."), model.search_result, model.lucy, model.all_pkg_names, model.search_text, model.auto_download_sqlite);
+      return [model$1, none()];
+    }
+  } else if (msg instanceof UserClickedDownloadCode) {
+    return download_server_db(model);
+  } else if (msg instanceof ServerReturnedCode) {
     let load_result = msg[0];
     if (load_result instanceof Ok) {
       let resp = load_result[0];
@@ -24597,87 +24971,114 @@ function update2(model, msg) {
       ];
     } else {
       let err = load_result[0];
-      echo(err, undefined, "src/jooc.gleam", 175);
-      let model$1 = new Model(new DbError("Failed to load package database from " + data_src + ". Maybe the database is no longer available. You could try checking connection and reloading."), model.search_result, model.lucy, model.all_pkg_names, model.search_text, model.query_from_initial_uri);
+      echo(err, undefined, "src/jooc.gleam", 203);
+      let model$1 = new Model(new DbError("Failed to load package database from " + data_src + ". Maybe the database is no longer available. You could try checking connection and reloading."), model.search_result, model.lucy, model.all_pkg_names, model.search_text, model.auto_download_sqlite);
       return [model$1, none()];
     }
-  } else if (msg instanceof SqliteReturnedOpen) {
-    let load_result = msg[0];
-    let _block;
-    if (load_result instanceof Ok) {
-      let db = load_result[0];
-      _block = [
-        (() => {
-          let $1 = model.database;
-          if ($1 instanceof DbLoadingFromCache) {
-            return new DbLoaded(db, Option$None$const);
-          } else if ($1 instanceof DbLoadingFromServer) {
-            return new DbLoaded(db, new Some(Animation$Finishing$const));
-          } else if ($1 instanceof DbLoaded) {
-            throw makeError("panic", FILEPATH3, "jooc", 194, "update", "xd", {});
-          } else {
-            throw makeError("panic", FILEPATH3, "jooc", 195, "update", "xdd", {});
-          }
-        })(),
-        query2(db, all_pkgs_by_recent, List$Empty$const, (_capture) => {
-          return new SqliteReturnedQuery(Query$QueryCanonical$const, model.search_text, _capture);
-        })
-      ];
-    } else {
-      let err = load_result[0];
-      _block = [new DbError(err), none()];
-    }
-    let $ = _block;
-    let database = $[0];
-    let exec = $[1];
-    let model$1 = new Model(database, model.search_result, Search$Searching$const, model.all_pkg_names, model.search_text, model.query_from_initial_uri);
-    return [model$1, exec];
-  } else if (msg instanceof SpinFinished) {
-    let _block;
+  } else if (msg instanceof ServerReturnedLoadProgress) {
+    let progress = msg[0];
     let $ = model.database;
     if ($ instanceof DbLoaded) {
-      let database = $.db;
-      _block = new Model(new DbLoaded(database, new Some(Animation$Done$const)), model.search_result, model.lucy, model.all_pkg_names, model.search_text, model.query_from_initial_uri);
-    } else {
-      _block = model;
-    }
-    let model$1 = _block;
-    return [model$1, none()];
-  } else if (msg instanceof SqliteReturnedQuery) {
-    let query_was = msg.query_was;
-    let search_text_was = msg.search_text_was;
-    let got = msg.got;
-    let $ = search_text_was === model.search_text;
-    if ($) {
-      let _block;
-      if (query_was instanceof QueryFuzzy) {
-        _block = list2(search_result_decoder(search_text_was));
+      let $1 = $[0];
+      if ($1 instanceof Metadata) {
+        let db = $1.db;
+        let database = new DbLoaded(new Metadata(db, new Some(progress)));
+        let model$1 = new Model(database, model.search_result, model.lucy, model.all_pkg_names, model.search_text, model.auto_download_sqlite);
+        return [model$1, none()];
       } else {
-        _block = list2(canonical_result_decoder());
+        return [model, none()];
       }
-      let decoder = _block;
-      return handle_query_result(model, got, decoder);
     } else {
       return [model, none()];
+    }
+  } else if (msg instanceof SqliteReturnedOpen) {
+    let $ = msg[0];
+    if ($ instanceof Ok) {
+      let db = $[0];
+      let model$1 = new Model(new DbLoaded(new Code(db)), model.search_result, model.lucy, model.all_pkg_names, model.search_text, model.auto_download_sqlite);
+      let $1 = model$1.all_pkg_names;
+      if ($1 instanceof Empty) {
+        let get_all_pkg_names = query2(db, all_pkgs_by_recent, List$Empty$const, (_capture) => {
+          return new SqliteReturnedQuery(SqliteQuery$Names$const, model$1.search_text, _capture);
+        });
+        return [model$1, get_all_pkg_names];
+      } else {
+        return text_to_query(model$1.search_text, model$1);
+      }
+    } else {
+      throw makeError("panic", FILEPATH4, "jooc", 260, "update", "db open failed xdd", {});
+    }
+  } else if (msg instanceof SqliteReturnedQuery) {
+    let $ = msg.query_was;
+    if ($ instanceof Names) {
+      let got = msg.got;
+      let _block;
+      if (got instanceof Ok) {
+        let rows = got[0];
+        let $1 = run(rows, list2(canonical_result_decoder()));
+        if ($1 instanceof Ok) {
+          let rows$1 = $1[0];
+          let _pipe = rows$1;
+          let _pipe$1 = values3(_pipe);
+          _block = map2(_pipe$1, (p2) => {
+            return p2.package.name;
+          });
+        } else {
+          _block = List$Empty$const;
+        }
+      } else {
+        _block = List$Empty$const;
+      }
+      let all_pkg_names = _block;
+      return text_to_query(model.search_text, new Model(model.database, model.search_result, model.lucy, all_pkg_names, model.search_text, model.auto_download_sqlite));
+    } else {
+      let search_text_was = msg.search_text_was;
+      let got = msg.got;
+      let query_was = $[0];
+      let $1 = search_text_was === model.search_text;
+      if ($1) {
+        let _block;
+        if (query_was instanceof Canonical) {
+          _block = list2(canonical_result_decoder());
+        } else {
+          _block = list2(search_result_decoder(search_text_was));
+        }
+        let decoder = _block;
+        return handle_query_result(model, got, decoder);
+      } else {
+        return [model, none()];
+      }
     }
   } else if (msg instanceof UserTypedQuery) {
     let text4 = msg[0];
     return text_to_query(text4, model);
-  } else {
+  } else if (msg instanceof UserClickedButton) {
     let premade_query = msg[0];
     let _block;
     let $ = model.database;
     if ($ instanceof DbLoaded) {
-      let db = $.db;
-      _block = query2(db, premade_query, List$Empty$const, (_capture) => {
-        return new SqliteReturnedQuery(Query$QueryFuzzy$const, "", _capture);
-      });
+      let $1 = $[0];
+      if ($1 instanceof Code) {
+        let db = $1.db;
+        _block = query2(db, premade_query, List$Empty$const, (_capture) => {
+          return new SqliteReturnedQuery(new Query(SqliteSearch$Fuzzy$const), "", _capture);
+        });
+      } else {
+        _block = none();
+      }
     } else {
       _block = none();
     }
     let exec = _block;
-    let model$1 = new Model(model.database, model.search_result, Search$Searching$const, model.all_pkg_names, "", model.query_from_initial_uri);
+    let model$1 = new Model(model.database, model.search_result, Search$Searching$const, model.all_pkg_names, "", model.auto_download_sqlite);
     return [model$1, exec];
+  } else {
+    let auto_download_sqlite = msg[0];
+    let model$1 = new Model(model.database, model.search_result, model.lucy, model.all_pkg_names, model.search_text, auto_download_sqlite);
+    let save_pref = from2((_) => {
+      return set_autodownload(auto_download_sqlite);
+    });
+    return [model$1, save_pref];
   }
 }
 function init(_) {
@@ -24703,7 +25104,7 @@ function init(_) {
   }
   let query_from_initial_uri = _block;
   return [
-    new Model(Db$DbLoadingFromCache$const, List$Empty$const, Search$NotSearching$const, List$Empty$const, unwrap(query_from_initial_uri, ""), query_from_initial_uri),
+    new Model(Db$DbLoading$const, List$Empty$const, Search$NotSearching$const, List$Empty$const, unwrap(query_from_initial_uri, ""), get_autodownload()),
     check_cached_etag2((var0) => {
       return new CacheReturnedEtag(var0);
     })
@@ -24713,7 +25114,7 @@ function main() {
   let app = application(init, update2, view2);
   let $ = start4(app, "#app", undefined);
   if (!($ instanceof Ok)) {
-    throw makeError("let_assert", FILEPATH3, "jooc", 33, "main", "Pattern match failed, no pattern matched the value.", { value: $, start: 727, end: 776, pattern_start: 738, pattern_end: 743 });
+    throw makeError("let_assert", FILEPATH4, "jooc", 37, "main", "Pattern match failed, no pattern matched the value.", { value: $, start: 799, end: 848, pattern_start: 810, pattern_end: 815 });
   }
   return;
 }
@@ -24847,9 +25248,9 @@ class Echo$Inspector {
     return body + "])";
   }
   #customType(record2) {
-    const props = globalThis.Object.keys(record2).map((label) => {
-      const value3 = this.inspect(record2[label]);
-      return isNaN(parseInt(label)) ? `${label}: ${value3}` : value3;
+    const props = globalThis.Object.keys(record2).map((label2) => {
+      const value3 = this.inspect(record2[label2]);
+      return isNaN(parseInt(label2)) ? `${label2}: ${value3}` : value3;
     }).join(", ");
     return props ? `${record2.constructor.name}(${props})` : record2.constructor.name;
   }
