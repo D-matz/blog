@@ -24202,7 +24202,7 @@ function main_view(model, pkg_db) {
       if (loading_percent instanceof Some) {
         let percent = loading_percent[0];
         let percent$1 = round(percent * 20);
-        return range2(0, 20, (num) => {
+        let _pipe = range2(0, 20, (num) => {
           let _block;
           let $ = num < percent$1;
           if ($) {
@@ -24213,6 +24213,7 @@ function main_view(model, pkg_db) {
           let src2 = _block;
           return img(prepend(src(src2), prepend(style("width", "5%"), List$Empty$const)));
         });
+        return prepend2(_pipe, p(List$Empty$const, prepend(text3("Loading..."), List$Empty$const)));
       } else {
         return prepend(button(prepend(pressable(), prepend(on_click(Msg$UserClickedDownloadCode$const), prepend(style("font-size", "1rem"), btn_styles()))), prepend(text3("enable search on type/fn"), prepend(br(List$Empty$const), prepend(text3("and on fuzzy code text"), prepend(br(List$Empty$const), prepend(text3("(downloads 150MB for"), prepend(br(List$Empty$const), prepend(text3("in-browser search)"), List$Empty$const)))))))), List$Empty$const);
       }
