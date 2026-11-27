@@ -24107,7 +24107,7 @@ var SqliteSearch$Fuzzy$const = new Fuzzy;
 var metadata_src_json = "https://bucket.correctarity.com/good.json";
 var data_src = "https://bucket.correctarity.com/packages.sqlite";
 function btn_styles() {
-  return prepend(style("margin", "5px"), prepend(style("padding", "5px 10px"), prepend(style("color", "var(--text)"), prepend(style("cursor", "pointer"), List$Empty$const))));
+  return prepend(style("margin", "5px"), prepend(style("padding", "5px 10px"), prepend(style("cursor", "pointer"), List$Empty$const)));
 }
 function pressable() {
   return class$("pressable");
@@ -24202,7 +24202,7 @@ function main_view(model, pkg_db) {
       if (loading_percent instanceof Some) {
         let percent = loading_percent[0];
         let percent$1 = round(percent * 20);
-        let _pipe = range2(0, 20, (num) => {
+        return range2(0, 20, (num) => {
           let _block;
           let $ = num < percent$1;
           if ($) {
@@ -24213,7 +24213,6 @@ function main_view(model, pkg_db) {
           let src2 = _block;
           return img(prepend(src(src2), prepend(style("width", "5%"), List$Empty$const)));
         });
-        return prepend2(_pipe, p(List$Empty$const, prepend(text3("Loading..."), List$Empty$const)));
       } else {
         return prepend(button(prepend(pressable(), prepend(on_click(Msg$UserClickedDownloadCode$const), prepend(style("font-size", "1rem"), btn_styles()))), prepend(text3("enable search on type/fn"), prepend(br(List$Empty$const), prepend(text3("and on fuzzy code text"), prepend(br(List$Empty$const), prepend(text3("(downloads 150MB for"), prepend(br(List$Empty$const), prepend(text3("in-browser search)"), List$Empty$const)))))))), List$Empty$const);
       }
@@ -24235,19 +24234,7 @@ function main_view(model, pkg_db) {
       return new UserTypedQuery(var0);
     });
     return debounce(_pipe, 200);
-  })(), prepend(styles(toList([
-    ["box-sizing", "border-box"],
-    ["width", "100%"],
-    ["height", "3.5rem"],
-    ["display", "block"],
-    ["margin", "0"],
-    ["padding", "0 1rem 0 3rem"],
-    ["font-size", "1.1rem"],
-    ["border", "1px solid #3a3a3a"],
-    ["border-radius", "1.75rem"],
-    ["background", "var(--bg)"],
-    ["color", "var(--text)"]
-  ])), List$Empty$const)))))), List$Empty$const))), prepend(view_results(model, new$9()), List$Empty$const))));
+  })(), prepend(styles(prepend(["box-sizing", "border-box"], prepend(["width", "100%"], prepend(["height", "3.5rem"], prepend(["display", "block"], prepend(["margin", "0"], prepend(["padding", "0 1rem 0 3rem"], prepend(["font-size", "1.1rem"], prepend(["border", "1px solid #3a3a3a"], prepend(["border-radius", "1.75rem"], prepend(["background", "var(--bg)"], List$Empty$const))))))))))), List$Empty$const)))))), List$Empty$const))), prepend(view_results(model, new$9()), List$Empty$const))));
 }
 function view2(model) {
   let $ = model.database;
